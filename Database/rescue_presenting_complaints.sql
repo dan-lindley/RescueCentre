@@ -24,15 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `rescue_presenting_complaints`
---
-
-CREATE TABLE `rescue_presenting_complaints` (
-  `pc_id` int(8) NOT NULL,
-  `prsenting_complaint` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
 -- Dumping data for table `rescue_presenting_complaints`
 --
 
@@ -64,21 +55,6 @@ INSERT INTO `rescue_presenting_complaints` (`pc_id`, `prsenting_complaint`) VALU
 -- Indexes for dumped tables
 --
 
---
--- Indexes for table `rescue_presenting_complaints`
---
-ALTER TABLE `rescue_presenting_complaints`
-  ADD PRIMARY KEY (`pc_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `rescue_presenting_complaints`
---
-ALTER TABLE `rescue_presenting_complaints`
-  MODIFY `pc_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

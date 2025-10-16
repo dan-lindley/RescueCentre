@@ -20,8 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `newsomew_wp191`
 --
-CREATE DATABASE IF NOT EXISTS `newsomew_wp191` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci;
-USE `newsomew_wp191`;
+CREATE DATABASE IF NOT EXISTS `local_rescue` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci;
+USE `local_rescue`;
 
 -- --------------------------------------------------------
 

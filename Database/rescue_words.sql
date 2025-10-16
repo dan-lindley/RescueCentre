@@ -23,17 +23,6 @@ SET time_zone = "+00:00";
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `rescue_words`
---
-
-CREATE TABLE `rescue_words` (
-  `word_1` varchar(255) DEFAULT NULL,
-  `word_2` varchar(255) DEFAULT NULL,
-  `word_3` varchar(255) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
-
---
 -- Dumping data for table `rescue_words`
 --
 

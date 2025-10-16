@@ -24,16 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `rescue_animal_types`
---
-
-CREATE TABLE `rescue_animal_types` (
-  `type_id` int(11) NOT NULL,
-  `type_name` varchar(255) NOT NULL,
-  `animal_order` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
 -- Dumping data for table `rescue_animal_types`
 --
 
@@ -115,20 +105,9 @@ INSERT INTO `rescue_animal_types` (`type_id`, `type_name`, `animal_order`) VALUE
 --
 
 --
--- Indexes for table `rescue_animal_types`
---
-ALTER TABLE `rescue_animal_types`
-  ADD PRIMARY KEY (`type_id`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
 
---
--- AUTO_INCREMENT for table `rescue_animal_types`
---
-ALTER TABLE `rescue_animal_types`
-  MODIFY `type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

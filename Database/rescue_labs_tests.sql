@@ -24,16 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `rescue_labs_tests`
---
-
-CREATE TABLE `rescue_labs_tests` (
-  `l_test_id` int(8) NOT NULL,
-  `lab_test` varchar(255) DEFAULT NULL,
-  `lab_category` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
-
---
 -- Dumping data for table `rescue_labs_tests`
 --
 
@@ -48,25 +38,7 @@ INSERT INTO `rescue_labs_tests` (`l_test_id`, `lab_test`, `lab_category`) VALUES
 (8, 'Protein', 'Urinalysis'),
 (9, 'pH', 'Urinalysis');
 
---
--- Indexes for dumped tables
---
 
---
--- Indexes for table `rescue_labs_tests`
---
-ALTER TABLE `rescue_labs_tests`
-  ADD PRIMARY KEY (`l_test_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `rescue_labs_tests`
---
-ALTER TABLE `rescue_labs_tests`
-  MODIFY `l_test_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
