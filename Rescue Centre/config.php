@@ -3,11 +3,11 @@ include 'connect_to_mysql.php';
 // Your MySQL database hostname.
 define('db_host','localhost');
 // Your MySQL database username.
-define('db_user','newsomew_wp927');
+define('db_user','user');
 // Your MySQL database password.
-define('db_pass','Y1@45nS(p9');
+define('db_pass','db_pass');
 // Your MySQL database name.
-define('db_name','newsomew_wp927');
+define('db_name','dab_name');
 // Your MySQL database charset.
 define('db_charset','utf8mb4');
 // The secret key used for hashing purposes. Change this to a random unique string.
