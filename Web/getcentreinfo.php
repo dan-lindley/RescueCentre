@@ -5,7 +5,7 @@ $centre_id = $account['centre_id'];
 
 
 $sql = 'SELECT * FROM rescue_centres WHERE rescue_id=:centre_id LIMIT 1';
-$statement = $conn->prepare($sql);
+$statement = $pdo->prepare($sql);
 $statement->bindParam(':centre_id', $centre_id, PDO::PARAM_INT);
 $statement->execute();
 $result = $statement->fetch(PDO::FETCH_ASSOC);

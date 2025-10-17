@@ -10,7 +10,7 @@
     data: {
       labels: [<?php
                     //Get compalint labels
-                    $stmt = $conn->prepare("SELECT presenting_complaint, COUNT(presenting_complaint) AS total_complaint
+                    $stmt = $pdo->prepare("SELECT presenting_complaint, COUNT(presenting_complaint) AS total_complaint
 											FROM rescue_admissions
 											INNER JOIN rescue_patients
 											ON rescue_admissions.patient_id = rescue_patients.patient_id
@@ -33,7 +33,7 @@
         borderColor: "#4e73df",
         data: [
            <?php //Get by complaint count
-                    $stmt = $conn->prepare("SELECT presenting_complaint, COUNT(presenting_complaint) AS total_complaint
+                    $stmt = $pdo->prepare("SELECT presenting_complaint, COUNT(presenting_complaint) AS total_complaint
 											FROM rescue_admissions
 											INNER JOIN rescue_patients
 											ON rescue_admissions.patient_id = rescue_patients.patient_id

@@ -1,7 +1,7 @@
 <?php
 //Get the weight and measurement units which were used upon admission for this patient
 $sql = 'SELECT * FROM rescue_measurements WHERE patient_id=:patient_id ORDER BY date ASC LIMIT 1';
-$statement = $conn->prepare($sql);
+$statement = $pdo->prepare($sql);
 $statement->bindParam(':patient_id', $patient_id, PDO::PARAM_INT);
 $statement->execute();
 $result = $statement->fetch(PDO::FETCH_ASSOC);
@@ -19,7 +19,7 @@ if ($result) {
 
 <?php
     //gets the targetsizes from the table to display 
-    $stmt = $conn->prepare("SELECT * FROM rescue_patients
+    $stmt = $pdo->prepare("SELECT * FROM rescue_patients
                             RIGHT JOIN rescue_animal_species ON rescue_animal_species.species_name = rescue_patients.animal_species
 							WHERE patient_id = :patient_id");
     $stmt->bindParam(':patient_id', $patient_id, PDO::PARAM_INT);
@@ -52,7 +52,7 @@ if ($result) {
 		data : {
 			labels : [ <?php
                         //Loop through the measurement months from the database
-                        $stmt = $conn->prepare("SELECT * FROM rescue_measurements WHERE patient_id = :patient_id ORDER by date ASC");
+                        $stmt = $pdo->prepare("SELECT * FROM rescue_measurements WHERE patient_id = :patient_id ORDER by date ASC");
                         $stmt->bindParam(':patient_id', $patient_id, PDO::PARAM_INT);
 
                         // initialise an array for the results
@@ -85,7 +85,7 @@ if ($result) {
 						data : [ 
                             <?php
                         //Loop through this patient's measurements from the database
-                        $stmt = $conn->prepare("SELECT * FROM rescue_measurements WHERE patient_id = :patient_id ORDER by date ASC");
+                        $stmt = $pdo->prepare("SELECT * FROM rescue_measurements WHERE patient_id = :patient_id ORDER by date ASC");
                         $stmt->bindParam(':patient_id', $patient_id, PDO::PARAM_INT);
 
                         // initialise an array for the results
@@ -151,7 +151,7 @@ if ($result) {
    <tbody>
 <?php
 //Get the stock from the stock table
-$stmt = $conn->prepare("SELECT *
+$stmt = $pdo->prepare("SELECT *
 FROM rescue_measurements
 WHERE rescue_measurements.patient_id = :patient_id
 ORDER BY date ASC");

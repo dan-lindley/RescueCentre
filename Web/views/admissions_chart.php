@@ -11,7 +11,7 @@
 					    {
 						data : [ 
                             <?php //Get by month count for 2023
-                            $stmt = $conn->prepare("SELECT
+                            $stmt = $pdo->prepare("SELECT
   											        MONTHNAME(m.month) MONTH_NAME,
   											        COUNT(a.admission_id)COUNT_ADMISSIONS23
 													FROM rescue_month_data AS m
@@ -41,7 +41,7 @@
 					    {
 						data : [ 
                             <?php //Get by month count for 2023
-                            $stmt = $conn->prepare("SELECT
+                            $stmt = $pdo->prepare("SELECT
   											        MONTHNAME(m.month) MONTH_NAME,
   											        COUNT(a.admission_id)COUNT_ADMISSIONS24
 													FROM rescue_month_data AS m
@@ -71,7 +71,7 @@
 					    {
 						data : [ 
                             <?php //Get by month count for 2023
-                            $stmt = $conn->prepare("SELECT
+                            $stmt = $pdo->prepare("SELECT
   											        MONTHNAME(m.month) MONTH_NAME,
   											        COUNT(a.admission_id)COUNT_ADMISSIONS25
 													FROM rescue_month_data AS m

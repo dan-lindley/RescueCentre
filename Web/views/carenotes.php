@@ -1,6 +1,6 @@
  <?php
    //Get existing notes
-   $stmt = $conn->prepare("SELECT * FROM rescue_notes_patients 
+   $stmt = $pdo->prepare("SELECT * FROM rescue_notes_patients 
                           LEFT JOIN rescue_images ON
                           rescue_notes_patients.image_id = rescue_images.image_id
                           WHERE rescue_notes_patients.patient_id=:patient_id AND deleted = 0 ORDER BY date DESC");

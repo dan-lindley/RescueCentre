@@ -6,7 +6,7 @@ INNER JOIN rescue_patients
 ON rescue_admissions.patient_id = rescue_patients.patient_id
 WHERE rescue_admissions.disposition = 'Held in captivity' AND rescue_patients.centre_id = :centre_id
 ORDER by `admission_date` DESC";
-$stmt = $conn->prepare($sql);
+$stmt = $pdo->prepare($sql);
 
 // bind parameters
 $stmt->bindParam(':centre_id', $centre_id);
@@ -174,7 +174,7 @@ $(function () {
     <tbody>
      <?php			
       //Loop from admissions table
-      $stmt = $conn->prepare("SELECT rescue_admissions.admission_id
+      $stmt = $pdo->prepare("SELECT rescue_admissions.admission_id
      , rescue_admissions.presenting_complaint
 	 , rescue_admissions.admission_date
 	 , rescue_admissions.current_location

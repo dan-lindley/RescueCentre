@@ -15,7 +15,7 @@
     <tbody>
 <?php
     //gets the partner logs from the table to display 
-    $stmt = $conn->prepare("SELECT * FROM rescue_partner_log 
+    $stmt = $pdo->prepare("SELECT * FROM rescue_partner_log 
     LEFT JOIN rescue_partner_types ON rescue_partner_log.partner_type = rescue_partner_types.p_type_id
     WHERE patient_id = :patient_id ORDER by date DESC");
     $stmt->bindParam(':patient_id', $patient_id, PDO::PARAM_INT);

@@ -1,6 +1,6 @@
 <?php 
 //All the current data
-$stmt = $conn->prepare("SELECT COUNT(*) as total,
+$stmt = $pdo->prepare("SELECT COUNT(*) as total,
     SUM(CASE WHEN disposition = 'Released' THEN 1 ELSE 0 END) AS Released,
     SUM(CASE WHEN disposition = 'Held in Captivity' THEN 1 ELSE 0 END) AS Captive,
 	  SUM(CASE WHEN disposition = 'Transferred Out' THEN 1 ELSE 0 END) AS Transferred,
@@ -46,7 +46,7 @@ $deductions = ($disptotal - ($dispin48 + $dispdoa + $dispeuth + $disptrans + $di
 }; 
 
 //All data but year to date
-$stmt = $conn->prepare("SELECT COUNT(*) as total,
+$stmt = $pdo->prepare("SELECT COUNT(*) as total,
     SUM(CASE WHEN disposition = 'Released' THEN 1 ELSE 0 END) AS Released,
     SUM(CASE WHEN disposition = 'Held in Captivity' THEN 1 ELSE 0 END) AS Captive,
 	  SUM(CASE WHEN disposition = 'Transferred Out' THEN 1 ELSE 0 END) AS Transferred,

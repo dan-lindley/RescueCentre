@@ -36,7 +36,7 @@ if (isset($_GET["alert"])) {
 
 //Get the information from the database
 $sql = 'SELECT * FROM rescue_patients WHERE patient_id=:patient_id AND centre_id=:centre_id LIMIT 1';
-$statement = $conn->prepare($sql);
+$statement = $pdo->prepare($sql);
 $statement->bindParam(':patient_id', $patient_id, PDO::PARAM_INT);
 $statement->bindParam(':centre_id', $centre_id, PDO::PARAM_INT);
 $statement->execute();

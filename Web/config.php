@@ -1,5 +1,4 @@
 <?php
-include 'connect_to_mysql.php';
 // Your MySQL database hostname.
 define('db_host','localhost');
 // Your MySQL database username.

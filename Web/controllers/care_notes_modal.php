@@ -13,7 +13,7 @@ if (isset($_POST['carenotes'])) {
     $date = date('Y-m-d H:i:s');
 
     try {
-        $statement = $conn->prepare('INSERT INTO rescue_notes_patients
+        $statement = $pdo->prepare('INSERT INTO rescue_notes_patients
             (patient_id, 
             message,
             author,

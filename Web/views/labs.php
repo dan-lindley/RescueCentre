@@ -16,7 +16,7 @@
 
 <?php
                                     //gets the medications from the table to display 
-                                    $stmt = $conn->prepare("SELECT * FROM rescue_labs
+                                    $stmt = $pdo->prepare("SELECT * FROM rescue_labs
                                             LEFT JOIN rescue_labs_tests
                                             ON rescue_labs_tests.l_test_id = rescue_labs.lab_test
                                             LEFT JOIN rescue_sample_types
