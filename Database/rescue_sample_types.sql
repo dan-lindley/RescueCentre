@@ -24,15 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `rescue_sample_types`
---
-
-CREATE TABLE `rescue_sample_types` (
-  `s_type_id` int(8) NOT NULL,
-  `sample_type` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
-
---
 -- Dumping data for table `rescue_sample_types`
 --
 
@@ -49,21 +40,6 @@ INSERT INTO `rescue_sample_types` (`s_type_id`, `sample_type`) VALUES
 -- Indexes for dumped tables
 --
 
---
--- Indexes for table `rescue_sample_types`
---
-ALTER TABLE `rescue_sample_types`
-  ADD PRIMARY KEY (`s_type_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `rescue_sample_types`
---
-ALTER TABLE `rescue_sample_types`
-  MODIFY `s_type_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

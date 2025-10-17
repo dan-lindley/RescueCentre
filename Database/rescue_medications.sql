@@ -23,23 +23,6 @@ SET time_zone = "+00:00";
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `rescue_medications`
---
-
-CREATE TABLE `rescue_medications` (
-  `medication_id` int(8) NOT NULL,
-  `medication_name` varchar(255) NOT NULL,
-  `class` varchar(255) NOT NULL,
-  `common_name` varchar(255) NOT NULL,
-  `description` longtext DEFAULT NULL,
-  `contraindications` longtext DEFAULT NULL,
-  `cautions` longtext DEFAULT NULL,
-  `dose` varchar(255) DEFAULT NULL,
-  `side_effects` longtext DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
 -- Dumping data for table `rescue_medications`
 --
 
@@ -74,21 +57,6 @@ INSERT INTO `rescue_medications` (`medication_id`, `medication_name`, `class`, `
 -- Indexes for dumped tables
 --
 
---
--- Indexes for table `rescue_medications`
---
-ALTER TABLE `rescue_medications`
-  ADD PRIMARY KEY (`medication_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `rescue_medications`
---
-ALTER TABLE `rescue_medications`
-  MODIFY `medication_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

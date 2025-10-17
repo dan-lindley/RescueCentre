@@ -24,15 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `rescue_roles`
---
-
-CREATE TABLE `rescue_roles` (
-  `role_id` int(8) NOT NULL,
-  `role_name` varchar(255) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
-
---
 -- Dumping data for table `rescue_roles`
 --
 
@@ -45,25 +36,6 @@ INSERT INTO `rescue_roles` (`role_id`, `role_name`) VALUES
 (6, 'Administrator'),
 (7, 'Driver');
 
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `rescue_roles`
---
-ALTER TABLE `rescue_roles`
-  ADD PRIMARY KEY (`role_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `rescue_roles`
---
-ALTER TABLE `rescue_roles`
-  MODIFY `role_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

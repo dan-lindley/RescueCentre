@@ -24,17 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `rescue_severity_score`
---
-
-CREATE TABLE `rescue_severity_score` (
-  `ss_id` int(8) NOT NULL,
-  `ss_category` varchar(255) DEFAULT NULL,
-  `ss_description` varchar(255) DEFAULT NULL,
-  `ss_value` int(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
-
---
 -- Dumping data for table `rescue_severity_score`
 --
 
@@ -56,21 +45,6 @@ INSERT INTO `rescue_severity_score` (`ss_id`, `ss_category`, `ss_description`, `
 -- Indexes for dumped tables
 --
 
---
--- Indexes for table `rescue_severity_score`
---
-ALTER TABLE `rescue_severity_score`
-  ADD PRIMARY KEY (`ss_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `rescue_severity_score`
---
-ALTER TABLE `rescue_severity_score`
-  MODIFY `ss_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

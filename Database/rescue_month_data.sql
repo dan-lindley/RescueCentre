@@ -24,17 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `rescue_month_data`
---
-
-CREATE TABLE `rescue_month_data` (
-  `month_id` int(8) NOT NULL,
-  `month_name` varchar(12) DEFAULT NULL,
-  `month` date DEFAULT NULL,
-  `count` int(1) DEFAULT 0
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
-
---
 -- Dumping data for table `rescue_month_data`
 --
 
@@ -81,21 +70,6 @@ INSERT INTO `rescue_month_data` (`month_id`, `month_name`, `month`, `count`) VAL
 -- Indexes for dumped tables
 --
 
---
--- Indexes for table `rescue_month_data`
---
-ALTER TABLE `rescue_month_data`
-  ADD PRIMARY KEY (`month_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `rescue_month_data`
---
-ALTER TABLE `rescue_month_data`
-  MODIFY `month_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

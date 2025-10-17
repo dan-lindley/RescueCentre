@@ -7,13 +7,13 @@ define('db_user','user');
 // Your MySQL database password.
 define('db_pass','db_pass');
 // Your MySQL database name.
-define('db_name','dab_name');
+define('db_name','local_rescue');
 // Your MySQL database charset.
 define('db_charset','utf8mb4');
 // The secret key used for hashing purposes. Change this to a random unique string.
 define('secret_key','yoursecretkey');
 // The base URL of the PHP login system (e.g. https://example.com/phplogin/). Must include a trailing slash.
-define('base_url','https://www.resccuecentre.org.uk/wp-content/themes/brikk-child/new/');
+define('base_url','http://localhost:8082');
 // The template editor to use for editing product descriptions, email templates, etc.
 // List:tinymce=TinyMCE,textarea=Textarea
 define('template_editor','tinymce');

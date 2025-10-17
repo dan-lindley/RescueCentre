@@ -24,17 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `rescue_frequency_times`
---
-
-CREATE TABLE `rescue_frequency_times` (
-  `frequency_time_id` int(8) NOT NULL,
-  `frequency_id` int(11) DEFAULT NULL,
-  `time` time DEFAULT NULL,
-  `frequency_name` varchar(255) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
-
---
 -- Dumping data for table `rescue_frequency_times`
 --
 
@@ -55,21 +44,6 @@ INSERT INTO `rescue_frequency_times` (`frequency_time_id`, `frequency_id`, `time
 -- Indexes for dumped tables
 --
 
---
--- Indexes for table `rescue_frequency_times`
---
-ALTER TABLE `rescue_frequency_times`
-  ADD PRIMARY KEY (`frequency_time_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `rescue_frequency_times`
---
-ALTER TABLE `rescue_frequency_times`
-  MODIFY `frequency_time_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

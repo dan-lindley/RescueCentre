@@ -27,22 +27,6 @@ SET time_zone = "+00:00";
 -- Table structure for table `rescue_animal_species`
 --
 
-CREATE TABLE `rescue_animal_species` (
-  `species_id` int(8) NOT NULL,
-  `species_name` varchar(255) NOT NULL,
-  `scientific_name` varchar(255) NOT NULL,
-  `animal_type` varchar(255) NOT NULL,
-  `species_weight_from` decimal(8,2) NOT NULL,
-  `species_weight_to` decimal(8,2) NOT NULL,
-  `species_weight_unit` text NOT NULL,
-  `species_measurement_from` decimal(8,2) NOT NULL,
-  `species_measurement_to` decimal(8,2) NOT NULL,
-  `species_measurement_unit` text NOT NULL,
-  `reference` text NOT NULL,
-  `species_measurement_standard` text DEFAULT NULL,
-  `iucn_status` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 --
 -- Dumping data for table `rescue_animal_species`
 --
@@ -398,25 +382,6 @@ INSERT INTO `rescue_animal_species` (`species_id`, `species_name`, `scientific_n
 (348, 'Northern white-breasted Hedgehog', 'Erinaceus Roumanicus', 'Hedgehog', 0.00, 0.00, '', 0.00, 0.00, '', '', NULL, NULL),
 (349, 'European Fat Dormouse', 'Glis Glis', 'Dormouse', 0.00, 0.00, '', 0.00, 0.00, '', '', NULL, NULL);
 
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `rescue_animal_species`
---
-ALTER TABLE `rescue_animal_species`
-  ADD PRIMARY KEY (`species_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `rescue_animal_species`
---
-ALTER TABLE `rescue_animal_species`
-  MODIFY `species_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=350;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
