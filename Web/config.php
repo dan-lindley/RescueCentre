@@ -1,6 +1,6 @@
 <?php
 // Your MySQL database hostname.
-define('db_host','localhost');
+define('db_host','db');
 // Your MySQL database username.
 define('db_user','user');
 // Your MySQL database password.
@@ -46,10 +46,10 @@ define('smtp_user','user@rescuecentre.org.uk');
 define('smtp_pass','secret');
 
 // Uncomment the below to output all errors
-// ini_set('log_errors', true);
-// ini_set('error_log', 'error.log');
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('log_errors', true);
+ini_set('error_log', 'error.log');
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 ?>
