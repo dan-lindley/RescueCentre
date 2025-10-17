@@ -1,0 +1,1 @@
+Copy templates from Routiz plugin /routiz/templates/ to this folder and override the template content.
