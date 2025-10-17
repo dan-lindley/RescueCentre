@@ -136,6 +136,11 @@ function send_activation_email($email, $code) {
 			$mail->Password = smtp_pass;
 			$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
 			$mail->Port = smtp_port;
+			if (SMTP_disable_security) {
+				$mail->SMTPAuth = false;
+				$mail->SMTPSecure = false;
+				$mail->SMTPAutoTLS = false;
+			}
 		}
 		// Recipients
 		$mail->setFrom(mail_from, mail_name);
@@ -179,6 +184,11 @@ function send_notification_email($account_id, $account_username, $account_email,
 			$mail->Password = smtp_pass;
 			$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
 			$mail->Port = smtp_port;
+			if (SMTP_disable_security) {
+				$mail->SMTPAuth = false;
+				$mail->SMTPSecure = false;
+				$mail->SMTPAutoTLS = false;
+			}
 		}
 		// Recipients
 		$mail->setFrom(mail_from, mail_name);
@@ -220,6 +230,11 @@ function send_password_reset_email($email, $username, $code) {
 			$mail->Password = smtp_pass;
 			$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
 			$mail->Port = smtp_port;
+			if (SMTP_disable_security) {
+				$mail->SMTPAuth = false;
+				$mail->SMTPSecure = false;
+				$mail->SMTPAutoTLS = false;
+			}
 		}
 		// Recipients
 		$mail->setFrom(mail_from, mail_name);
