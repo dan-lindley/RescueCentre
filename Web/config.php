@@ -1,6 +1,6 @@
 <?php
 // Your MySQL database hostname.
-define('db_host','db');
+define('db_host','db'); //TODO: localhost
 // Your MySQL database username.
 define('db_user','user');
 // Your MySQL database password.
@@ -35,16 +35,19 @@ define('notifications_enabled',true);
 // The email address to send notification emails to.
 define('notification_email','notifications@example.com');
 // Is SMTP server?
-define('SMTP',false);
+define('SMTP',true); //TODO: false
 // SMTP Hostname
-define('smtp_host','smtp.rescuecentre.org.uk');
+define('smtp_host','mailhog'); //TODO: 'smtp.rescuecentre.org.uk'
 // SMTP Port number
-define('smtp_port',465);
+define('smtp_port',1025); //TODO: 465
 // SMTP Username
-define('smtp_user','user@rescuecentre.org.uk');
+define('smtp_user','test'); //TODO: 'user@rescuecentre.org.uk'
 // SMTP Password
-define('smtp_pass','secret');
+define('smtp_pass','test'); //TODO: 'secret'
+// SMTP Disable security
+define('SMTP_disable_security', true); //TODO: false
 
+//TODO: comment out again
 // Uncomment the below to output all errors
 ini_set('log_errors', true);
 ini_set('error_log', 'error.log');
