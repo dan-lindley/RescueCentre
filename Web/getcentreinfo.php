@@ -1,5 +1,4 @@
 <?php 
-include ('../connect_to_mysql.php');
 //$centre_id = $_SESSION['centre_id'];
 $centre_id = $account['centre_id'];
 
