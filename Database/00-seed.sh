@@ -10,7 +10,7 @@ run_sql() {
 }
 
 BASE="/seed/Database"
-STRUCTURE_FILE="$BASE/RescueDB - with WP - Structure only.sql"
+STRUCTURE_FILE="$BASE/database_new_structure_and_standing_data.sql"
 
 echo "==> Importing structure (if present)..."
 if [[ -f "$STRUCTURE_FILE" ]]; then
@@ -20,9 +20,9 @@ else
   echo "   !! Structure file not found at: $STRUCTURE_FILE"
 fi
 
-echo "==> Importing rescue_*.sql files..."
+echo "==> Importing migrate_*.sql files..."
 shopt -s nullglob
-for f in "$BASE"/rescue_*.sql; do
+for f in "$BASE"/migrate_*.sql; do
   echo "   -> $f"
   run_sql "$f"
 done
