@@ -168,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Install Rescue Centre Lite</title>
-    <link rel="stylesheet" href="/assets/css/core.css">
+    <link rel="stylesheet" href="/core/css/core.css">
 </head>
 <body>
 <main class="rc-page-shell">
@@ -293,4 +293,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
 </main>
 </body>
 </html>
+
 
