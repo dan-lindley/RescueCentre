@@ -1,1 +1,12 @@
-.idea
+.idea/
+*.zip
+oauth.txt
+client_secret_*.json
+Web/config.php
+Web/config/config.php
+Web/user_images/
+Web/user_documents/
+Company Stuff/
+Hub Firmware/
+kids/
+php/
