@@ -1,1 +1,0 @@
-Copy templates from Brikk theme /brikk/templates/ to this folder and override the template content.
