@@ -1,0 +1,15 @@
+{
+  "name": "Residents",
+  "version": "0.1.0",
+  "description": "Manage long-term captive residents with care notes, observations, medication, tasks and discharge actions.",
+  "image": "modules/residents/residents.png",
+  "nav": [
+    {
+      "category": "Patients",
+      "label": "Residents",
+      "href": "module.php?module=residents&view=residents",
+      "selected": "module_residents",
+      "order": 13
+    }
+  ]
+}

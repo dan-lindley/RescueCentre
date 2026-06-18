@@ -1,0 +1,18 @@
+{
+  "name": "Patient Archive",
+  "version": "0.2.1",
+  "description": "Review archived patient admissions with search, pagination and CSV exports.",
+  "image": "modules/patient_archive/archive.png",
+  "permission": "module.patient_archive",
+  "nav": [
+    {
+      "category": "Patients",
+      "label": "Archive",
+      "label_key": "LM_ARCHIVE",
+      "href": "module.php?module=patient_archive&view=archive",
+      "selected": "module_patient_archive",
+      "permission": "module.patient_archive",
+      "order": 99
+    }
+  ]
+}

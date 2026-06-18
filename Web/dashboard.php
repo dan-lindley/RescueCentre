@@ -2,44 +2,79 @@
 include 'dashmain.php';
 include 'getcentreinfo.php';
 include 'models/all_dataModel.php';
+$page_css_files = [
+    'core/css/dashboard.css',
+    'core/css/charts.css',
+];
 ?>
-<?=template_admin_header('Dashboard', 'dashboard')?>
-
-<div class="content-title">
-    <div class="title">
-        <div class="icon">
-            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm320 96c0-26.9-16.5-49.9-40-59.3V88c0-13.3-10.7-24-24-24s-24 10.7-24 24V292.7c-23.5 9.5-40 32.5-40 59.3c0 35.3 28.7 64 64 64s64-28.7 64-64zM144 176a32 32 0 1 0 0-64 32 32 0 1 0 0 64zm-16 80a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm288 32a32 32 0 1 0 0-64 32 32 0 1 0 0 64zM400 144a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
-        </div>
-        <div class="txt">
-            <h2>Dashboard</h2>
-            <p>View statistics and more.</p>
-                    
-        </div>
-    </div>
-</div>
-
+<?=template_admin_header($lang['LM_DASHBOARD'] . ' - ' . $rescue_name . ' - Rescue Centre - Rescue Management System', 'dashboard')?>
 
 <?php include ('views/stats_view.php'); ?> 
-	
-<div class="row">
-    <div class="col-sm-6">
-        <div class="card">
-            <h5 class="card-header">Monthly Admissions</h5>
+
+<div class="xform-grid">
+    <div class="xform-field span-4">
+        <div class="content-block">
+            <h5 class="card-header"><?php echo ($lang['ADMISSIONS'] ?? 'Admissions') . ' ' . ($lang['MAP'] ?? 'Map'); ?></h5>
             <div class="card-body">
-                <?php include ('views/admissions_chart.php'); ?> 
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6">
-        <div class="card">
-            <h5 class="card-header">Presenting complaints</h5>
-            <div class="card-body">
-                <?php include ('views/complaints_chart.php'); ?> 
+                <?php include __DIR__ . '/operations/map/map.php'; ?>
             </div>
         </div>
     </div>
 </div>
 
+<div class="xform-grid">
 
+    <!-- Monthly admissions (wide) -->
+    <div class="xform-field span-2">
+        <div class="content-block">
+            <h5 class="card-header"><?php echo ($lang['ADMISSIONS'] ?? 'Admissions') . ' / ' . ($lang['MONTH'] ?? 'Month'); ?></h5>
+            <div class="card-body">
+                <?php include ('views/admissions_chart.php'); ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Presenting complaints (wide) -->
+    <div class="xform-field span-2">
+        <div class="content-block">
+            <h5 class="card-header"><?php echo $lang['PRESENTING_COMPLAINT']; ?></h5>
+            <div class="card-body">
+                <?php include ('views/complaints_chart.php'); ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- NEW CHARTS (3 column layout) -->
+<div class="xform-grid">
+    <div class="xform-field span-2">
+        <div class="content-block">
+            <h5 class="card-header"><?php echo ($lang['ADMISSIONS'] ?? 'Admissions') . ' / ' . ($lang['DAY'] ?? 'Day'); ?></h5>
+            <div class="card-body">
+                <?php include ('views/admissions_dayofweek_chart.php'); ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="xform-field span-2">
+        <div class="content-block">
+            <h5 class="card-header"><?php echo ($lang['ADMISSIONS'] ?? 'Admissions') . ' / ' . ($lang['HOUR'] ?? 'Hour'); ?></h5>
+            <div class="card-body">
+                <?php include ('views/admissions_hourly_chart.php'); ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="xform-grid">
+    <div class="xform-field span-4">
+        <div class="content-block">
+                 <?php include ('views/admissions_dayhour_heatmap.php'); ?>
+        </div>
+    </div>
+</div>
+
+
+<?php include 'views/species_chart.php'; ?>
 
 <?=template_admin_footer()?>

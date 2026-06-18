@@ -1,0 +1,9 @@
+{
+  "name": "Quick Tasks",
+  "version": "0.1.0",
+  "description": "Add quick tasks to the My patients screen. Assign Xray, bloods etc and mark when done.",
+  "image": "modules/quick_tasks/quicktasks.png",
+  "available": true,
+  "dependencies": [],
+  "nav": []
+}

@@ -26,6 +26,13 @@ if (strlen($_POST['password']) > 20 || strlen($_POST['password']) < 5) {
 if ($_POST['cpassword'] != $_POST['password']) {
 	exit('Error: Passwords do not match!');
 }
+// Account type (role) from registration select
+$account_type = $_POST['account_type'] ?? 'Member';
+$allowed_roles = ['Member', 'Vet', 'NGO'];
+if (!in_array($account_type, $allowed_roles, true)) {
+	exit('Error: Invalid account type selection!');
+}
+
 // Check if the account with that username already exists
 $stmt = $pdo->prepare('SELECT * FROM accounts WHERE username = ? OR email = ?');
 $stmt->execute([ $_POST['username'], $_POST['email'] ]);
@@ -42,13 +49,37 @@ if ($account) {
 	$activation_code = account_activation ? hash('sha256', uniqid() . $_POST['email'] . secret_key) : 'activated';
 	// Approval required?
 	$approved = account_approval ? 0 : 1;
-	// Default role
-	$role = 'Member';
+	
+	// Role from registration select (store lowercase consistently)
+	$role = $account_type;
+
 	// Current date
 	$date = date('Y-m-d\TH:i:s');
 	// Prepare query; prevents SQL injection
-	$stmt = $pdo->prepare('INSERT INTO accounts (username, password, email, activation_code, role, registered, last_seen, approved) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-	$stmt->execute([ $_POST['username'], $password, $_POST['email'], $activation_code, $role, $date, $date, $approved ]);
+	$stmt = $pdo->prepare('
+	INSERT INTO accounts
+		(username, password, email, activation_code, role, registered, last_seen, approved, centre_id, vet_id, ngo_id, vet_ok, ngo_ok, onboarded)
+	VALUES
+		(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+');
+$stmt->execute([
+	$_POST['username'],
+	$password,
+	$_POST['email'],
+	$activation_code,
+	$role,
+	$date,
+	$date,
+	$approved,
+	null,   // centre_id
+	null,   // vet_id
+	null,   // ngo_id
+	0,      // vet_ok
+	0,      // ngo_ok
+	0       // onboarded
+]);
+
+	
 	// Get last insert ID
 	$id = $pdo->lastInsertId();
 	// Send notification email
@@ -69,7 +100,15 @@ if ($account) {
 			$_SESSION['account_loggedin'] = TRUE;
 			$_SESSION['account_name'] = $_POST['username'];
 			$_SESSION['account_id'] = $id;
-			$_SESSION['account_role'] = $role;		
+			$_SESSION['account_role'] = $role;	
+			$_SESSION['centre_id'] = null;
+
+$_SESSION['vet_id'] = null;
+$_SESSION['ngo_id'] = null;
+$_SESSION['vet_ok'] = 0;
+$_SESSION['ngo_ok'] = 0;
+$_SESSION['onboarded'] = 0;
+	
 			// Do not change the output message as the AJAX code will use this to detect if the registration was successful and redirect to the home page
 			echo 'Redirect: home.php';
 		} else {

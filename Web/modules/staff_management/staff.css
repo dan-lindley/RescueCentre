@@ -1,0 +1,150 @@
+.staff-management-toolbar {
+    margin-bottom: 14px;
+}
+
+.staff-management-search {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.staff-management-search .xform-field {
+    flex: 1 1 320px;
+}
+
+.staff-management-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.staff-management-shell {
+    padding: 0;
+}
+
+.staff-management-layout {
+    display: grid;
+    grid-template-columns: minmax(320px, 1.1fr) minmax(360px, .9fr);
+    min-height: 420px;
+}
+
+.staff-management-list-pane,
+.staff-management-detail-pane {
+    min-width: 0;
+    padding: 16px;
+}
+
+.staff-management-detail-pane {
+    border-left: 1px solid var(--rc-blue-border);
+    background: var(--rc-blue-bg);
+}
+
+.staff-management-panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.staff-management-panel-head h3 {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.25;
+}
+
+.staff-management-table {
+    width: 100%;
+}
+
+.staff-management-table td,
+.staff-management-table th {
+    vertical-align: middle;
+}
+
+.staff-management-name {
+    color: #3671c9;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.staff-management-name:hover {
+    text-decoration: underline;
+}
+
+html[data-theme="dark"] .staff-management-name {
+    color: var(--rc-blue-text);
+}
+
+html[data-theme="dark"] .staff-management-detail-pane {
+    border-left-color: var(--rc-blue-border);
+    background: var(--rc-blue-bg);
+}
+
+.staff-management-detail {
+    color: var(--rc-muted, #6b7280);
+    font-size: .88rem;
+}
+
+.staff-management-detail-pane .xform-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.staff-management-detail-pane .xform-grid .span-2 {
+    grid-column: 1 / -1;
+}
+
+.staff-management-detail-pane .xform-button-row {
+    justify-content: flex-start;
+}
+
+.staff-management-lookup-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+}
+
+.staff-management-lookup-row .btn {
+    min-height: 38px;
+    white-space: nowrap;
+}
+
+.staff-management-lookup-action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.staff-management-found-pill {
+    display: none;
+}
+
+.rc-status.on-leave {
+    background: var(--rc-amber-bg);
+    border-color: var(--rc-amber-border);
+    color: var(--rc-amber-text);
+}
+
+@media (max-width: 1000px) {
+    .staff-management-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .staff-management-detail-pane {
+        border-left: 0;
+        border-top: 1px solid var(--rc-border);
+    }
+}
+
+@media (max-width: 640px) {
+    .staff-management-detail-pane .xform-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .staff-management-lookup-row {
+        grid-template-columns: 1fr;
+    }
+}

@@ -3,7 +3,7 @@ include 'main.php';
 // No need for the user to see the login form if they're logged-in, so redirect them to the home page
 if (isset($_SESSION['account_loggedin'])) {
 	// If the user is logged in, redirect to the home page.
-    header('Location: dashboard.php');
+    header('Location: home.php');
     exit;
 }
 // Also check if they are "remembered"
@@ -14,60 +14,82 @@ if (isset($_COOKIE['remember_me']) && !empty($_COOKIE['remember_me'])) {
 	$account = $stmt->fetch(PDO::FETCH_ASSOC);
 	if ($account) {
 		// Authenticate the user
-		session_regenerate_id();
-		$_SESSION['account_loggedin'] = TRUE;
-		$_SESSION['account_name'] = $account['username'];
-		$_SESSION['account_id'] = $account['id'];
-		$_SESSION['centre_id'] = $account['centre_id'];
+session_regenerate_id();
+$_SESSION['account_loggedin'] = TRUE;
+$_SESSION['account_name'] = $account['username'];
+$_SESSION['account_id'] = $account['id'];
+$_SESSION['centre_id'] = $account['centre_id'];
+$_SESSION['account_role'] = $account['role'];
+
+// NEW: secondary access + onboarding
+$_SESSION['vet_id'] = $account['vet_id'] ?? null;
+$_SESSION['ngo_id'] = $account['ngo_id'] ?? null;
+$_SESSION['vet_ok'] = isset($account['vet_ok']) ? (int)$account['vet_ok'] : 0;
+$_SESSION['ngo_ok'] = isset($account['ngo_ok']) ? (int)$account['ngo_ok'] : 0;
+$_SESSION['onboarded'] = isset($account['onboarded']) ? (int)$account['onboarded'] : 0;
+
 		$_SESSION['account_role'] = $account['role'];
 		// Update last seen date
 		$date = date('Y-m-d\TH:i:s');
 		$stmt = $pdo->prepare('UPDATE accounts SET last_seen = ? WHERE id = ?');
 		$stmt->execute([ $date, $account['id'] ]);
 		// Redirect to home page
-        header('Location: dashboard.php');
+        header('Location: home.php');
 		exit;
 	}
 }
+$favicon_path = __DIR__ . '/img/favicon.ico';
+$favicon_version = is_file($favicon_path) ? filemtime($favicon_path) : time();
 ?>
 <!DOCTYPE html>
 <html>
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width,minimum-scale=1">
-		<title>Member Login</title>
+		<title>MyRescueCentre.com - Member Login</title>
 		<link href="style.css" rel="stylesheet" type="text/css">
-		<style>
-body {
-  background-image: url('img/woodlandscene-1.png');
-  background-size: cover;
-}
-</style>
+		<link rel="icon" type="image/x-icon" href="<?= htmlspecialchars(base_url . 'img/favicon.ico?v=' . $favicon_version, ENT_QUOTES, 'UTF-8') ?>">
+		<link rel="shortcut icon" type="image/x-icon" href="<?= htmlspecialchars(base_url . 'img/favicon.ico?v=' . $favicon_version, ENT_QUOTES, 'UTF-8') ?>">
+		<meta property="og:type" content="website">
+		<meta property="og:site_name" content="MyRescueCentre">
+		<meta property="og:title" content="MyRescueCentre – RescueCentre Login">
+		<meta property="og:description" content="Secure access to the RescueCentre platform for rescue organisations worldwide.">
+		<meta property="og:url" content="https://myrescuecentre.com/">
+		<meta property="og:image" content="https://myrescuecentre.com/myrescuecentrelogin.png">
+		<meta property="og:image:secure_url" content="https://myrescuecentre.com/myrescuecentrelogin.png">
+		<meta property="og:image:width" content="1200">
+		<meta property="og:image:height" content="630">
 	</head>
-	.
 	<body>
+<div class="login-page month-<?= htmlspecialchars($GLOBALS['login_month_key'], ENT_QUOTES, 'UTF-8'); ?>">
 		<div class="login">
 			
 			<div class="icon blue">
 				<!-- You could add your own site logo or icon here 26 -->
-				 <img src="img/logo-square-white-cropped.png" width="50px" height="50px">
+				 <img src="rescue_centre_logo_login.png" width="50px" height="50px">
 			</div>
 
-			<h1>Rescue Centre Login</h1>
+			<h1>MyRescueCentre Login</h1>
 
 			<form action="authenticate.php" method="post" class="form login-form">
 
-				<label class="form-label" for="username">Username</label>
+				<label class="form-label" for="identity">Username or email</label>
 				<div class="form-group">
 					<svg class="form-icon-left" width="14" height="14" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg>
-					<input class="form-input" type="text" name="username" placeholder="Username" id="username" required>
+					<input class="form-input" type="text" name="identity" placeholder="Username or email" id="identity" required autofocus autocomplete="username">
 				</div>
 
 				<label class="form-label" for="password">Password</label>
-				<div class="form-group">
-					<svg class="form-icon-left" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M144 144v48H304V144c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192V144C80 64.5 144.5 0 224 0s144 64.5 144 144v48h16c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V256c0-35.3 28.7-64 64-64H80z"/></svg>
-					<input class="form-input" type="password" name="password" placeholder="Password" id="password" required>
-				</div>
+					<div class="form-group">
+						<svg class="form-icon-left" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 448 512"><path d="M144 144v48H304V144c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192V144C80 64.5 144.5 0 224 0s144 64.5 144 144v48h16c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V256c0-35.3 28.7-64 64-64H80z"/></svg>
+						<input class="form-input" type="password" name="password" placeholder="Password" id="password" required autocomplete="current-password">
+						<button type="button" id="togglePassword" aria-label="Show password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:transparent; border:0; padding:6px; cursor:pointer;">
+						<svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+							<path fill="#98a0a8" d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
+						</svg>
+						</button>
+					</div>
+
 
 				<div class="form-group pad-y-5">
 					<label id="remember_me">
@@ -79,12 +101,22 @@ body {
 				<div class="msg"></div>
 							
 				<button class="btn blue" type="submit">Login</button>
+				<br>
+				
+				<!--Google SSO button --> 
+				<div id="g_id_onload" data-client_id="211946896680-28005ke1hgelc8e4go1aovl6h74e4urs.apps.googleusercontent.com"
+  				data-ux_mode="redirect" data-login_uri="https://myrescuecentre.com/google_callback.php" data-auto_prompt="false"></div>
 
-				<p class="register-link">Don't have an account? <a href="register.php" class="form-link">Register</a></p>
+				<div class="g_id_signin" data-type="standard" data-theme="outline" data-text="continue_with" data-size="large" data-width="100%"></div>
+				<!--end google SSO button -->
 
+
+				<p class="register-link">Don't have an account? <a href="register.php" class="form-link">Register</a>
+			<br>Existing users that have not migrated should log into the <a href="legacy.rescuecentre.org.uk" class="form-link">legacy system</a> and use the migration tool to use this version.</p>
+			<br>The legacy version will no longer be accessible from 1st July 2026
 			</form>
 		</div>
-&nbsp;
+	</div>
 		<script>
 		// AJAX code
 		const loginForm = document.querySelector('.login-form');
@@ -105,5 +137,24 @@ body {
 			});
 		};
 		</script>
+		<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<script>
+  const pwd = document.getElementById('password');
+  const btn = document.getElementById('togglePassword');
+  const icon = document.getElementById('eyeIcon');
+  if (pwd && btn) {
+    btn.addEventListener('click', () => {
+      const showing = pwd.type === 'text';
+      pwd.type = showing ? 'password' : 'text';
+      btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+      // Swap icon (eye / eye-off) by simple path swap
+      icon.innerHTML = showing
+        ? '<path fill="#98a0a8" d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>'
+        : '<path fill="#98a0a8" d="M2.1 3.5 3.5 2.1 21.9 20.5 20.5 21.9l-2.2-2.2A12.9 12.9 0 0 1 12 19c-7 0-11-7-11-7a19 19 0 0 1 5.2-5.9L2.1 3.5ZM12 7a5 5 0 0 1 5 5c0 .6-.1 1.2-.3 1.7l-1.6-1.6c0-2-1.6-3.6-3.6-3.6l-1.6-1.6c.5-.2 1.1-.3 1.7-.3Zm-5 5c0-.6.1-1.2.3-1.7l6.4 6.4c-.5.2-1.1.3-1.7.3a5 5 0 0 1-5-5Zm10.8 4.7-2-2A7 7 0 0 0 9.3 8.2l-2-2A12 12 0 0 1 12 5c7 0 11 7 11 7a19 19 0 0 1-5.2 5.7Z"/>';
+    });
+  }
+</script>
+
 	</body>
 </html>

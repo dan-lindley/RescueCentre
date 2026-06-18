@@ -1,0 +1,163 @@
+/*
+ * Chart-specific UI.
+ *
+ * Why this is not in core.css:
+ * - These classes describe chart canvases and heatmap internals, not general page layout.
+ * - Heatmap cells/hours/legend are a specialised chart rendering pattern.
+ * - Generic comparison, trend, card, grid, and form classes belong in core.css instead.
+ *
+ * Use from chart views only:
+ * - .chart-block: fixed-height Chart.js wrapper.
+ * - .chart-canvas-short: short Chart.js canvas sizing.
+ * - .rc-heatmap-*: admission/time heatmap shell and grid.
+ * - .heatmap-*: heatmap labels, cells, and legend.
+ */
+.chart-block {
+    position: relative;
+    min-height: 340px;
+}
+
+.chart-canvas-short {
+    width: 100% !important;
+    height: 295px !important;
+}
+
+/*
+ * Heatmap chart.
+ * Kept here because it requires a fixed 24-column grid and cell colour scale;
+ * that would be too specific for universal layout classes.
+ */
+.rc-heatmap-card {
+    background: var(--rc-surface);
+    border: 1px solid var(--rc-border);
+    border-radius: 12px;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.rc-heatmap-title {
+    margin: 0 0 14px 0;
+    font-size: 18px;
+    line-height: 1.3;
+    color: var(--rc-text);
+}
+
+.rc-heatmap-wrap {
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
+.rc-heatmap-grid {
+    display: grid;
+    grid-template-columns: 72px repeat(24, minmax(42px, 1fr));
+    gap: 5px;
+    min-width: 1180px;
+    align-items: center;
+}
+
+.heatmap-corner {
+    height: 32px;
+}
+
+.heatmap-hour,
+.heatmap-day {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rc-muted);
+    text-align: center;
+}
+
+.heatmap-day {
+    text-align: left;
+    padding-left: 4px;
+}
+
+.heatmap-cell {
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid rgba(0,0,0,0.05);
+    box-sizing: border-box;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.heatmap-cell:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.heatmap-cell.is-light {
+    color: #234;
+}
+
+.heatmap-cell.is-dark {
+    color: #fff;
+}
+
+.heatmap-legend {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--rc-muted);
+}
+
+.heatmap-legend-bar {
+    width: 180px;
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(
+        to right,
+        rgba(60, 186, 159, 0.10),
+        rgba(60, 186, 159, 1)
+    );
+}
+
+html[data-theme="dark"] .rc-heatmap-card {
+    background: #162527;
+    border-color: rgba(148, 163, 184, .18);
+    color: #eaf6f4;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, .22);
+}
+
+html[data-theme="dark"] .rc-heatmap-wrap {
+    scrollbar-color: rgba(94, 234, 212, .35) #101b1e;
+}
+
+html[data-theme="dark"] .heatmap-cell {
+    border-color: rgba(148, 163, 184, .16);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .02);
+}
+
+html[data-theme="dark"] .heatmap-cell:hover {
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .28);
+}
+
+html[data-theme="dark"] .heatmap-cell.is-light {
+    color: #eaf6f4;
+}
+
+html[data-theme="dark"] .heatmap-cell.is-dark {
+    color: #061314;
+}
+
+html[data-theme="dark"] .heatmap-legend-bar {
+    background: linear-gradient(
+        to right,
+        rgba(94, 234, 212, 0.12),
+        rgba(94, 234, 212, 0.95)
+    );
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .12);
+}
+
+@media (max-width: 900px) {
+    .heatmap-cell {
+        height: 36px;
+        font-size: 11px;
+    }
+}

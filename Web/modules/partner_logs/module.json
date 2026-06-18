@@ -1,0 +1,9 @@
+{
+  "name": "Partner Logs",
+  "version": "0.1.0",
+  "description": "Add partner and external agency logs to patient care plans.",
+  "image": "modules/partner_logs/partner.png",
+  "available": true,
+  "dependencies": [],
+  "nav": []
+}

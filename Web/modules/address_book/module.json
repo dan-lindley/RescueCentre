@@ -1,0 +1,18 @@
+{
+  "name": "Address Book",
+  "version": "0.1.1",
+  "description": "Centre-bound finder address book for contact preferences, donation and Gift Aid status.",
+  "image": "modules/address_book/address.png",
+  "available": true,
+  "dependencies": [],
+  "nav": [
+    {
+      "category": "Patients",
+      "label": "Address Book",
+      "label_key": "ADD_ADDRESS_BOOK_TITLE",
+      "href": "module.php?module=address_book&view=address_book",
+      "selected": "module_address_book",
+      "order": 35
+    }
+  ]
+}

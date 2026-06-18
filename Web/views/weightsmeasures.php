@@ -1,20 +1,25 @@
-<div class="row">
-    <div class="col-sm-6">
-        <div class="card">
-            <h5 class="card-header">Weight Chart</h5>
-            <div class="card-body">
-                <?php include ('views/weights_chart.php'); ?> 
-                table here (or in the chart file)
+    <div class="xform">
+
+        <div class="xform-grid">
+
+            <!-- COLUMN 1 -->
+            <div class="xform-field span-2">
+                <div class="rc-card rc-card-muted">
+                 <?php include ('views/weights_chart.php'); ?> 
+                <h5>Add Weight</h5><br>
+                <?php include ('controllers/add_weight.php'); ?>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="col-sm-6">
-        <div class="card">
-            <h5 class="card-header">Measurement Chart</h5>
-            <div class="card-body">
+
+            <!-- COLUMN 2 -->
+            <div class="xform-field span-2">
+                <div class="rc-card rc-card-muted">
                 <?php include ('views/measurements_chart.php'); ?> 
-                Table here (or in the chart file)
+                <h5>Add Measurement</h5><br>
+                <?php include ('controllers/add_measurement.php'); ?>
+                </div>
             </div>
+
         </div>
+
     </div>
-</div>

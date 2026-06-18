@@ -1,0 +1,52 @@
+/*
+ * Group admission page CSS.
+ *
+ * Why this is not in core.css:
+ * - These selectors are tied to the group admission workflow and generated
+ *   patient rows on group_admission.php.
+ * - New wizard pages should prefer the universal .rc-stage-* classes in core.css.
+ * - New forms should prefer .xform-grid, .xform-field, .xform-input, and .rc-card.
+ *
+ * The step navigation has been migrated to universal .rc-stage-* classes.
+ * Keep only behaviour/layout that is still unique to group admission:
+ * - .group-panel: per-stage panel visibility.
+ * - .patient-row-card/.patient-row-grid: generated patient detail rows.
+ * - .group-summary/.summary-box: final confirmation summary.
+ * - .group-status: page-specific save/status message.
+ *
+ * Migration target:
+ * - .patient-row-card -> .rc-card
+ * - .summary-box -> .rc-card-muted
+ * - .autocomplete-results -> .rc-autocomplete-results
+ */
+.group-panel { display: none; }
+.group-panel.active { display: block; min-height: 360px; overflow: visible; }
+.group-patient-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; }
+.group-patient-table th { text-align: left; padding: 10px; color: var(--rc-muted); border-bottom: 1px solid var(--rc-border); }
+.group-patient-table td { padding: 8px; border-bottom: 1px solid var(--rc-border); vertical-align: top; }
+.patient-row-card { border: 1px solid var(--rc-border); border-radius: var(--rc-radius); padding: 12px; margin-top: 10px; background: var(--rc-surface); }
+.patient-row-card h4 { margin: 0 0 10px; font-size: 0.98rem; }
+.patient-row-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.4fr; gap: 10px; align-items: end; }
+.patient-row-grid.secondary { grid-template-columns: repeat(6, minmax(0, 1fr)); margin-top: 10px; }
+.patient-row-grid.identifiers { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 10px; }
+.patient-row-grid .xform-field { min-width: 0; }
+.patient-row-grid .xform-input { width: 100%; min-width: 0; }
+.patient-row-grid .compact-input { max-width: 92px; }
+.patient-row-grid .compact-unit { max-width: 82px; }
+.group-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.summary-box { border: 1px solid var(--rc-border); border-radius: var(--rc-radius); padding: 12px; background: var(--rc-surface-muted); }
+.autocomplete-results { background: var(--rc-surface); border: 1px solid var(--rc-border); max-height: 260px; overflow-y: auto; position: absolute; z-index: 9999; width: 100%; box-shadow: var(--rc-shadow); }
+.autocomplete-results ul { list-style: none; margin: 0; padding: 0; }
+.autocomplete-results li { padding: 7px 10px; cursor: pointer; }
+.autocomplete-results li:hover { background: var(--rc-blue-bg); }
+.group-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; }
+.group-status { display:none; margin-bottom: 12px; padding: 10px; border-radius: 6px; }
+.group-status.ok { display:block; background: var(--rc-green-bg); color: var(--rc-green-text); }
+.group-status.err { display:block; background: var(--rc-red-bg); color: var(--rc-red-text); }
+
+@media (max-width: 900px) {
+    .group-summary { grid-template-columns: 1fr; }
+    .patient-row-grid,
+    .patient-row-grid.secondary,
+    .patient-row-grid.identifiers { grid-template-columns: 1fr 1fr; }
+}

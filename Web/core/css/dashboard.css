@@ -1,0 +1,593 @@
+/*
+ * Dashboard-only metric UI.
+ *
+ * Why this is not in core.css:
+ * - These classes define the dashboard KPI visual language: large metric cards,
+ *   all-time summary strip, capacity meter, and seasonal pressure indicator.
+ * - They are intentionally more decorative and data-dense than generic .rc-card/.rc-stat.
+ * - Use core.css first for ordinary cards, grids, trends, badges, and comparison rows.
+ *
+ * Use from dashboard/stats views only:
+ * - .metric-board: dashboard KPI layout wrapper.
+ * - .metric-summary*: all-time summary strip and mini stat tiles.
+ * - .metric-grid/.metric-grid-secondary: dashboard card grids.
+ * - .metric-card*: large KPI cards with colour variants.
+ * - .rc-meter*: capacity utilisation meter used inside dashboard KPIs.
+ * - .rc-pressure*: seasonal pressure block and thermometer-style meter.
+ */
+.metric-board {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.metric-summary {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ffffff 0%, #f6f8fc 42%, #eef4ff 100%);
+    border: 1px solid #dfe7f2;
+    border-radius: 18px;
+    padding: 16px 18px;
+    box-shadow: 0 10px 26px rgba(24, 39, 75, 0.08);
+}
+
+.metric-summary::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 6px;
+    background: linear-gradient(180deg, #6366f1 0%, #3b82f6 50%, #14b8a6 100%);
+}
+
+.metric-summary-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-left: 6px;
+}
+
+.metric-summary-head h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: #1f2a44;
+    letter-spacing: .02em;
+}
+
+.metric-summary-note {
+    font-size: 12px;
+    color: #6f7a89;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid #e6edf5;
+    border-radius: 999px;
+    padding: 5px 10px;
+}
+
+.metric-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+    align-items: stretch;
+    padding-left: 6px;
+}
+
+.metric-summary-item {
+    background: rgba(255,255,255,0.78);
+    border: 1px solid #ebf0f6;
+    border-radius: 14px;
+    padding: 12px 12px 10px;
+    backdrop-filter: blur(3px);
+}
+
+.metric-summary-item .label {
+    display: block;
+    font-size: 11px;
+    color: #718096;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    font-weight: 700;
+}
+
+.metric-summary-item .value {
+    display: block;
+    font-size: 24px;
+    line-height: 1.05;
+    font-weight: 900;
+    color: #162334;
+}
+
+.metric-summary-item.is-blue .value   { color: #2563eb; }
+.metric-summary-item.is-green .value  { color: #0f9f6e; }
+.metric-summary-item.is-red .value    { color: #dc2626; }
+.metric-summary-item.is-teal .value   { color: #0f766e; }
+.metric-summary-item.is-purple .value { color: #7c3aed; }
+
+/*
+ * Dashboard KPI card grids.
+ * Keep here because the column counts and spacing are tuned to the dashboard
+ * statistics layout, not general repeated cards.
+ */
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.metric-grid-secondary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.metric-card {
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e7ebf0;
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 10px 24px rgba(24, 39, 75, 0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.metric-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: #dbe4f0;
+}
+
+.metric-card.card-blue {
+    background: linear-gradient(180deg, #ffffff 0%, #f4f8ff 100%);
+    border-color: #dbe8ff;
+}
+.metric-card.card-blue::before { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+
+.metric-card.card-green {
+    background: linear-gradient(180deg, #ffffff 0%, #f3fcf7 100%);
+    border-color: #d9f0df;
+}
+.metric-card.card-green::before { background: linear-gradient(90deg, #22c55e, #16a34a); }
+
+.metric-card.card-red {
+    background: linear-gradient(180deg, #ffffff 0%, #fff5f5 100%);
+    border-color: #f5dada;
+}
+.metric-card.card-red::before { background: linear-gradient(90deg, #ef4444, #dc2626); }
+
+.metric-card.card-purple {
+    background: linear-gradient(180deg, #ffffff 0%, #faf6ff 100%);
+    border-color: #eadbfd;
+}
+.metric-card.card-purple::before { background: linear-gradient(90deg, #8b5cf6, #7c3aed); }
+
+.metric-card.card-amber {
+    background: linear-gradient(180deg, #ffffff 0%, #fff9f1 100%);
+    border-color: #f7e6c9;
+}
+.metric-card.card-amber::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+
+.metric-card.card-indigo {
+    background: linear-gradient(180deg, #ffffff 0%, #f5f7ff 100%);
+    border-color: #dfe3ff;
+}
+.metric-card.card-indigo::before { background: linear-gradient(90deg, #6366f1, #4f46e5); }
+
+.metric-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.metric-title {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 800;
+    color: #607086;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.metric-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.card-blue .metric-icon {
+    background: linear-gradient(180deg, #deebff 0%, #cfe1ff 100%);
+    color: #2563eb;
+}
+.card-green .metric-icon {
+    background: linear-gradient(180deg, #dcfce7 0%, #c9f3d8 100%);
+    color: #15803d;
+}
+.card-red .metric-icon {
+    background: linear-gradient(180deg, #ffe3e3 0%, #ffd1d1 100%);
+    color: #dc2626;
+}
+.card-purple .metric-icon {
+    background: linear-gradient(180deg, #efe1ff 0%, #e7d4ff 100%);
+    color: #7c3aed;
+}
+.card-amber .metric-icon {
+    background: linear-gradient(180deg, #ffefcf 0%, #ffe2ab 100%);
+    color: #b45309;
+}
+.card-indigo .metric-icon {
+    background: linear-gradient(180deg, #e4e8ff 0%, #d8ddff 100%);
+    color: #4f46e5;
+}
+
+.metric-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.metric-value {
+    font-size: 36px;
+    line-height: 1;
+    font-weight: 900;
+    color: #162334;
+    letter-spacing: -.02em;
+}
+
+.metric-inline-note {
+    font-size: 13px;
+    font-weight: 800;
+    color: #556476;
+    white-space: nowrap;
+}
+
+.metric-footer {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid rgba(226,232,240,0.9);
+    font-size: 13px;
+    font-weight: 700;
+    color: #556476;
+}
+
+.metric-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px;
+    margin-top: 2px;
+}
+
+.metric-mini-cell {
+    font-size: 12px;
+    color: #6f7a89;
+    line-height: 1.4;
+}
+
+/*
+ * Dashboard capacity meter.
+ * Similar to .rc-progress, but this version includes dashboard-specific sizing,
+ * status text layout, and good/medium/high occupancy colour treatment.
+ */
+.rc-meter-wrap{
+    margin-top: 10px;
+}
+
+.rc-meter{
+    width: 100%;
+    height: 12px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.rc-meter-fill{
+    height: 100%;
+    border-radius: 999px;
+    transition: width .4s ease;
+}
+
+.rc-meter-fill.is-good{
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.rc-meter-fill.is-medium{
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.rc-meter-fill.is-high{
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.rc-meter-meta{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 700;
+}
+
+.rc-status-pill{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .02em;
+}
+
+.rc-status-pill.is-good{
+    background: #dcfce7;
+    color: #166534;
+}
+
+.rc-status-pill.is-medium{
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.rc-status-pill.is-high{
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/*
+ * Seasonal pressure indicator.
+ * This is dashboard-specific because it combines a current count, seasonal norm,
+ * pressure badge, and vivid dark-mode thermometer meter.
+ */
+.rc-pressure-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.rc-pressure-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 92px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.rc-pressure-badge.season-low {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.rc-pressure-badge.season-normal {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.rc-pressure-badge.season-high {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.rc-pressure-badge.season-peak {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.rc-pressure-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.rc-pressure-item {
+    background: rgba(255,255,255,0.65);
+    border: 1px solid rgba(226,232,240,0.9);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.rc-pressure-item .label {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.rc-pressure-item .value {
+    display: block;
+    font-size: 20px;
+    line-height: 1.1;
+    font-weight: 900;
+    color: #162334;
+}
+
+.rc-pressure-meter-wrap {
+    margin-top: 12px;
+}
+
+.rc-pressure-meter {
+    width: 100%;
+    height: 14px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: linear-gradient(90deg, #dbeafe 0%, #dcfce7 35%, #fef3c7 70%, #fee2e2 100%);
+    position: relative;
+}
+
+.rc-pressure-marker {
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    background: #111827;
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+
+.rc-pressure-caption {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 700;
+}
+
+html[data-theme="dark"] .metric-summary {
+    background: linear-gradient(135deg, #162527 0%, #101b1e 56%, #13233d 100%);
+    border-color: rgba(148, 163, 184, .18);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, .22);
+}
+
+/*
+ * Dashboard dark mode.
+ * Kept alongside dashboard components so core.css does not inherit KPI-only
+ * colours, shadows, or meter treatment.
+ */
+html[data-theme="dark"] .metric-summary-head h3,
+html[data-theme="dark"] .metric-value,
+html[data-theme="dark"] .rc-pressure-item .value,
+html[data-theme="dark"] .metric-mini strong {
+    color: #eaf6f4 !important;
+}
+
+html[data-theme="dark"] .metric-summary-note,
+html[data-theme="dark"] .metric-summary-item,
+html[data-theme="dark"] .rc-pressure-item {
+    background: rgba(255, 255, 255, .06);
+    border-color: rgba(148, 163, 184, .18);
+    color: #eaf6f4;
+}
+
+html[data-theme="dark"] .metric-summary-item .label,
+html[data-theme="dark"] .metric-title,
+html[data-theme="dark"] .metric-inline-note,
+html[data-theme="dark"] .metric-footer,
+html[data-theme="dark"] .metric-mini-cell,
+html[data-theme="dark"] .rc-meter-meta,
+html[data-theme="dark"] .rc-pressure-item .label,
+html[data-theme="dark"] .rc-pressure-caption {
+    color: #9db0b5;
+}
+
+html[data-theme="dark"] .metric-card,
+html[data-theme="dark"] .metric-card.card-blue,
+html[data-theme="dark"] .metric-card.card-green,
+html[data-theme="dark"] .metric-card.card-red,
+html[data-theme="dark"] .metric-card.card-purple,
+html[data-theme="dark"] .metric-card.card-amber,
+html[data-theme="dark"] .metric-card.card-indigo {
+    background: #162527;
+    border-color: rgba(148, 163, 184, .18);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, .22);
+}
+
+html[data-theme="dark"] .metric-footer {
+    border-top-color: rgba(148, 163, 184, .16);
+}
+
+html[data-theme="dark"] .metric-icon {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
+}
+
+html[data-theme="dark"] .card-blue .metric-icon { background: #13233d; color: #93c5fd; }
+html[data-theme="dark"] .card-green .metric-icon { background: #122c23; color: #86efac; }
+html[data-theme="dark"] .card-red .metric-icon { background: #351819; color: #fca5a5; }
+html[data-theme="dark"] .card-purple .metric-icon { background: #241936; color: #c4b5fd; }
+html[data-theme="dark"] .card-amber .metric-icon { background: #332813; color: #fcd34d; }
+html[data-theme="dark"] .card-indigo .metric-icon { background: #191f3a; color: #a5b4fc; }
+
+html[data-theme="dark"] .rc-meter {
+    background: #0f1b1e;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .35);
+}
+
+html[data-theme="dark"] .rc-pressure-marker {
+    width: 20px;
+    height: 20px;
+    background: #ffffff;
+    border: 4px solid #5eead4;
+    box-shadow: 0 0 0 4px rgba(94, 234, 212, .16), 0 0 22px rgba(94, 234, 212, .85);
+}
+
+html[data-theme="dark"] .rc-pressure-meter {
+    height: 18px;
+    background: linear-gradient(90deg, #38bdf8 0%, #22c55e 34%, #facc15 66%, #fb7185 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12), 0 10px 22px rgba(0, 0, 0, .22);
+}
+
+html[data-theme="dark"] .rc-pressure-badge.season-low {
+    background: rgba(56, 189, 248, .18);
+    color: #7dd3fc;
+}
+
+html[data-theme="dark"] .rc-pressure-badge.season-normal {
+    background: rgba(34, 197, 94, .18);
+    color: #86efac;
+}
+
+html[data-theme="dark"] .rc-pressure-badge.season-high {
+    background: rgba(250, 204, 21, .18);
+    color: #fde047;
+}
+
+html[data-theme="dark"] .rc-pressure-badge.season-peak {
+    background: rgba(251, 113, 133, .18);
+    color: #fda4af;
+}
+
+@media (max-width: 1200px) {
+    .metric-summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .metric-grid,
+    .metric-grid-secondary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 800px) {
+    .rc-pressure-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .metric-summary-grid,
+    .metric-grid,
+    .metric-grid-secondary,
+    .metric-mini-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-summary,
+    .metric-card {
+        padding: 16px;
+    }
+}

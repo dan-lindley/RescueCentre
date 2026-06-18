@@ -36,14 +36,9 @@ if (isset($_COOKIE['remember_me']) && !empty($_COOKIE['remember_me'])) {
 		<meta name="viewport" content="width=device-width,minimum-scale=1">
 		<title>Register for Rescue Centre</title>
 		<link href="style.css" rel="stylesheet" type="text/css">
-				<style>
-body {
-  background-image: url('img/woodlandscene-1.png');
-  background-size: cover;
-}
-</style>
 	</head>
-	<body>&nbsp;
+	<body class="login-page month-<?= htmlspecialchars($GLOBALS['login_month_key'], ENT_QUOTES, 'UTF-8'); ?>">
+		
 		<div class="register">
 
 			<div class="icon">
@@ -54,6 +49,16 @@ body {
 			<h1>Register for Rescue Centre</h1>
 
 			<form action="register-process.php" method="post" class="form register-form">
+
+			<label class="form-label" for="account_type">I am a…</label>
+<div class="form-group">
+    <select name="account_type" id="account_type" class="form-input" required>
+        <option value="Member" selected>Animal Rescue or Rehabber (I rescue animals)</option>
+        <option value="Vet">Veterinary Professional registering a practice (I'm not a rescue)</option>
+        <option value="NGO">NGO, Charity or Academic Institution (I'm not a rescue)</option>
+    </select>
+</div>
+
 
 				<label class="form-label" for="username">Username</label>
 				<div class="form-group">
@@ -88,7 +93,7 @@ body {
 			</form>
 
 		</div>
-&nbsp;
+
 		<script>
 		// AJAX code
 		const registrationForm = document.querySelector('.register-form');

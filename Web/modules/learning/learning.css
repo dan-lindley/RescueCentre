@@ -1,0 +1,169 @@
+/*
+ * Learning module CSS.
+ * Keep this file for learning-specific layout only.
+ * Use universal core.css classes for panels, forms, tables, tabs, badges,
+ * progress bars, alerts, cards, grids, and action rows.
+ */
+
+.learning-shell {
+    max-width: 1220px;
+}
+
+.learning-builder-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+    gap: 16px;
+    align-items: start;
+}
+
+.learning-course-layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.learning-course-nav {
+    position: sticky;
+    top: 78px;
+}
+
+.learning-page-link {
+    display: block;
+    padding: 10px 12px;
+    border: 1px solid var(--rc-border);
+    border-radius: var(--rc-radius);
+    background: var(--rc-surface-muted);
+    color: var(--rc-text);
+    text-decoration: none;
+}
+
+.learning-page-link strong,
+.learning-page-link span {
+    display: block;
+}
+
+.learning-page-link span {
+    margin-top: 3px;
+    color: var(--rc-muted);
+    font-size: .88rem;
+}
+
+.learning-page-link:hover,
+.learning-page-link.is-active {
+    border-color: var(--rc-blue-border);
+    background: var(--rc-blue-bg);
+    color: var(--rc-blue-text);
+}
+
+.learning-page-link:hover span,
+.learning-page-link.is-active span {
+    color: inherit;
+}
+
+.learning-content {
+    color: var(--rc-text);
+    line-height: 1.75;
+}
+
+.learning-content p,
+.learning-content ul,
+.learning-content ol {
+    margin-top: 0;
+    margin-bottom: 14px;
+}
+
+.learning-content img,
+.learning-content video,
+.learning-content iframe {
+    max-width: 100%;
+    border-radius: var(--rc-radius);
+}
+
+.learning-answer-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.learning-answer-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--rc-border);
+    border-radius: var(--rc-radius);
+    background: var(--rc-surface-muted);
+    color: var(--rc-text);
+}
+
+.learning-answer-option input {
+    margin-top: 3px;
+}
+
+.learning-answer-edit-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+}
+
+@media (max-width: 900px) {
+    .learning-builder-grid,
+    .learning-course-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .learning-course-nav {
+        position: static;
+    }
+}
+
+@media (max-width: 560px) {
+    .learning-answer-edit-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Learner assessment rendering */
+.learning-assessment-panel {
+    margin-top: 14px;
+}
+
+.learning-question-card h4 {
+    margin: 0;
+}
+
+.learning-answer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.learning-answer-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 9px 10px;
+    border: 1px solid var(--rc-border);
+    border-radius: var(--rc-radius);
+    background: var(--rc-surface);
+    color: var(--rc-text);
+    cursor: pointer;
+}
+
+.learning-answer-option:hover {
+    border-color: var(--rc-blue-border);
+    background: var(--rc-blue-bg);
+}
+
+.learning-answer-option input {
+    margin-top: 3px;
+    flex: 0 0 auto;
+}
+
+.learning-page-link.is-assessment-ready {
+    border-style: dashed;
+}

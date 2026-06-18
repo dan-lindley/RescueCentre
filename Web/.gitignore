@@ -1,0 +1,10 @@
+﻿/config.php
+/config/config.php
+/storage/uploads/*
+/storage/logs/*
+!/storage/uploads/.gitkeep
+!/storage/logs/.gitkeep
+/vendor/
+.env
+*.log
+

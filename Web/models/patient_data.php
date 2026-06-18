@@ -1,63 +1,104 @@
-<?php 
-//Retrieve the GET value from the URL, and sanitise it for security purposes
+<?php
+
+/* ------------------------------------------------------------
+   GET patient_id (existing behaviour)
+   ------------------------------------------------------------ */
 function test_input($data)
 {
     $data = trim($data);
     $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    return $data;
+    return htmlspecialchars($data);
 }
 
-if (isset($_GET["patient_id"])) {
-    $patient_id = test_input($_GET["patient_id"]);
-} else {
+if (!isset($_GET['patient_id'])) {
     echo "Error #1 - Patient not found.";
     exit();
 }
 
-if (isset($_GET["alert"])) {
-    $alert = test_input($_GET["alert"]);
+$patient_id = (int) test_input($_GET['patient_id']);
 
-    if ($alert = 1) {
-        $alertmsg = "<div class='alert alert-success' role='alert'>
-        This patient's details were updated in the database.
-        </div>";
-    } else if ($alert = 2) {
-        $alertmsg = "<div class='alert alert-success' role='alert'>
-        Alert
-        </div>";
-    } else {
-        $alertmsg = "";
-    }
-} else {
-    $alertmsg = "";
-}
+/* ------------------------------------------------------------
+   SQL — PATIENT (UNCHANGED) + ACTIVE ADMISSION (ADDED)
+   ------------------------------------------------------------ */
+$sql = "
+SELECT
+    /* ---------------- PATIENT (ORIGINAL FIELDS) ---------------- */
+    p.patient_id,
+    p.name,
+    p.ringed,
+    p.ring_number,
+    p.microchipped,
+    p.microchip_number,
+    p.animal_type,
+    p.animal_order,
+    p.animal_species,
+    p.sex,
+    p.status,
+    p.date_added,
+    p.centre_id,
 
+    /* ---------------- ADMISSION (ADDED ONLY) ---------------- */
+    a.admission_id,
+    a.admission_date,
+    a.current_location,
+    a.finder_name,
+    a.finder_tel,
+    a.presenting_complaint,
+    a.passphrase
 
-//Get the information from the database
-$sql = 'SELECT * FROM rescue_patients WHERE patient_id=:patient_id AND centre_id=:centre_id LIMIT 1';
-$statement = $pdo->prepare($sql);
-$statement->bindParam(':patient_id', $patient_id, PDO::PARAM_INT);
-$statement->bindParam(':centre_id', $centre_id, PDO::PARAM_INT);
-$statement->execute();
-$result = $statement->fetch(PDO::FETCH_ASSOC);
-/*---------------------------------------------------------------------------------*/
-if ($result) {
-    $patient_name = $result["name"];
-    $patient_ringed = $result["ringed"];
-    $patient_ring_number = $result["ring_number"];
-    $patient_microchipped = $result["microchipped"];
-    $patient_microchip_number = $result["microchip_number"];
-    $patient_animal_type = $result["animal_type"];
-    $patient_animal_order = $result["animal_order"];
-    $patient_animal_species = $result["animal_species"];
-    $patient_sex = $result["sex"];
-    $patient_status = $result["status"];
-    $date_added = $result["date_added"];
+FROM rescue_patients p
 
-    $formatted_date = new DateTime($date_added);
-    $formatted_date = $formatted_date->format('d-m-Y H:i');
-} else {
+LEFT JOIN rescue_admissions a
+       ON a.admission_id = (
+            SELECT a2.admission_id
+            FROM rescue_admissions a2
+            WHERE a2.patient_id = p.patient_id
+            ORDER BY a2.admission_date DESC, a2.admission_id DESC
+            LIMIT 1
+       )
+
+WHERE p.patient_id = :patient_id
+  AND p.centre_id = :centre_id
+
+LIMIT 1
+";
+
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':patient_id', $patient_id, PDO::PARAM_INT);
+$stmt->bindParam(':centre_id', $centre_id, PDO::PARAM_INT);
+$stmt->execute();
+
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$result) {
     echo "The patient ID was not found or does not relate to your rescue";
     exit();
 }
+
+/* ------------------------------------------------------------
+   ORIGINAL PATIENT VARIABLES (UNCHANGED)
+   ------------------------------------------------------------ */
+$patient_name              = $result["name"];
+$patient_ringed            = $result["ringed"];
+$patient_ring_number       = $result["ring_number"];
+$patient_microchipped      = $result["microchipped"];
+$patient_microchip_number  = $result["microchip_number"];
+$patient_animal_type       = $result["animal_type"];
+$patient_animal_order      = $result["animal_order"];
+$patient_animal_species    = $result["animal_species"];
+$patient_sex               = $result["sex"];
+$patient_status            = $result["status"];
+
+$formatted_date = (new DateTime($result["date_added"]))
+                    ->format('d-m-Y H:i');
+
+/* ------------------------------------------------------------
+   ADMISSION VARIABLES (NEW, ADDITIVE ONLY)
+   ------------------------------------------------------------ */
+$admission_id           = $result["admission_id"];
+$admission_date         = $result["admission_date"];
+$current_location       = $result["current_location"];
+$finder_name            = $result["finder_name"];
+$finder_tel             = $result["finder_tel"];
+$presenting_complaint   = $result["presenting_complaint"];
+$passphrase             = $result["passphrase"];

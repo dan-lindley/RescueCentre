@@ -1,0 +1,19 @@
+{
+  "name": "Triage Builder",
+  "version": "0.1.0",
+  "description": "UNAVAILABLE - Draft builder for global and centre-specific triage questions, answers, advice and flow ordering.",
+  "image": "modules/development.png",
+  "available": true,
+  "dependencies": [
+    "triage"
+  ],
+  "nav": [
+    {
+      "category": "Management",
+      "label": "Triage Questions",
+      "href": "module.php?module=triage_builder&view=questions",
+      "selected": "module_triage_builder",
+      "order": 45
+    }
+  ]
+}

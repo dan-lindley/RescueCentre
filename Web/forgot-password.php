@@ -36,6 +36,7 @@ if (isset($_POST['email'])) {
 		<link href="style.css" rel="stylesheet" type="text/css">
 	</head>
 	<body>
+		<div class="login-page month-<?= htmlspecialchars($GLOBALS['login_month_key'], ENT_QUOTES, 'UTF-8'); ?>">
 		<div class="login">
 
 			<h1>Forgot Password</h1>
@@ -63,5 +64,6 @@ if (isset($_POST['email'])) {
 			</form>
 
 		</div>
+				</div>
 	</body>
 </html>

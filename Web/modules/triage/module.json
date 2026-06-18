@@ -1,0 +1,16 @@
+{
+  "name": "Triage",
+  "version": "0.1.0",
+  "description": "UNAVAILABLE - Draft telephone triage call module for structured question flow, advice recording and collection/intake details.",
+  "image": "modules/development.png",
+  "available": true,
+  "nav": [
+    {
+      "category": "Patients",
+      "label": "Triage Call",
+      "href": "module.php?module=triage&view=call",
+      "selected": "module_triage",
+      "order": 35
+    }
+  ]
+}

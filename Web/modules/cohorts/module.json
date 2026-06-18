@@ -1,0 +1,15 @@
+{
+  "name": "Cohorts",
+  "version": "0.1.0",
+  "description": "Group patients together and add group care notes, movement and dispositions.",
+  "image": "modules/cohorts/cohorts.png",
+  "nav": [
+    {
+      "category": "Patients",
+      "label": "Cohorts",
+      "href": "module.php?module=cohorts&view=cohorts",
+      "selected": "module_cohorts",
+      "order": 12
+    }
+  ]
+}

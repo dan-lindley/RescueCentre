@@ -1,0 +1,18 @@
+{
+  "name": "Incidents",
+  "version": "0.1.0",
+  "description": "Create incidents, mass casualty events and manage linked patients.",
+  "image": "modules/incidents/incidents.png",
+  "available": true,
+  "dependencies": [],
+  "nav": [
+    {
+      "category": "Patients",
+      "label": "Incidents",
+      "label_key": "LM_INCIDENTS",
+      "href": "module.php?module=incidents&view=incidents",
+      "selected": "module_incidents",
+      "order": 30
+    }
+  ]
+}

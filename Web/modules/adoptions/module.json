@@ -1,0 +1,17 @@
+{
+  "name": "Adoptions",
+  "version": "0.1.0",
+  "description": "Manage patients awaiting adoption and adopted patients.",
+  "image": "modules/development.png",
+  "available": true,
+  "dependencies": [],
+  "nav": [
+    {
+      "category": "Patients",
+      "label": "Adoptions",
+      "href": "module.php?module=adoptions&view=awaiting",
+      "selected": "module_adoptions",
+      "order": 14
+    }
+  ]
+}

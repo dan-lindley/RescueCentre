@@ -1,0 +1,77 @@
+/*
+ * Patient list compatibility CSS.
+ *
+ * Why this is not in core.css:
+ * - These selectors target legacy patient table/detail markup:
+ *   .patient-block, .patient-panel, and .patient-table.
+ * - They are dark-mode patches for the patient list view, not universal UI primitives.
+ * - New patient UI should use core.css classes such as .rc-table, .rc-card,
+ *   .rc-card-muted, .rc-comparison-*, and .rc-chip.
+ *
+ * Keep here while my_patients.php/group patient views still emit legacy classes.
+ */
+html[data-theme="dark"] body.admin .patient-block {
+    border-color: var(--rc-border) !important;
+    background: var(--rc-surface);
+}
+
+html[data-theme="dark"] body.admin .patient-panel td,
+html[data-theme="dark"] body.admin .patient-table td {
+    background: transparent;
+}
+
+html[data-theme="dark"] body.admin .patient-panel .rc-card-muted {
+    background: var(--rc-surface-muted);
+    border-color: var(--rc-border);
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .patient-panel hr {
+    border-top-color: var(--rc-border-strong) !important;
+}
+
+html[data-theme="dark"] body.admin .patient-table td.alert-red,
+html[data-theme="dark"] body.admin .patient-block td.alert-red {
+    background: var(--rc-red-bg) !important;
+    border-left-color: var(--rc-red-border) !important;
+    color: var(--rc-red-text) !important;
+    font-weight: 900;
+}
+
+html[data-theme="dark"] body.admin .patient-table td.alert-amber,
+html[data-theme="dark"] body.admin .patient-block td.alert-amber {
+    background: var(--rc-amber-bg) !important;
+    border-left-color: var(--rc-amber-border) !important;
+    color: var(--rc-amber-text) !important;
+    font-weight: 900;
+}
+
+html[data-theme="dark"] body.admin .patient-table td.alert-green,
+html[data-theme="dark"] body.admin .patient-block td.alert-green {
+    background: var(--rc-green-bg) !important;
+    border-left-color: var(--rc-green-border) !important;
+    color: var(--rc-green-text) !important;
+    font-weight: 900;
+}
+
+html[data-theme="dark"] body.admin .patient-table td.alert-blue,
+html[data-theme="dark"] body.admin .patient-block td.alert-blue {
+    background: var(--rc-blue-bg) !important;
+    border-left-color: var(--rc-blue-border) !important;
+    color: var(--rc-blue-text) !important;
+    font-weight: 900;
+}
+
+html[data-theme="dark"] body.admin .patient-table td.alert-grey,
+html[data-theme="dark"] body.admin .patient-block td.alert-grey {
+    background: var(--rc-grey-bg) !important;
+    border-left-color: var(--rc-grey-border) !important;
+    color: var(--rc-grey-text) !important;
+    font-weight: 900;
+}
+
+html[data-theme="dark"] body.admin .patient-table td[class*="alert-"] h5,
+html[data-theme="dark"] body.admin .patient-block td[class*="alert-"] h5 {
+    color: inherit;
+    font-weight: 900;
+}

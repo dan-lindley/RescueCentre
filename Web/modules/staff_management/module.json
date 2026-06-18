@@ -1,0 +1,17 @@
+{
+  "name": "Staff & Volunteers",
+  "version": "0.1.0",
+  "description": "Manage staff and volunteer personal details, with optional links to user accounts.",
+  "image": "modules/staff_management/staff.png",
+  "available": true,
+  "dependencies": [],
+  "nav": [
+    {
+      "category": "Staff",
+      "label": "Staff & Volunteers",
+      "href": "module.php?module=staff_management&view=index",
+      "selected": "module_staff_management",
+      "order": 10
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Duties",
+  "version": "0.1.0",
+  "description": "Manage staff and volunteer rotas, repeating duty patterns, and assigned daily tasks.",
+  "image": "modules/duties/duties.png",
+  "available": true,
+  "dependencies": ["staff_management"],
+  "nav": [
+    {
+      "category": "Staff",
+      "label": "Duties",
+      "href": "module.php?module=duties&view=index",
+      "selected": "module_duties",
+      "order": 25
+    }
+  ]
+}

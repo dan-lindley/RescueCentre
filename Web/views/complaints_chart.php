@@ -4,6 +4,10 @@
 
 <script>
   const ctx = document.getElementById('complaintsChart');
+  const complaintsChartIsDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const complaintsChartText = complaintsChartIsDark ? '#eaf6f4' : '#162334';
+  const complaintsChartMuted = complaintsChartIsDark ? '#9db0b5' : '#858796';
+  const complaintsChartGrid = complaintsChartIsDark ? 'rgba(148, 163, 184, .18)' : 'rgba(226, 232, 240, .9)';
 
   new Chart(ctx, {
     type: 'bar',
@@ -27,7 +31,7 @@
                          print '"' . $complaint . '"	,';
                     }?>],
       datasets: [{
-        label: 'Total Admissions',
+        label: <?php echo json_encode(($lang['TOTAL'] ?? 'Total') . ' ' . ($lang['ADMISSIONS'] ?? 'Admissions')); ?>,
         backgroundColor: ['#5AAb16', '#FBDb25', '#0f4c5c', '#F5a701', '#E34d36', '#A71c5d', '#2e546c', '#4da67c', '#77e44c', '#caff00'  ],
         hoverBackgroundColor: "#2e59d9",
         borderColor: "#4e73df",
@@ -66,15 +70,18 @@
     },
 
     legend: {
-      display: false
+      display: false,
+      labels: {
+        fontColor: complaintsChartText
+      }
     },
     tooltips: {
       titleMarginBottom: 10,
-      titleFontColor: '#6e707e',
+      titleFontColor: complaintsChartText,
       titleFontSize: 14,
-      backgroundColor: "rgb(255,255,255)",
-      bodyFontColor: "#858796",
-      borderColor: '#dddfeb',
+      backgroundColor: complaintsChartIsDark ? '#162527' : "rgb(255,255,255)",
+      bodyFontColor: complaintsChartMuted,
+      borderColor: complaintsChartIsDark ? 'rgba(148, 163, 184, .18)' : '#dddfeb',
       borderWidth: 1,
       xPadding: 15,
       yPadding: 15,
@@ -85,6 +92,39 @@
           var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
           return datasetLabel + ': ' + number_format(tooltipItem.yLabel);
         }
+      }
+    },
+    plugins: {
+      legend: {
+        labels: {
+          color: complaintsChartText
+        }
+      },
+      tooltip: {
+        backgroundColor: complaintsChartIsDark ? '#162527' : '#ffffff',
+        titleColor: complaintsChartText,
+        bodyColor: complaintsChartMuted,
+        borderColor: complaintsChartIsDark ? 'rgba(148, 163, 184, .18)' : '#dddfeb',
+        borderWidth: 1
+      }
+    },
+    scales: {
+      xAxes: [{
+        ticks: { fontColor: complaintsChartMuted },
+        gridLines: { color: complaintsChartGrid }
+      }],
+      yAxes: [{
+        ticks: { fontColor: complaintsChartMuted, precision: 0 },
+        gridLines: { color: complaintsChartGrid }
+      }],
+      x: {
+        ticks: { color: complaintsChartMuted },
+        grid: { color: complaintsChartGrid }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: { color: complaintsChartMuted, precision: 0 },
+        grid: { color: complaintsChartGrid }
       }
     },
   }

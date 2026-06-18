@@ -1,0 +1,25 @@
+{
+  "name": "E-Learning",
+  "version": "1.0.0",
+  "description": "Lightweight e-learning module for course creation, management, and learner tracking.",
+  "image": "modules/development.png",
+  "available": true,
+  "dependencies": [],
+  "nav": [
+    {
+      "category": "Management",
+      "label": "Learning Management",
+      "href": "module.php?module=learning&view=admin_dashboard",
+      "selected": "module_learning_admin",
+      "order": 50,
+      "permissions": ["admin", "learning_admin", "centre_manager"]
+    },
+    {
+      "category": "Staff",
+      "label": "My Learning",
+      "href": "module.php?module=learning&view=learner_dashboard",
+      "selected": "module_learning",
+      "order": 5
+    }
+  ]
+}

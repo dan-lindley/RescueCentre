@@ -1,0 +1,2174 @@
+/*
+ * Rescue Centre core UI primitives.
+ * Shared by the main app and modules. Module CSS should only contain
+ * layout/behaviour that is specific to that module.
+ *
+ * Ownership:
+ * - core.css: universal classes that can be reused on any page.
+ * - charts.css: chart-only styles that are not useful outside chart views.
+ * - pagename.css: page-specific styles that cannot be made universal.
+ *
+ * Quick reuse map:
+ * - THEME TOKENS: --rc-* colours, borders, radius, shadow.
+ * - DARK MODE COMPAT: broad admin surface/table/form/tab fallbacks.
+ * - LAYOUT: .rc-stack, .rc-row-head, .rc-split-head, .rc-actions, .rc-actions-stack.
+ * - CARDS/PANELS: .rc-panel, .rc-card, .rc-card-muted, .content-block.
+ * - GRIDS: .rc-item-grid, .rc-card-grid, .rc-card-grid-4, .rc-stat-grid.
+ * - STATS: .rc-stat-grid, .rc-stat.
+ * - WIZARDS/STEPS: .rc-stage-shell, .rc-stage-nav, .rc-stage-list, .rc-stage-link.
+ * - AUTOCOMPLETE: .rc-autocomplete-results, .rc-autocomplete-option.
+ * - TABLES: .rc-table, .rc-table-scroll, .rc-table-actions, .row-hover.
+ * - FORMS: .xform, .xform-grid, .xform-field, .xform-label, .xform-input, .xform-actions.
+ * - ALERTS: .rc-alert plus .red/.amber/.green/.blue/.grey/.purple.
+ * - CHIPS/STATUS: .rc-pill, .rc-chip, .rc-status, .rc-badge, .trend-chip, .triangle.
+ * - COMPARISON LISTS: .rc-comparison-* for label/value/delta rows.
+ * - PAGINATION: .rc-pager, .rc-pager-btn.
+ * - PROGRESS: .rc-progress, .rc-progress-fill, .rc-thermometer.
+ * - TABS: .rc-tabs, .rc-tab, .rc-tab-panel.
+ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    --rc-surface: #fff;
+    --rc-surface-muted: #f9fafb;
+    --rc-border: #e5e7eb;
+    --rc-border-strong: #d1d5db;
+    --rc-text: #111827;
+    --rc-muted: #6b7280;
+    --rc-blue-bg: #eff6ff;
+    --rc-blue-border: #bfdbfe;
+    --rc-blue-text: #1d4ed8;
+    --rc-green-bg: #dcfce7;
+    --rc-green-border: #bbf7d0;
+    --rc-green-text: #166534;
+    --rc-amber-bg: #fffbeb;
+    --rc-amber-border: #fde68a;
+    --rc-amber-text: #92400e;
+    --rc-red-bg: #fee2e2;
+    --rc-red-border: #fca5a5;
+    --rc-red-text: #991b1b;
+    --rc-grey-bg: #e5e7eb;
+    --rc-grey-border: #9ca3af;
+    --rc-grey-text: #374151;
+    --rc-purple-bg: #f3e8ff;
+    --rc-purple-border: #d8b4fe;
+    --rc-purple-text: #6b21a8;
+    --rc-palette-01: #2563eb;
+    --rc-palette-02: #16a34a;
+    --rc-palette-03: #d97706;
+    --rc-palette-04: #dc2626;
+    --rc-palette-05: #7c3aed;
+    --rc-palette-06: #0891b2;
+    --rc-palette-07: #be185d;
+    --rc-palette-08: #4f46e5;
+    --rc-palette-09: #0f766e;
+    --rc-palette-10: #a16207;
+    --rc-palette-11: #c2410c;
+    --rc-palette-12: #9333ea;
+    --rc-palette-13: #0369a1;
+    --rc-palette-14: #15803d;
+    --rc-palette-15: #b91c1c;
+    --rc-palette-16: #6d28d9;
+    --rc-palette-17: #047857;
+    --rc-palette-18: #b45309;
+    --rc-palette-19: #db2777;
+    --rc-palette-20: #1d4ed8;
+    --rc-palette-21: #65a30d;
+    --rc-palette-22: #ea580c;
+    --rc-palette-23: #0284c7;
+    --rc-palette-24: #059669;
+    --rc-palette-25: #9f1239;
+    --rc-radius: 6px;
+    --rc-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+/*
+ * THEME TOKENS
+ * Use var(--rc-surface), var(--rc-text), var(--rc-border), etc. in new CSS.
+ * Prefer these over hard-coded colours so dark mode follows automatically.
+ */
+html[data-theme="dark"] {
+    --rc-surface: #162527;
+    --rc-surface-muted: #101b1e;
+    --rc-border: rgba(148, 163, 184, .18);
+    --rc-border-strong: rgba(148, 163, 184, .28);
+    --rc-text: #eaf6f4;
+    --rc-muted: #9db0b5;
+    --rc-blue-bg: #13233d;
+    --rc-blue-border: rgba(96, 165, 250, .32);
+    --rc-blue-text: #93c5fd;
+    --rc-green-bg: #122c23;
+    --rc-green-border: rgba(74, 222, 128, .30);
+    --rc-green-text: #86efac;
+    --rc-amber-bg: #332813;
+    --rc-amber-border: rgba(251, 191, 36, .34);
+    --rc-amber-text: #fcd34d;
+    --rc-red-bg: #351819;
+    --rc-red-border: rgba(248, 113, 113, .34);
+    --rc-red-text: #fca5a5;
+    --rc-grey-bg: #243033;
+    --rc-grey-border: rgba(148, 163, 184, .30);
+    --rc-grey-text: #cbd5e1;
+    --rc-purple-bg: #241936;
+    --rc-purple-border: rgba(196, 181, 253, .30);
+    --rc-purple-text: #c4b5fd;
+    --rc-shadow: 0 14px 32px rgba(0, 0, 0, .22);
+}
+
+/*
+ * DARK MODE: ADMIN SHELL
+ * Broad compatibility for existing admin layout, side menu, headers, cards,
+ * tables, forms, dropdowns, pagination, and legacy tabs.
+ */
+html[data-theme="dark"] body.admin {
+    background: #0e1719;
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin main,
+html[data-theme="dark"] body.admin main header {
+    background: #0e1719;
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin main header {
+    border-bottom-color: var(--rc-border);
+    box-shadow: none;
+}
+
+html[data-theme="dark"] body.admin aside {
+    background: #24274a;
+    border-right-color: rgba(148, 163, 184, .18);
+}
+
+html[data-theme="dark"] body.admin aside h1 {
+    color: #f8fbff;
+}
+
+html[data-theme="dark"] body.admin aside > a {
+    color: #c8d8f2;
+}
+
+html[data-theme="dark"] body.admin aside > a .icon svg {
+    fill: #c8d8f2;
+}
+
+html[data-theme="dark"] body.admin aside > a:hover,
+html[data-theme="dark"] body.admin aside > a.selected {
+    background-color: #343d4e;
+    border-left-color: #5c8fe0;
+    color: #ffffff;
+}
+
+html[data-theme="dark"] body.admin aside > a:hover svg,
+html[data-theme="dark"] body.admin aside > a.selected svg {
+    fill: #ffffff;
+}
+
+html[data-theme="dark"] body.admin aside > a .note {
+    background-color: #5c8fe0;
+    color: #ffffff;
+}
+
+html[data-theme="dark"] body.admin aside .sub {
+    background-color: #1c202a;
+}
+
+html[data-theme="dark"] body.admin aside .sub a {
+    color: #c8d8f2;
+}
+
+html[data-theme="dark"] body.admin aside .sub a:hover,
+html[data-theme="dark"] body.admin aside .sub a.selected {
+    background-color: #262c39;
+    color: #ffffff;
+}
+
+html[data-theme="dark"] body.admin aside .sub a span.square {
+    background-color: rgba(200, 216, 242, .38);
+}
+
+html[data-theme="dark"] body.admin aside .sub a:hover span.square,
+html[data-theme="dark"] body.admin aside .sub a.selected span.square {
+    background-color: #ffffff;
+}
+
+html[data-theme="dark"] body.admin aside .footer {
+    border-color: rgba(148, 163, 184, .18);
+    color: #c8d8f2;
+}
+
+html[data-theme="dark"] body.admin aside .footer a {
+    color: #dbeafe;
+}
+
+/*
+ * SECTION NAV / LOCATION TABS
+ * Reusable tab-strip styling used by location-style navigation.
+ * Prefer .rc-tabs/.rc-tab for new tabbed interfaces unless this exact
+ * horizontal location tab style is wanted.
+ */
+body.admin #locationTabs {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 18px 0 12px;
+    padding: 8px;
+    overflow-x: auto;
+    border: 1px solid rgba(36, 39, 74, .10);
+    border-radius: 16px;
+    background: #edf2ff;
+    box-shadow: 0 10px 24px rgba(36, 39, 74, .08);
+}
+
+body.admin #locationTabs .loc-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 9px 14px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease;
+}
+
+body.admin #locationTabs .loc-tab:hover {
+    border-color: rgba(54, 113, 201, .18);
+    background: rgba(255, 255, 255, .62);
+    color: #24274a;
+}
+
+body.admin #locationTabs .loc-tab.active {
+    border-color: rgba(54, 113, 201, .22);
+    background: #ffffff;
+    color: #24274a;
+    box-shadow: 0 8px 18px rgba(36, 39, 74, .12);
+}
+
+/*
+ * DARK MODE: CONTENT SURFACES AND LEGACY COMPONENTS
+ * Keeps old .content-block/.card/.table/.form/.tabs UI readable.
+ * For new pages, prefer the .rc-* classes below.
+ */
+html[data-theme="dark"] body.admin main .content-title .title h2,
+html[data-theme="dark"] body.admin h1,
+html[data-theme="dark"] body.admin h2,
+html[data-theme="dark"] body.admin h3,
+html[data-theme="dark"] body.admin h4,
+html[data-theme="dark"] body.admin h5,
+html[data-theme="dark"] body.admin h6 {
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin main .content-title .title p,
+html[data-theme="dark"] body.admin .text-muted,
+html[data-theme="dark"] body.admin small {
+    color: var(--rc-muted);
+}
+
+html[data-theme="dark"] body.admin .content-block,
+html[data-theme="dark"] body.admin .card,
+html[data-theme="dark"] body.admin .rc-panel,
+html[data-theme="dark"] body.admin .rc-card,
+html[data-theme="dark"] body.admin .xform-field {
+    border-color: var(--rc-border);
+    background: var(--rc-surface);
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .content-block.stat,
+html[data-theme="dark"] body.admin .content-block.green,
+html[data-theme="dark"] body.admin .content-block.cyan,
+html[data-theme="dark"] body.admin .content-block.red {
+    background: var(--rc-surface);
+}
+
+html[data-theme="dark"] body.admin .card-header {
+    border-color: var(--rc-border);
+    background: var(--rc-surface);
+    color: var(--rc-text);
+    box-shadow: none;
+}
+
+html[data-theme="dark"] body.admin .content-block .block-header,
+html[data-theme="dark"] body.admin .content-block .block-header .content-left,
+html[data-theme="dark"] body.admin .content-block .block-header .content-right {
+    border-color: var(--rc-border);
+    background: var(--rc-surface);
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .content-block .footer,
+html[data-theme="dark"] body.admin .content-block .data h3,
+html[data-theme="dark"] body.admin .content-block .data p {
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .card-body,
+html[data-theme="dark"] body.admin .table,
+html[data-theme="dark"] body.admin .table table,
+html[data-theme="dark"] body.admin table {
+    background: transparent;
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .table thead,
+html[data-theme="dark"] body.admin .table thead tr,
+html[data-theme="dark"] body.admin .table table thead tr,
+html[data-theme="dark"] body.admin thead.thead-dark,
+html[data-theme="dark"] body.admin .thead-dark th {
+    background: var(--rc-surface-muted);
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .table tbody tr,
+html[data-theme="dark"] body.admin .table table tbody tr,
+html[data-theme="dark"] body.admin .table table tbody tr:nth-child(even),
+html[data-theme="dark"] body.admin .table-striped tbody tr:nth-of-type(odd),
+html[data-theme="dark"] body.admin .table-hover tbody tr:hover {
+    background: var(--rc-surface);
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .table table tbody tr:nth-child(even),
+html[data-theme="dark"] body.admin .table-striped tbody tr:nth-of-type(odd) {
+    background: rgba(255, 255, 255, .035);
+}
+
+html[data-theme="dark"] body.admin .table-hover tbody tr:hover {
+    background: rgba(94, 234, 212, .07);
+}
+
+html[data-theme="dark"] body.admin .table th,
+html[data-theme="dark"] body.admin .table td,
+html[data-theme="dark"] body.admin table th,
+html[data-theme="dark"] body.admin table td {
+    border-color: var(--rc-border);
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .form-container .rc-card {
+    background: var(--rc-surface-muted);
+    border-color: var(--rc-border);
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .tabs {
+    border-bottom-color: var(--rc-border);
+}
+
+html[data-theme="dark"] body.admin .tabs a,
+html[data-theme="dark"] body.admin .loc-tab {
+    background: var(--rc-surface);
+    border-color: var(--rc-border);
+    color: var(--rc-muted);
+}
+
+html[data-theme="dark"] body.admin .tabs a.active,
+html[data-theme="dark"] body.admin .loc-tab.active,
+html[data-theme="dark"] body.admin .tabs a:hover,
+html[data-theme="dark"] body.admin .loc-tab:hover {
+    background: rgba(94, 234, 212, .10);
+    border-color: rgba(94, 234, 212, .28);
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin #locationTabs {
+    border-color: rgba(148, 163, 184, .16);
+    background: #151f36;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, .22);
+}
+
+html[data-theme="dark"] body.admin #locationTabs .loc-tab {
+    background: transparent;
+    border-color: transparent;
+    color: #b8c4d8;
+}
+
+html[data-theme="dark"] body.admin #locationTabs .loc-tab:hover {
+    border-color: rgba(147, 197, 253, .18);
+    background: rgba(147, 197, 253, .10);
+    color: #eaf6f4;
+}
+
+html[data-theme="dark"] body.admin #locationTabs .loc-tab.active {
+    border-color: rgba(147, 197, 253, .24);
+    background: #24274a;
+    color: #ffffff;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .26);
+}
+
+html[data-theme="dark"] body.admin .xform-input,
+html[data-theme="dark"] body.admin .form input,
+html[data-theme="dark"] body.admin .form select,
+html[data-theme="dark"] body.admin .form textarea,
+html[data-theme="dark"] body.admin input[type="text"],
+html[data-theme="dark"] body.admin input[type="search"],
+html[data-theme="dark"] body.admin input[type="number"],
+html[data-theme="dark"] body.admin input[type="date"],
+html[data-theme="dark"] body.admin select,
+html[data-theme="dark"] body.admin textarea {
+    background: var(--rc-surface-muted);
+    border-color: var(--rc-border);
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin input::placeholder,
+html[data-theme="dark"] body.admin textarea::placeholder {
+    color: var(--rc-muted);
+}
+
+html[data-theme="dark"] body.admin label,
+html[data-theme="dark"] body.admin .xform-label,
+html[data-theme="dark"] body.admin .form label {
+    color: var(--rc-muted);
+}
+
+html[data-theme="dark"] body.admin .dropdown .list,
+html[data-theme="dark"] body.admin .dropdown-list,
+html[data-theme="dark"] body.admin .dropdown-menu {
+    border-color: var(--rc-border);
+    background: var(--rc-surface);
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .dropdown .list a,
+html[data-theme="dark"] body.admin .dropdown-item {
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .dropdown .list a:hover,
+html[data-theme="dark"] body.admin .dropdown-item:hover {
+    background: rgba(94, 234, 212, .08);
+}
+
+body.admin header .rc-lang-switcher {
+    position: relative;
+    align-self: center;
+    margin-left: 12px;
+    height: 30px;
+}
+
+body.admin header .rc-lang-switcher summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 30px;
+    min-width: 52px;
+    padding: 0 9px;
+    border: 1px solid var(--rc-border);
+    border-radius: 999px;
+    background: var(--rc-surface);
+    color: var(--rc-text);
+    box-shadow: 0 1px 4px rgba(45, 54, 68, .08);
+    cursor: pointer;
+    list-style: none;
+}
+
+body.admin header .rc-lang-switcher summary::-webkit-details-marker {
+    display: none;
+}
+
+body.admin header .rc-lang-switcher summary:hover {
+    border-color: var(--rc-border-strong);
+    background: var(--rc-surface-muted);
+}
+
+body.admin header .rc-lang-switcher img {
+    display: block;
+    width: 22px;
+    height: 16px;
+    object-fit: cover;
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px rgba(17, 24, 39, .12);
+}
+
+body.admin header .rc-lang-arrow {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid currentColor;
+    opacity: .75;
+}
+
+body.admin header .rc-lang-switcher[open] .rc-lang-arrow {
+    transform: rotate(180deg);
+}
+
+body.admin header .rc-lang-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 100000;
+    display: grid;
+    grid-template-columns: repeat(4, 34px);
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid var(--rc-border);
+    border-radius: 12px;
+    background: var(--rc-surface);
+    box-shadow: var(--rc-shadow);
+}
+
+body.admin header .rc-lang-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 28px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+body.admin header .rc-lang-option:hover,
+body.admin header .rc-lang-option.is-active {
+    border-color: var(--rc-blue-border);
+    background: var(--rc-blue-bg);
+}
+
+html[data-theme="dark"] body.admin header .rc-lang-option:hover,
+html[data-theme="dark"] body.admin header .rc-lang-option.is-active {
+    border-color: rgba(94, 234, 212, .28);
+    background: rgba(94, 234, 212, .10);
+}
+
+html[data-theme="dark"] body.admin .pagination a,
+html[data-theme="dark"] body.admin .pagination .page-link {
+    background: var(--rc-surface);
+    border-color: var(--rc-border);
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .pagination a:hover,
+html[data-theme="dark"] body.admin .pagination .page-link:hover,
+html[data-theme="dark"] body.admin .pagination .active a,
+html[data-theme="dark"] body.admin .pagination .page-item.active .page-link {
+    background: rgba(94, 234, 212, .12);
+    border-color: rgba(94, 234, 212, .28);
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] body.admin .btn.grey {
+    background: #243033;
+    border-color: rgba(148, 163, 184, .24);
+    color: #eaf6f4;
+}
+
+/*
+ * PANELS / CARDS
+ * Use:
+ * - .rc-panel: larger framed section with padding.
+ * - .rc-card: compact framed item/card.
+ * - .rc-card-muted: softer nested/secondary surface.
+ * - .rc-stack: vertical spacing between blocks.
+ * - .rc-list/.rc-scroll-list: stacked list layouts.
+ */
+.rc-panel,
+.rc-card {
+    background: var(--rc-surface);
+    border: 1px solid var(--rc-border);
+    border-radius: var(--rc-radius);
+    box-shadow: var(--rc-shadow);
+}
+
+.rc-panel {
+    padding: 14px;
+}
+
+.rc-panel h4 {
+    margin: 0 0 4px;
+    color: var(--rc-text);
+    font-size: 1rem;
+    line-height: 1.25;
+}
+
+.rc-card {
+    padding: 12px;
+}
+
+.rc-select-card {
+    position: relative;
+    display: flex !important;
+    min-height: 132px;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+}
+
+.rc-select-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: #2563eb;
+}
+
+.rc-card-grid .rc-select-card:nth-child(6n+1)::before { background: #0ea5ff; }
+.rc-card-grid .rc-select-card:nth-child(6n+2)::before { background: #ff8a00; }
+.rc-card-grid .rc-select-card:nth-child(6n+3)::before { background: #ffd000; }
+.rc-card-grid .rc-select-card:nth-child(6n+4)::before { background: #a855f7; }
+.rc-card-grid .rc-select-card:nth-child(6n+5)::before { background: #ff2d55; }
+.rc-card-grid .rc-select-card:nth-child(6n+6)::before { background: #00b8d9; }
+
+.rc-select-card:hover {
+    border-color: rgba(37, 99, 235, .55);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, .12);
+}
+
+.rc-select-card-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+}
+
+.rc-select-card-check {
+    display: inline-flex;
+    position: absolute;
+    top: 14px;
+    right: 12px;
+    width: 20px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--rc-border);
+    border-radius: 999px;
+    color: transparent;
+    background: var(--rc-surface);
+    font-size: .8rem;
+    line-height: 1;
+    opacity: .75;
+}
+
+.rc-select-card:has(.rc-select-card-input:checked) {
+    border-color: #18e06f;
+    border-width: 2px;
+    box-shadow: 0 0 0 3px rgba(24, 224, 111, .24), var(--rc-shadow);
+}
+
+.rc-select-card:has(.rc-select-card-input:checked)::before {
+    background: #18e06f;
+}
+
+.rc-select-card:has(.rc-select-card-input:checked) .rc-select-card-check {
+    border-color: #18e06f;
+    background: #18e06f;
+    color: #052e16;
+    opacity: 1;
+}
+
+.rc-card-muted {
+    background: var(--rc-surface-muted);
+}
+
+.rc-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.rc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rc-scroll-list {
+    display: flex;
+    max-height: 280px;
+    flex-direction: column;
+    gap: 8px;
+    overflow: auto;
+}
+
+/*
+ * LAYOUT GRIDS AND ITEM ROWS
+ * Use:
+ * - .rc-item-grid: compact repeated items, 3 columns desktop.
+ * - .rc-card-grid: repeated cards, 3 columns desktop.
+ * - .rc-card-grid-4: repeated cards, 4 columns desktop.
+ * - .rc-item: single row/card item with action space.
+ * - .rc-row-head: title/content left, action right.
+ * - .rc-split-head: flexible space-between header.
+ * - .rc-actions/.rc-actions-stack: button/action groups.
+ */
+.rc-item-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.rc-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.rc-card-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.rc-document-thumb {
+    display: flex;
+    height: 150px;
+    margin: -2px -2px 12px;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--rc-border);
+    border-radius: var(--rc-radius);
+    background: var(--rc-surface);
+}
+
+.rc-document-thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.rc-document-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rc-document-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: var(--rc-muted);
+    font-size: 12px;
+}
+
+.rc-document-filetype {
+    display: flex;
+    width: 82px;
+    height: 104px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--rc-palette-01);
+    color: #fff;
+    text-align: center;
+}
+
+.rc-document-filetype strong {
+    font-size: 20px;
+}
+
+.rc-document-filetype span {
+    margin-top: 4px;
+    font-size: 11px;
+    opacity: .78;
+}
+
+.rc-document-preview-fallback {
+    display: none;
+}
+
+.rc-upload-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.rc-upload-action {
+    align-self: center;
+}
+
+.rc-delete-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+    align-items: end;
+}
+
+@media (max-width: 700px) {
+    .rc-upload-row {
+        grid-template-columns: 1fr;
+    }
+
+    .rc-delete-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.rc-item {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--rc-border);
+    border-radius: var(--rc-radius);
+    padding: 10px 12px;
+    background: var(--rc-surface-muted);
+}
+
+.rc-item-main {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.rc-item-main strong,
+.rc-item-main small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rc-item > .btn,
+.rc-item > form {
+    flex: 0 0 auto;
+}
+
+.rc-inline-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.rc-row-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+}
+
+.rc-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+}
+
+.rc-actions-compact {
+    gap: 4px;
+}
+
+.rc-actions-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.btn.yellow {
+    background: #d5a400;
+}
+
+.btn.yellow:hover {
+    background: #bd9100;
+}
+
+.rc-split-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.rc-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+/*
+ * STAT SUMMARIES
+ * Use .rc-stat-grid around .rc-stat for simple metric cards.
+ * For complex dashboard-only KPI cards, use dashboard.css instead.
+ */
+.rc-stat {
+    padding: 12px;
+    background: var(--rc-surface);
+    border: 1px solid var(--rc-border);
+    border-radius: var(--rc-radius);
+    box-shadow: var(--rc-shadow);
+}
+
+.rc-stat strong {
+    display: block;
+    color: var(--rc-text);
+    font-size: 1.45rem;
+    line-height: 1;
+}
+
+.rc-stat span {
+    display: block;
+    margin-top: 5px;
+    color: var(--rc-muted);
+    font-size: .86rem;
+}
+
+.rc-toggle-panel {
+    display: none;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rc-border);
+}
+
+.rc-toggle-panel.is-open {
+    display: block;
+}
+
+.rc-muted {
+    color: var(--rc-muted);
+    font-size: .88rem;
+    line-height: 1.35;
+}
+
+.rc-note {
+    margin: 6px 0 0;
+    color: var(--rc-muted);
+    font-size: .9rem;
+    line-height: 1.35;
+}
+
+.rc-note.is-danger {
+    color: var(--rc-red-text);
+}
+
+/*
+ * SIGNATURES
+ * Reusable signature display/capture wrappers.
+ */
+.rc-signature-frame {
+    display: inline-block;
+    padding: 6px;
+    border: 1px solid var(--rc-border);
+    border-radius: var(--rc-radius);
+    background: var(--rc-surface);
+}
+
+.rc-signature-pad {
+    max-width: 100%;
+    border: 1px dashed var(--rc-border-strong);
+    background: #fff;
+    touch-action: none;
+}
+
+.rc-stored-signature {
+    max-width: 100%;
+    padding: 6px;
+    border: 1px solid var(--rc-border);
+    background: #fff;
+}
+
+/*
+ * WIZARDS / STEP NAVIGATION
+ * Use:
+ * - .rc-stage-shell: two-column stage nav + main content.
+ * - .rc-stage-nav/.rc-stage-list: side navigation wrapper/list.
+ * - .rc-stage-link with .is-active/.is-done: step buttons.
+ * - .rc-stage-index/.rc-stage-label/.rc-stage-meta: step content.
+ * Stage links receive per-section accent colours from their list position.
+ */
+.rc-stage-shell {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+    overflow: visible;
+}
+
+.rc-stage-nav {
+    position: sticky;
+    top: 78px;
+    z-index: 5;
+    overflow: visible;
+}
+
+.admission-stage-nav {
+    border: 1px solid var(--rc-border);
+    background: var(--rc-surface);
+}
+
+html[data-theme="dark"] body.admin .admission-stage-nav,
+html[data-theme="dark"] body.admin main .admission-stage-nav.content-block {
+    border-color: rgba(148, 163, 184, .18) !important;
+    background: linear-gradient(180deg, #162527 0%, #101b1e 100%) !important;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .26) !important;
+}
+
+.rc-stage-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.rc-stage-list li:nth-child(1) { --rc-stage-accent: #2563eb; --rc-stage-accent-soft: rgba(37, 99, 235, .14); --rc-stage-accent-border: rgba(37, 99, 235, .30); }
+.rc-stage-list li:nth-child(2) { --rc-stage-accent: #0f766e; --rc-stage-accent-soft: rgba(15, 118, 110, .14); --rc-stage-accent-border: rgba(15, 118, 110, .30); }
+.rc-stage-list li:nth-child(3) { --rc-stage-accent: #7c3aed; --rc-stage-accent-soft: rgba(124, 58, 237, .14); --rc-stage-accent-border: rgba(124, 58, 237, .30); }
+.rc-stage-list li:nth-child(4) { --rc-stage-accent: #d97706; --rc-stage-accent-soft: rgba(217, 119, 6, .16); --rc-stage-accent-border: rgba(217, 119, 6, .32); }
+.rc-stage-list li:nth-child(5) { --rc-stage-accent: #dc2626; --rc-stage-accent-soft: rgba(220, 38, 38, .13); --rc-stage-accent-border: rgba(220, 38, 38, .28); }
+.rc-stage-list li:nth-child(6) { --rc-stage-accent: #0891b2; --rc-stage-accent-soft: rgba(8, 145, 178, .14); --rc-stage-accent-border: rgba(8, 145, 178, .30); }
+.rc-stage-list li:nth-child(7) { --rc-stage-accent: #16a34a; --rc-stage-accent-soft: rgba(22, 163, 74, .14); --rc-stage-accent-border: rgba(22, 163, 74, .30); }
+
+.rc-stage-nav > .btn {
+    width: 100%;
+    margin-top: 12px;
+}
+
+.rc-stage-link {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid transparent;
+    border-left: 4px solid var(--rc-stage-accent, var(--rc-border-strong));
+    border-radius: var(--rc-radius);
+    background: var(--rc-surface-muted);
+    color: var(--rc-grey-text);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45);
+    transition: background .2s, color .2s, border-color .2s, box-shadow .2s, transform .2s;
+}
+
+.rc-stage-link:hover {
+    border-color: var(--rc-stage-accent-border, var(--rc-border));
+    border-left-color: var(--rc-stage-accent, var(--rc-border-strong));
+    background: var(--rc-stage-accent-soft, var(--rc-surface-muted));
+    color: var(--rc-text);
+    transform: translateX(2px);
+}
+
+.rc-stage-link.is-active {
+    border-color: var(--rc-stage-accent-border, var(--rc-blue-border));
+    border-left-color: var(--rc-stage-accent, var(--rc-blue-text));
+    background: linear-gradient(90deg, var(--rc-stage-accent-soft, var(--rc-blue-bg)), var(--rc-surface));
+    color: var(--rc-stage-accent, var(--rc-blue-text));
+    font-weight: 700;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, .08);
+}
+
+.rc-stage-link.is-done {
+    border-color: rgba(22, 163, 74, .24);
+    border-left-color: var(--rc-stage-accent, var(--rc-green-text));
+    background: linear-gradient(90deg, rgba(22, 163, 74, .12), var(--rc-surface));
+    color: var(--rc-green-text);
+    font-weight: 700;
+}
+
+.rc-stage-index {
+    display: inline-flex;
+    width: 22px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 22px;
+    border-radius: 999px;
+    background: var(--rc-stage-accent-soft, rgba(255, 255, 255, .72));
+    color: var(--rc-stage-accent, inherit);
+    font-size: .78rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+html[data-theme="dark"] .rc-stage-link {
+    border-color: rgba(148, 163, 184, .14);
+    border-left-color: var(--rc-stage-accent, rgba(148, 163, 184, .50));
+    background: linear-gradient(90deg, rgba(255, 255, 255, .055), rgba(255, 255, 255, .025));
+    color: #dbeafe;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 10px 22px rgba(0, 0, 0, .16);
+}
+
+html[data-theme="dark"] .rc-stage-link:hover {
+    border-color: var(--rc-stage-accent-border, rgba(148, 163, 184, .24));
+    border-left-color: var(--rc-stage-accent, #93c5fd);
+    background: linear-gradient(90deg, var(--rc-stage-accent-soft, rgba(96, 165, 250, .14)), rgba(255, 255, 255, .045));
+    color: #ffffff;
+    box-shadow: 0 12px 26px rgba(0, 0, 0, .24), 0 0 0 1px rgba(255, 255, 255, .03);
+}
+
+html[data-theme="dark"] .rc-stage-link.is-active {
+    border-color: var(--rc-stage-accent-border, rgba(96, 165, 250, .35));
+    border-left-color: var(--rc-stage-accent, #93c5fd);
+    background: linear-gradient(90deg, var(--rc-stage-accent-soft, rgba(96, 165, 250, .22)), rgba(255, 255, 255, .07));
+    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, .28), 0 0 0 1px var(--rc-stage-accent-border, rgba(96, 165, 250, .20));
+}
+
+html[data-theme="dark"] .rc-stage-link.is-done {
+    border-color: rgba(134, 239, 172, .26);
+    border-left-color: var(--rc-stage-accent, #86efac);
+    background: linear-gradient(90deg, rgba(34, 197, 94, .18), rgba(255, 255, 255, .045));
+    color: #bbf7d0;
+}
+
+html[data-theme="dark"] .rc-stage-index {
+    background: var(--rc-stage-accent-soft, rgba(255, 255, 255, .10));
+    color: #ffffff;
+    box-shadow: inset 0 0 0 1px var(--rc-stage-accent-border, rgba(255, 255, 255, .12));
+}
+
+.rc-stage-label,
+.rc-stage-link span:nth-child(2) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rc-stage-meta,
+.rc-stage-link span:last-child {
+    font-size: .82rem;
+    font-weight: 800;
+    opacity: .86;
+}
+
+.rc-main-panel {
+    min-width: 0;
+    overflow: visible;
+}
+
+.rc-main-panel .content-block {
+    margin-top: 0;
+    overflow: visible;
+}
+
+/*
+ * AUTOCOMPLETE
+ * Use .rc-autocomplete-results for dropdown result containers.
+ * Use .rc-autocomplete-option for individual result rows when not using <li>.
+ */
+.rc-autocomplete-results {
+    display: none;
+    position: absolute;
+    z-index: 9999;
+    width: 100%;
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid var(--rc-border);
+    border-radius: var(--rc-radius);
+    background: var(--rc-surface);
+    box-shadow: var(--rc-shadow);
+}
+
+.rc-autocomplete-results ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.rc-autocomplete-results li,
+.rc-autocomplete-option {
+    padding: 7px 10px;
+    cursor: pointer;
+    color: var(--rc-text);
+}
+
+.rc-autocomplete-results li:hover,
+.rc-autocomplete-option:hover {
+    background: var(--rc-blue-bg);
+}
+.rc-autocomplete-results:not(:empty) {
+    display: block;
+}
+
+.rc-lookup-wrap {
+    position: relative;
+}
+
+.rc-lookup-wrap .rc-autocomplete-results {
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+}
+
+.rc-lookup-wrap #useMyLocationIcon {
+    display: none;
+}
+
+.rc-location-lookup-row {
+    display: grid;
+    grid-template-columns: minmax(76px, 108px) minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+}
+
+.rc-location-address-field {
+    position: relative;
+    min-width: 0;
+}
+
+.rc-location-address-field .rc-autocomplete-results {
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+}
+
+.rc-inline-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+    min-height: 38px;
+}
+
+.rc-inline-options label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    white-space: nowrap;
+}
+
+#save-status,
+#add_species_panel,
+#addFinderWrapper,
+#addFinderStatus {
+    display: none;
+}
+
+/*
+ * TABLES
+ * Use:
+ * - .rc-table: universal table styling.
+ * - .rc-table.row-hover: hoverable rows.
+ * - .rc-table-scroll: horizontal overflow wrapper.
+ * - .rc-table-actions: right-aligned action column/cell.
+ */
+.rc-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.rc-table th,
+.rc-table td {
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    vertical-align: middle;
+}
+
+.rc-table th:not(:first-child),
+.rc-table td:not(:first-child) {
+    border-left: 1px solid rgba(0, 0, 0, .06);
+}
+
+.rc-table.row-hover tbody tr:hover {
+    background: rgba(0, 0, 0, .03);
+}
+
+.rc-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.rc-table-actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/*
+ * FORMS
+ * Use:
+ * - .xform or .rc-form-grid: form/grid wrapper.
+ * - .xform-grid/.rc-form-grid: 4-column responsive form grid.
+ * - .span-2/.span-3/.span-4: grid-column spans.
+ * - .xform-field/.rc-form-field: field wrapper.
+ * - .xform-label/.rc-form-label: label.
+ * - .xform-input/.rc-input: input/select/textarea.
+ * - .xform-actions/.rc-form-actions: submit/action button row.
+ */
+.xform {
+    margin: 0;
+}
+
+.xform-grid,
+.rc-form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    align-items: end;
+}
+
+.xform-grid .span-2,
+.rc-form-grid .span-2 {
+    grid-column: span 2;
+}
+
+.xform-grid .span-3,
+.rc-form-grid .span-3 {
+    grid-column: span 3;
+}
+
+.xform-grid .span-4,
+.rc-form-grid .span-4 {
+    grid-column: span 4;
+}
+
+.xform-field,
+.xform-group,
+.rc-form-field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    position: relative;
+}
+
+.xform-label,
+.rc-form-label {
+    display: block;
+    margin: 0 0 6px;
+    color: #343a40;
+    font-size: .9rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.xform label:has(input[type="checkbox"]),
+.xform label:has(input[type="radio"]) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.xform-input,
+.rc-input {
+    width: 100%;
+    max-width: 100%;
+    min-height: 38px;
+    padding: 9px 11px;
+    border: 1px solid #ced4da;
+    border-radius: var(--rc-radius);
+    background: var(--rc-surface);
+    color: var(--rc-text);
+    font: inherit;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+textarea.xform-input,
+textarea.rc-input {
+    min-height: 78px;
+    resize: vertical;
+}
+
+.xform-input:focus,
+.rc-input:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .22);
+}
+
+.xform-input.is-required,
+.rc-input.is-required {
+    border-color: var(--rc-red-text);
+    background: var(--rc-red-bg);
+    box-shadow:
+        0 0 0 2px var(--rc-red-border),
+        inset 4px 0 0 var(--rc-red-text);
+}
+
+.xform-field.is-required-group {
+    border-color: var(--rc-red-text);
+    background: var(--rc-red-bg);
+    box-shadow:
+        0 0 0 2px var(--rc-red-border),
+        inset 4px 0 0 var(--rc-red-text);
+}
+
+.xform-input.is-required:focus,
+.rc-input.is-required:focus {
+    border-color: var(--rc-red-text);
+    box-shadow: 0 0 0 3px var(--rc-red-border);
+}
+
+.xform-field.is-required-group {
+    padding: 8px;
+    border: 1px solid var(--rc-red-text);
+    border-radius: var(--rc-radius);
+}
+
+[data-theme="dark"] .xform-input.is-required,
+[data-theme="dark"] .rc-input.is-required,
+[data-theme="dark"] .xform-field.is-required-group {
+    border-color: #ff6b6b;
+    background: rgba(239, 68, 68, .18);
+    box-shadow:
+        0 0 0 2px rgba(248, 113, 113, .55),
+        inset 4px 0 0 #ff6b6b;
+}
+
+.xform-input::placeholder,
+.rc-input::placeholder {
+    color: #9ca3af;
+}
+
+html[data-theme="dark"] .xform-label,
+html[data-theme="dark"] .rc-form-label {
+    color: var(--rc-text);
+}
+
+html[data-theme="dark"] .xform-input::placeholder,
+html[data-theme="dark"] .rc-input::placeholder {
+    color: #74868b;
+}
+
+.xform-actions,
+.xform-button-row,
+.rc-form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+/*
+ * ALERTS
+ * Use .rc-alert plus semantic colour modifier:
+ * .red, .amber, .green, .blue, .grey, .purple.
+ */
+.rc-alert {
+    padding: 10px 12px;
+    border-left: 8px solid var(--rc-grey-border);
+    border-radius: var(--rc-radius);
+    background: var(--rc-grey-bg);
+    color: var(--rc-grey-text);
+    line-height: 1.35;
+}
+
+.rc-alert.red {
+    background: var(--rc-red-bg) !important;
+    border-left-color: var(--rc-red-border) !important;
+    color: var(--rc-red-text) !important;
+}
+
+.rc-alert.amber {
+    background: var(--rc-amber-bg) !important;
+    border-left-color: var(--rc-amber-border) !important;
+    color: var(--rc-amber-text) !important;
+}
+
+.rc-alert.green {
+    background: var(--rc-green-bg) !important;
+    border-left-color: var(--rc-green-border) !important;
+    color: var(--rc-green-text) !important;
+}
+
+.rc-alert.blue {
+    background: var(--rc-blue-bg) !important;
+    border-left-color: var(--rc-blue-border) !important;
+    color: var(--rc-blue-text) !important;
+}
+
+.rc-alert.grey {
+    background: var(--rc-grey-bg) !important;
+    border-left-color: var(--rc-grey-border) !important;
+    color: var(--rc-grey-text) !important;
+}
+
+.rc-alert.purple {
+    background: var(--rc-purple-bg) !important;
+    border-left-color: var(--rc-purple-border) !important;
+    color: var(--rc-purple-text) !important;
+}
+
+html[data-theme="dark"] .alert-brown {
+    background-color: #2f251c !important;
+    border-left-color: #d6a96f !important;
+    color: #f7dfc2 !important;
+}
+
+html[data-theme="dark"] .alert-grey {
+    background-color: #263136 !important;
+    border-left-color: #94a3b8 !important;
+    color: #dbe7eb !important;
+}
+
+html[data-theme="dark"] .alert-pink {
+    background-color: #351827 !important;
+    border-left-color: #f472b6 !important;
+    color: #fce7f3 !important;
+}
+
+/*
+ * PILLS / CHIPS / STATUS
+ * Use:
+ * - .rc-pill: simple pill.
+ * - .rc-chip: bordered chip, supports .good/.warn/.blue/.purple.
+ * - .rc-status: status label, supports .active/.inactive.
+ * - .rc-chip-row: wrapping chip group.
+ * Legacy .tb-* and .triage-pill aliases are kept for older views.
+ */
+.rc-pill,
+.rc-chip,
+.rc-status,
+.tb-chip,
+.tb-status,
+.triage-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: .78rem;
+    line-height: 1.2;
+}
+
+.rc-pill,
+.rc-status {
+    min-width: 72px;
+    font-weight: 800;
+}
+
+.rc-chip,
+.tb-chip {
+    border: 1px solid var(--rc-border);
+    background: var(--rc-surface);
+    color: var(--rc-grey-text);
+}
+
+.rc-chip strong {
+    color: inherit;
+}
+
+.rc-chip.good,
+.tb-chip.good,
+.rc-status.active,
+.tb-active {
+    background: var(--rc-green-bg);
+    border-color: var(--rc-green-border);
+    color: var(--rc-green-text);
+}
+
+.rc-chip.bad,
+.tb-chip.bad {
+    background: var(--rc-red-bg);
+    border-color: var(--rc-red-border);
+    color: var(--rc-red-text);
+}
+
+.rc-chip.warn,
+.tb-chip.warn {
+    background: var(--rc-amber-bg);
+    border-color: var(--rc-amber-border);
+    color: var(--rc-amber-text);
+}
+
+.rc-chip.blue,
+.tb-chip.blue,
+.triage-pill {
+    background: var(--rc-blue-bg);
+    border-color: var(--rc-blue-border);
+    color: var(--rc-blue-text);
+}
+
+.rc-status.inactive,
+.tb-inactive {
+    background: var(--rc-grey-bg);
+    color: var(--rc-grey-text);
+}
+
+.rc-chip-row,
+.tb-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 8px;
+}
+
+.rc-chip.purple {
+    background: var(--rc-purple-bg);
+    border-color: var(--rc-purple-border);
+    color: var(--rc-purple-text);
+}
+
+/*
+ * TREND INDICATORS
+ * Use .trend-chip with .trend-up/.trend-down/.trend-flat.
+ * Add .triangle.up/.triangle.down/.triangle.flat inside for the icon.
+ */
+.trend-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    font-weight: 700;
+}
+
+.trend-up { color: #15803d; }
+.trend-down { color: #dc2626; }
+.trend-flat { color: #6f7a89; }
+
+.triangle {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    vertical-align: middle;
+}
+
+.triangle.up {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 8px solid currentColor;
+}
+
+.triangle.down {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid currentColor;
+}
+
+.triangle.flat {
+    width: 8px;
+    height: 8px;
+    background: currentColor;
+    border-radius: 50%;
+}
+
+html[data-theme="dark"] .trend-up { color: #86efac; }
+html[data-theme="dark"] .trend-down { color: #fca5a5; }
+html[data-theme="dark"] .trend-flat { color: #cbd5e1; }
+
+/*
+ * BADGES
+ * Use .rc-badge for compact numeric/category badges.
+ * Modifiers: .ok/.low, .mid, .warn, .bad, .na/.dark.
+ */
+.rc-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    padding: 6px 10px;
+    border: 1px solid rgba(0, 0, 0, .12);
+    border-radius: 12px;
+    font-weight: 800;
+}
+
+.rc-badge.ok,
+.rc-badge.low {
+    color: #14532d;
+    background: rgba(34, 197, 94, .24);
+    border-color: rgba(34, 197, 94, .48);
+}
+
+.rc-badge.mid {
+    color: #075985;
+    background: rgba(14, 165, 233, .24);
+    border-color: rgba(14, 165, 233, .48);
+}
+
+.rc-badge.warn {
+    color: #854d0e;
+    background: rgba(245, 158, 11, .28);
+    border-color: rgba(245, 158, 11, .52);
+}
+
+.rc-badge.bad {
+    color: #991b1b;
+    background: rgba(239, 68, 68, .24);
+    border-color: rgba(239, 68, 68, .50);
+}
+
+.rc-badge.na {
+    background: rgba(0, 0, 0, .08);
+    border-color: rgba(0, 0, 0, .16);
+}
+
+.rc-badge.dark {
+    color: #581c87;
+    background: rgba(168, 85, 247, .24);
+    border-color: rgba(168, 85, 247, .50);
+}
+
+html[data-theme="dark"] body.admin .rc-badge.ok,
+html[data-theme="dark"] body.admin .rc-badge.low {
+    color: #dcfce7;
+    background: rgba(34, 197, 94, .34);
+    border-color: rgba(74, 222, 128, .62);
+}
+
+html[data-theme="dark"] body.admin .rc-badge.mid {
+    color: #e0f2fe;
+    background: rgba(14, 165, 233, .34);
+    border-color: rgba(56, 189, 248, .62);
+}
+
+html[data-theme="dark"] body.admin .rc-badge.warn {
+    color: #fef3c7;
+    background: rgba(245, 158, 11, .38);
+    border-color: rgba(251, 191, 36, .66);
+}
+
+html[data-theme="dark"] body.admin .rc-badge.bad {
+    color: #fee2e2;
+    background: rgba(239, 68, 68, .34);
+    border-color: rgba(248, 113, 113, .62);
+}
+
+html[data-theme="dark"] body.admin .rc-badge.na {
+    color: #e5e7eb;
+    background: rgba(148, 163, 184, .18);
+    border-color: rgba(148, 163, 184, .36);
+}
+
+html[data-theme="dark"] body.admin .rc-badge.dark {
+    color: #f3e8ff;
+    background: rgba(168, 85, 247, .36);
+    border-color: rgba(192, 132, 252, .66);
+}
+
+/*
+ * COMPARISON LISTS
+ * Use for rows comparing a name/value against a reference point.
+ * Structure:
+ * .rc-comparison-body
+ *   .rc-comparison-note
+ *   .rc-comparison-row
+ *     .rc-comparison-main
+ *       .rc-comparison-name
+ *       .rc-comparison-meta
+ *     .rc-comparison-delta + optional .trend-chip
+ */
+.rc-comparison-body {
+    padding: 16px 18px 18px 18px;
+}
+
+.rc-comparison-note,
+.rc-comparison-meta,
+.rc-comparison-empty {
+    color: var(--rc-muted);
+}
+
+.rc-comparison-note {
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+.rc-comparison-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rc-border);
+}
+
+.rc-comparison-main {
+    min-width: 0;
+    padding-right: 12px;
+}
+
+.rc-comparison-name {
+    font-weight: 600;
+    color: var(--rc-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rc-comparison-meta {
+    font-size: 13px;
+    margin-top: 3px;
+}
+
+.rc-comparison-delta {
+    text-align: right;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rc-muted);
+}
+
+/*
+ * PAGINATION
+ * Use .rc-pager around .rc-pager-btn links/buttons.
+ * Modifiers: .active, .disabled.
+ */
+.rc-pager {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+}
+
+.rc-pager-btn {
+    display: inline-flex;
+    min-width: 38px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 10px;
+    border: 1px solid rgba(0, 0, 0, .10);
+    border-radius: var(--rc-radius);
+    background: rgba(255, 255, 255, .75);
+    text-decoration: none;
+}
+
+.rc-pager-btn:hover {
+    background: rgba(0, 0, 0, .03);
+}
+
+.rc-pager-btn.active {
+    border-color: rgba(0, 0, 0, .18);
+    background: rgba(0, 0, 0, .08);
+    font-weight: 800;
+    pointer-events: none;
+}
+
+.rc-pager-btn.disabled {
+    opacity: .45;
+    pointer-events: none;
+}
+
+/*
+ * PROGRESS BARS
+ * Use .rc-progress around .rc-progress-fill.
+ * Width is set inline or by script. Modifiers: .green, .amber.
+ */
+.rc-progress {
+    display: flex;
+    height: 20px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--rc-grey-bg);
+}
+
+.rc-progress-fill {
+    display: block;
+    width: 0;
+    height: 100%;
+    transition: width .15s ease;
+}
+
+.rc-progress-fill.green {
+    background: #22c55e;
+}
+
+.rc-progress-fill.amber {
+    background: #f59e0b;
+}
+
+.rc-progress-fill.red {
+    background: #ef4444;
+}
+
+/*
+ * THERMOMETER METERS
+ * Use .rc-thermometer around .rc-thermometer-fill.
+ * Width is set inline or by script. Modifiers: .green, .amber, .red.
+ */
+.rc-thermometer {
+    position: relative;
+    width: 100%;
+    height: 18px;
+    margin: 6px 0 12px 0;
+    overflow: hidden;
+    border: 1px solid var(--rc-border);
+    border-radius: 999px;
+    background:
+        linear-gradient(90deg, rgba(255,255,255,.28), rgba(255,255,255,0) 42%),
+        var(--rc-surface-muted);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.16);
+}
+
+.rc-thermometer::after {
+    content: "";
+    position: absolute;
+    inset: 2px auto 50% 8px;
+    width: calc(100% - 16px);
+    border-radius: 999px;
+    background: rgba(255,255,255,.24);
+    pointer-events: none;
+}
+
+.rc-thermometer-fill {
+    display: block;
+    width: 0;
+    height: 100%;
+    min-width: 8px;
+    border-radius: inherit;
+    transition: width .2s ease;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.32);
+}
+
+.rc-thermometer-fill.green {
+    background: linear-gradient(90deg, #16a34a, #4ade80);
+}
+
+.rc-thermometer-fill.amber {
+    background: linear-gradient(90deg, #d97706, #fbbf24);
+}
+
+.rc-thermometer-fill.red {
+    background: linear-gradient(90deg, #dc2626, #fb7185);
+}
+
+html[data-theme="dark"] .rc-thermometer {
+    background:
+        linear-gradient(90deg, rgba(255,255,255,.12), rgba(255,255,255,0) 42%),
+        rgba(15, 23, 42, .78);
+    border-color: rgba(148, 163, 184, .3);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.46);
+}
+
+/*
+ * TABS
+ * Use .rc-tabs around .rc-tab controls and .rc-tab-panel panels.
+ * Modifiers: .is-active on the active tab/panel.
+ * Use .rc-tabs-pill when you want the rounded section-navigation strip.
+ */
+.rc-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-bottom: 1px solid var(--rc-border-strong);
+}
+
+.rc-tab {
+    appearance: none;
+    border: 1px solid var(--rc-border-strong);
+    border-bottom: 0;
+    border-radius: var(--rc-radius) var(--rc-radius) 0 0;
+    background: var(--rc-surface-muted);
+    color: var(--rc-grey-text);
+    padding: 10px 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.rc-tab.is-active {
+    background: var(--rc-surface);
+    color: var(--rc-text);
+}
+
+.rc-tabs-pill {
+    align-items: center;
+    margin: 18px 0 12px;
+    padding: 8px;
+    overflow-x: auto;
+    border: 1px solid rgba(36, 39, 74, .10);
+    border-radius: 16px;
+    background: #edf2ff;
+    box-shadow: 0 10px 24px rgba(36, 39, 74, .08);
+}
+
+.rc-tabs-pill .rc-tab {
+    display: inline-flex;
+    min-height: 38px;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 14px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease;
+}
+
+.rc-tabs-pill .rc-tab:hover {
+    border-color: rgba(54, 113, 201, .18);
+    background: rgba(255, 255, 255, .62);
+    color: #24274a;
+}
+
+.rc-tabs-pill .rc-tab.is-active {
+    border-color: rgba(54, 113, 201, .22);
+    background: #ffffff;
+    color: #24274a;
+    box-shadow: 0 8px 18px rgba(36, 39, 74, .12);
+}
+
+html[data-theme="dark"] body.admin .rc-tabs-pill {
+    border-color: rgba(148, 163, 184, .16);
+    background: #151f36;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, .22);
+}
+
+html[data-theme="dark"] body.admin .rc-tabs-pill .rc-tab {
+    background: transparent;
+    border-color: transparent;
+    color: #b8c4d8;
+}
+
+html[data-theme="dark"] body.admin .rc-tabs-pill .rc-tab:hover {
+    border-color: rgba(147, 197, 253, .18);
+    background: rgba(147, 197, 253, .10);
+    color: #eaf6f4;
+}
+
+html[data-theme="dark"] body.admin .rc-tabs-pill .rc-tab.is-active {
+    border-color: rgba(147, 197, 253, .24);
+    background: #24274a;
+    color: #ffffff;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .26);
+}
+
+.rc-tab-panel {
+    display: none;
+}
+
+.rc-tab-panel.is-active {
+    display: block;
+}
+
+@media (max-width: 900px) {
+    .rc-stage-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .rc-stage-nav {
+        position: static;
+    }
+
+    .rc-row-head {
+        grid-template-columns: 1fr;
+    }
+
+    .rc-actions {
+        justify-content: flex-start;
+    }
+
+    .rc-actions-stack {
+        align-items: flex-start;
+    }
+
+    .rc-item-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rc-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rc-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .xform-grid,
+    .rc-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .xform-grid .span-3,
+    .xform-grid .span-4,
+    .rc-form-grid .span-3,
+    .rc-form-grid .span-4 {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 640px) {
+    html,
+    body {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    body.admin main,
+    body.admin .content,
+    main,
+    .content {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .rc-panel {
+        padding: 16px;
+        border-radius: 14px;
+    }
+
+    .rc-card {
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .rc-panel,
+    .rc-card,
+    .rc-item,
+    .rc-stat,
+    .rc-alert {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .xform-grid,
+    .rc-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rc-item-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rc-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rc-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rc-split-head,
+    .rc-row-head {
+        grid-template-columns: 1fr;
+    }
+
+    .rc-tabs-pill {
+        margin-right: -10px;
+        padding-bottom: 4px;
+    }
+
+    .rc-tabs-pill .rc-tab {
+        min-width: max-content;
+    }
+
+    .xform-grid .span-2,
+    .xform-grid .span-3,
+    .xform-grid .span-4,
+    .rc-form-grid .span-2,
+    .rc-form-grid .span-3,
+    .rc-form-grid .span-4 {
+        grid-column: span 1;
+    }
+}

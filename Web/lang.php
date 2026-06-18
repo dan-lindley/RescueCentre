@@ -1,46 +1,49 @@
 <?php
-//session_start();
-header('Cache-control: private'); // IE 6 FIX
+// -----------------------------------------
+// Language bootstrap (wrapper safe)
+// -----------------------------------------
 
-if(isSet($_GET['lang']))
-{
-$lang = $_GET['lang'];
+/*ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);*/
 
-// register the session and set the cookie
-$_SESSION['lang'] = $lang;
 
-setcookie('lang', $lang, time() + (3600 * 24 * 30));
-}
-else if(isSet($_SESSION['lang']))
-{
-$lang = $_SESSION['lang'];
-}
-else if(isSet($_COOKIE['lang']))
-{
-$lang = $_COOKIE['lang'];
-}
-else
-{
-$lang = 'en';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-switch ($lang) {
-  case 'en':
-  $lang_file = 'lang.en.php';
-  break;
+$allowed_langs = ['en', 'es', 'fr', 'de', 'pl']; // add more later
 
-  case 'de':
-  $lang_file = 'lang.de.php';
-  break;
-
-  case 'es':
-  $lang_file = 'lang.es.php';
-  break;
-
-  default:
-  $lang_file = 'lang.en.php';
-
+// 1. Language explicitly changed via URL
+if (isset($_GET['lang']) && in_array($_GET['lang'], $allowed_langs, true)) {
+    $lang = $_GET['lang'];
+    $_SESSION['lang'] = $lang;
+    setcookie('lang', $lang, time() + (3600 * 24 * 30), '/');
 }
-include_once 'languages/en.php';
-include_once 'languages/'.$lang_file;
-?>
+
+// 2. Session language
+elseif (isset($_SESSION['lang']) && in_array($_SESSION['lang'], $allowed_langs, true)) {
+    $lang = $_SESSION['lang'];
+}
+
+// 3. Cookie fallback
+elseif (isset($_COOKIE['lang']) && in_array($_COOKIE['lang'], $allowed_langs, true)) {
+    $lang = $_COOKIE['lang'];
+    $_SESSION['lang'] = $lang;
+}
+
+// 4. Default
+else {
+    $lang = 'en';
+    $_SESSION['lang'] = $lang;
+}
+
+// Load language file
+$lang_file = __DIR__ . "/languages/lang.$lang.php";
+
+if (!file_exists($lang_file)) {
+    $lang_file = __DIR__ . "/languages/lang.en.php";
+}
+
+require $lang_file;
+
