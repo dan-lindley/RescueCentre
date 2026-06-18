@@ -684,3 +684,39 @@ INSERT IGNORE INTO rescue_sample_types (sample_type) VALUES ('Faeces'), ('Swab')
 INSERT IGNORE INTO rescue_frequencies (frequency, sort_order) VALUES ('Once daily', 10), ('Twice daily', 20), ('Three times daily', 30), ('As required', 90);
 INSERT IGNORE INTO rescue_diet_items (item_name, default_unit) VALUES ('Mealworms', 'g'), ('Formula', 'ml'), ('Water', 'ml');
 INSERT IGNORE INTO rescue_partner_types (partner_type) VALUES ('Police'), ('RSPCA'), ('Vet'), ('Local Authority'), ('Other');
+
+CREATE TABLE IF NOT EXISTS rescue_orgs (
+    org_id INT AUTO_INCREMENT PRIMARY KEY,
+    org_name VARCHAR(190) NOT NULL,
+    email VARCHAR(190) NULL,
+    phone VARCHAR(80) NULL,
+    county VARCHAR(120) NULL,
+    country VARCHAR(80) NULL,
+    country_code CHAR(2) NULL,
+    status VARCHAR(40) NOT NULL DEFAULT 'Active',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_orgs_status (status),
+    INDEX idx_orgs_country (country_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS rescue_time_admission (
+    time_admission_id INT AUTO_INCREMENT PRIMARY KEY,
+    time_to_admission VARCHAR(120) NOT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    UNIQUE KEY uq_time_to_admission (time_to_admission)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS rescue_words (
+    word_id INT AUTO_INCREMENT PRIMARY KEY,
+    word_key VARCHAR(120) NOT NULL,
+    word_value VARCHAR(255) NOT NULL,
+    word_group VARCHAR(120) NULL,
+    language_code VARCHAR(10) NOT NULL DEFAULT 'en',
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    UNIQUE KEY uq_rescue_word (word_key, language_code),
+    INDEX idx_rescue_words_group (word_group)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO rescue_time_admission (time_to_admission, sort_order) VALUES ('Immediate', 10), ('Within 1 hour', 20), ('1-4 hours', 30), ('4-12 hours', 40), ('12-24 hours', 50), ('Over 24 hours', 60), ('Unknown', 90);
