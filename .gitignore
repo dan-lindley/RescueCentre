@@ -1,11 +1,19 @@
-.idea/
+/config.php
+/config/config.php
+/storage/uploads/*
+/storage/logs/*
+/user_images/*
+/user_documents/*
+!/storage/uploads/.gitkeep
+!/storage/logs/.gitkeep
+/vendor/
+.env
+*.log
 *.zip
+.idea/
 oauth.txt
 client_secret_*.json
-Web/config.php
-Web/config/config.php
-Web/user_images/
-Web/user_documents/
+docker-compose.yml
 Company Stuff/
 Hub Firmware/
 kids/

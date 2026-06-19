@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Rescue Centre Lite installer entry point.
 // This file is intentionally defensive for shared hosting/cPanel installs:
 // if the installer fails, show a useful error instead of a blank HTTP 500.
@@ -36,7 +36,7 @@ function rc_lite_install_error_page($title, $message, $details = '')
     if ($details !== '') {
         echo '<pre>' . rc_lite_install_escape($details) . '</pre>';
     }
-    echo '<p>Check the file path, PHP version, permissions, and whether <code>Web/database/schema.sql</code> exists.</p>';
+    echo '<p>Check the file path, PHP version, permissions, and whether <code>database/schema.sql</code> exists.</p>';
     echo '</div></body></html>';
     exit;
 }
