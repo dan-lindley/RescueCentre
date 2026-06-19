@@ -13,6 +13,76 @@ function post_string($key)
     return trim((string)($_POST[$key] ?? ''));
 }
 
+function lite_install_sync_connect($apiUrl, $installId, $email, $password)
+{
+    $apiUrl = trim((string)$apiUrl);
+    if ($apiUrl === '') {
+        throw new RuntimeException('Hosted sync API URL is required.');
+    }
+
+    $payload = json_encode([
+        'action' => 'connect',
+        'install_id' => $installId,
+        'email' => $email,
+        'password' => $password,
+    ], JSON_UNESCAPED_SLASHES);
+
+    if (!is_string($payload)) {
+        throw new RuntimeException('Could not build hosted sync request.');
+    }
+
+    $statusCode = 0;
+    $body = false;
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($apiUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'Accept: application/json'],
+            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_TIMEOUT => 20,
+        ]);
+        $body = curl_exec($ch);
+        $statusCode = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($body === false) {
+            throw new RuntimeException('Hosted sync connection failed: ' . $curlError);
+        }
+    } else {
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: application/json\r\nAccept: application/json\r\n",
+                'content' => $payload,
+                'timeout' => 20,
+                'ignore_errors' => true,
+            ],
+        ]);
+        $body = file_get_contents($apiUrl, false, $context);
+        if (isset($http_response_header[0]) && preg_match('/\s(\d{3})\s/', $http_response_header[0], $match)) {
+            $statusCode = (int)$match[1];
+        }
+    }
+
+    if (!is_string($body) || trim($body) === '') {
+        throw new RuntimeException('Hosted sync returned an empty response.');
+    }
+
+    $decoded = json_decode($body, true);
+    if (!is_array($decoded)) {
+        throw new RuntimeException('Hosted sync returned invalid JSON.');
+    }
+
+    if ($statusCode < 200 || $statusCode >= 300 || ($decoded['status'] ?? '') !== 'linked') {
+        $message = (string)($decoded['message'] ?? 'Hosted sync refused the connection.');
+        throw new RuntimeException($message);
+    }
+
+    return $decoded;
+}
 function write_config($path, array $data)
 {
     $contents = "<?php\n\n";
@@ -62,6 +132,10 @@ $defaults = [
     'admin_email' => '',
     'admin_first_name' => '',
     'admin_last_name' => '',
+    'sync_enabled' => '1',
+    'hosted_api_url' => 'https://rescuecentre.org.uk/api/lite_sync.php',
+    'hosted_email' => '',
+    'install_id' => 'lite_' . bin2hex(random_bytes(8)),
 ];
 
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
@@ -80,6 +154,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
     $data['db_pass'] = (string)($_POST['db_pass'] ?? '');
     $adminPassword = (string)($_POST['admin_password'] ?? '');
     $adminPasswordConfirm = (string)($_POST['admin_password_confirm'] ?? '');
+    $syncPassword = (string)($_POST['hosted_password'] ?? '');
+    $syncRequested = (string)($data['sync_enabled'] ?? '') === '1';
+    $syncResponse = null;
+
+    if ($syncRequested) {
+        if (!filter_var($data['hosted_api_url'], FILTER_VALIDATE_URL)) {
+            $errors[] = 'Hosted sync API URL is not valid.';
+        }
+        if (!filter_var($data['hosted_email'], FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Hosted Rescue Centre account email is required for sync.';
+        }
+        if ($syncPassword === '') {
+            $errors[] = 'Hosted Rescue Centre password is required for sync.';
+        }
+        if (!preg_match('/^[A-Za-z0-9_-]{6,96}$/', $data['install_id'])) {
+            $errors[] = 'Install ID is invalid.';
+        }
+        if (!$errors) {
+            try {
+                $syncResponse = lite_install_sync_connect($data['hosted_api_url'], $data['install_id'], $data['hosted_email'], $syncPassword);
+                $syncCentre = is_array($syncResponse['centre'] ?? null) ? $syncResponse['centre'] : [];
+                $data['centre_name'] = (string)($syncCentre['rescue_name'] ?? $data['centre_name']);
+                $data['centre_email'] = (string)($syncCentre['email'] ?? $data['centre_email']);
+                $data['county'] = (string)($syncCentre['county'] ?? $data['county']);
+                $data['country_code'] = (string)($syncCentre['country_code'] ?? $data['country_code']);
+            } catch (Throwable $e) {
+                $errors[] = 'Hosted sync failed: ' . $e->getMessage();
+            }
+        }
+    }
 
     if ($data['db_host'] === '') $errors[] = 'Database host is required.';
     if ($data['db_name'] === '') $errors[] = 'Database name is required.';
@@ -139,6 +243,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             $settingsStmt = $pdo->prepare('INSERT INTO lite_settings (setting_key, setting_value) VALUES (:setting_key, :setting_value)');
             $settingsStmt->execute([':setting_key' => 'single_centre_id', ':setting_value' => (string)$centreId]);
             $settingsStmt->execute([':setting_key' => 'installed_at', ':setting_value' => date('c')]);
+            $settingsStmt->execute([':setting_key' => 'sync_enabled', ':setting_value' => $syncResponse ? '1' : '0']);
+            if ($syncResponse) {
+                $settingsStmt->execute([':setting_key' => 'sync_provider', ':setting_value' => 'rescue_centre_hosted']);
+                $settingsStmt->execute([':setting_key' => 'sync_api_url', ':setting_value' => $data['hosted_api_url']]);
+                $settingsStmt->execute([':setting_key' => 'sync_install_id', ':setting_value' => $data['install_id']]);
+                $settingsStmt->execute([':setting_key' => 'sync_hosted_centre_id', ':setting_value' => (string)($syncResponse['hosted_centre_id'] ?? '')]);
+                $settingsStmt->execute([':setting_key' => 'sync_hosted_account_id', ':setting_value' => (string)($syncResponse['hosted_account_id'] ?? '')]);
+                $settingsStmt->execute([':setting_key' => 'sync_api_key', ':setting_value' => (string)($syncResponse['api_key'] ?? '')]);
+                $settingsStmt->execute([':setting_key' => 'sync_centre_payload', ':setting_value' => json_encode($syncResponse['centre'] ?? [], JSON_UNESCAPED_SLASHES)]);
+                $settingsStmt->execute([':setting_key' => 'sync_last_connected_at', ':setting_value' => date('c')]);
+            }
             $pdo->commit();
 
             write_config($configPath, [
@@ -186,9 +301,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         .install-card-inner { padding:20px; }
         .install-card h2 { margin:0 0 4px; color:#fff; font-size:1.24rem; }
         .install-card-note { margin:0 0 16px; color:var(--install-muted); font-size:.92rem; }
-        .install-card.application { --accent:var(--install-blue); } .install-card.database { --accent:var(--install-green); } .install-card.centre { --accent:var(--install-orange); } .install-card.admin { --accent:var(--install-red); }
+        .install-card.application { --accent:var(--install-blue); } .install-card.database { --accent:var(--install-green); } .install-card.centre { --accent:var(--install-orange); } .install-card.admin { --accent:var(--install-red); } .install-card.sync { --accent:#7fd6ee; grid-column:1 / -1; }
         .install-form-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
         .install-field-full { grid-column:1 / -1; }
+        .install-check { display:flex; align-items:center; gap:10px; color:#d9eef4; font-weight:700; }
         .install-card .xform-label { color:#d9eef4; font-weight:700; }
         .install-card .xform-input, .install-card select.xform-input { width:100%; box-sizing:border-box; background:rgba(5,22,30,.78); color:#f5fbfd; border:1px solid rgba(151,210,225,.24); }
         .install-card .xform-input:focus { outline:none; border-color:rgba(129,216,239,.75); box-shadow:0 0 0 3px rgba(15,119,168,.22); }
@@ -224,6 +340,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
                     <section class="install-card database"><div class="install-card-inner"><h2>Database</h2><p class="install-card-note">Use the MySQL database and user created in cPanel.</p><div class="install-form-grid"><div class="xform-field"><label class="xform-label" for="db_host">Host</label><input class="xform-input" id="db_host" name="db_host" value="<?= h($defaults['db_host']) ?>" required></div><div class="xform-field"><label class="xform-label" for="db_name">Database</label><input class="xform-input" id="db_name" name="db_name" value="<?= h($defaults['db_name']) ?>" required></div><div class="xform-field"><label class="xform-label" for="db_user">User</label><input class="xform-input" id="db_user" name="db_user" value="<?= h($defaults['db_user']) ?>" required></div><div class="xform-field"><label class="xform-label" for="db_pass">Password</label><input class="xform-input" id="db_pass" name="db_pass" type="password" value="<?= h($defaults['db_pass']) ?>"></div></div></div></section>
                     <section class="install-card centre"><div class="install-card-inner"><h2>Centre</h2><p class="install-card-note">Create the single rescue centre for this Lite install.</p><div class="install-form-grid"><div class="xform-field install-field-full"><label class="xform-label" for="centre_name">Centre name</label><input class="xform-input" id="centre_name" name="centre_name" value="<?= h($defaults['centre_name']) ?>" required></div><div class="xform-field install-field-full"><label class="xform-label" for="centre_email">Centre email</label><input class="xform-input" id="centre_email" name="centre_email" type="email" value="<?= h($defaults['centre_email']) ?>"></div><div class="xform-field"><label class="xform-label" for="country_code">Country code</label><input class="xform-input" id="country_code" name="country_code" maxlength="2" value="<?= h($defaults['country_code']) ?>"></div><div class="xform-field"><label class="xform-label" for="county">County / state</label><input class="xform-input" id="county" name="county" value="<?= h($defaults['county']) ?>"></div></div></div></section>
                     <section class="install-card admin"><div class="install-card-inner"><h2>Admin user</h2><p class="install-card-note">This account will be able to manage the Lite install.</p><div class="install-form-grid"><div class="xform-field"><label class="xform-label" for="admin_first_name">First name</label><input class="xform-input" id="admin_first_name" name="admin_first_name" value="<?= h($defaults['admin_first_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="admin_last_name">Last name</label><input class="xform-input" id="admin_last_name" name="admin_last_name" value="<?= h($defaults['admin_last_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="admin_username">Username</label><input class="xform-input" id="admin_username" name="admin_username" value="<?= h($defaults['admin_username']) ?>" required></div><div class="xform-field"><label class="xform-label" for="admin_email">Email</label><input class="xform-input" id="admin_email" name="admin_email" type="email" value="<?= h($defaults['admin_email']) ?>" required></div><div class="xform-field"><label class="xform-label" for="admin_password">Password</label><input class="xform-input" id="admin_password" name="admin_password" type="password" required></div><div class="xform-field"><label class="xform-label" for="admin_password_confirm">Confirm password</label><input class="xform-input" id="admin_password_confirm" name="admin_password_confirm" type="password" required></div></div></div></section>
+                    <section class="install-card sync"><div class="install-card-inner"><h2>Hosted sync</h2><p class="install-card-note">Connect this local install to your hosted Rescue Centre account. Centre details will be checked and synced by default.</p><div class="install-form-grid"><input type="hidden" name="install_id" value="<?= h($defaults['install_id']) ?>"><label class="install-check install-field-full"><input type="checkbox" name="sync_enabled" value="1" <?= (string)$defaults['sync_enabled'] === '1' ? 'checked' : '' ?>> Connect to hosted Rescue Centre</label><div class="xform-field install-field-full"><label class="xform-label" for="hosted_api_url">Hosted API URL</label><input class="xform-input" id="hosted_api_url" name="hosted_api_url" value="<?= h($defaults['hosted_api_url']) ?>"></div><div class="xform-field"><label class="xform-label" for="hosted_email">Hosted account email</label><input class="xform-input" id="hosted_email" name="hosted_email" type="email" value="<?= h($defaults['hosted_email']) ?>"></div><div class="xform-field"><label class="xform-label" for="hosted_password">Hosted password</label><input class="xform-input" id="hosted_password" name="hosted_password" type="password" autocomplete="current-password"></div></div></div></section>
                 </div>
                 <div class="install-actions"><button class="btn green install-submit" type="submit">Install Rescue Centre Lite</button></div>
             </form>
