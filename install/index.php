@@ -394,10 +394,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         setStatus(which === 'centre' ? centreStatus : userStatus, 'Checking hosted Rescue Centre...', null);
 
         try {
-            const response = await fetch(apiUrl.value, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=UTF-8', 'Accept': 'application/json' },
-                body: JSON.stringify(payload)
+            const checkUrl = new URL(apiUrl.value);
+            Object.keys(payload).forEach(key => {
+                if (payload[key]) checkUrl.searchParams.set(key, payload[key]);
+            });
+            const response = await fetch(checkUrl.toString(), {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
             });
             const data = await response.json();
             if (data.status !== 'checked') throw new Error(data.message || 'Hosted check failed.');
