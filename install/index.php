@@ -299,6 +299,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         .install-card .xform-label { color:#d9eef4; font-weight:700; }
         .install-card .xform-input, .install-card select.xform-input { width:100%; box-sizing:border-box; background:rgba(5,22,30,.78); color:#f5fbfd; border:1px solid rgba(151,210,225,.24); }
         .install-card .xform-input:focus { outline:none; border-color:rgba(129,216,239,.75); box-shadow:0 0 0 3px rgba(15,119,168,.22); }
+        .install-card-status { grid-column:1 / -1; padding:10px 12px; border-radius:12px; border:1px solid rgba(151,210,225,.22); background:rgba(5,22,30,.46); color:var(--install-muted); font-size:.9rem; }
+        .install-card-status.is-ok { border-color:rgba(24,160,109,.55); background:rgba(24,160,109,.14); color:#c9f6e2; }
+        .install-card-status.is-warn { border-color:rgba(213,164,0,.62); background:rgba(213,164,0,.14); color:#ffe7a3; }
+        .install-card-status.is-error { border-color:rgba(216,91,105,.62); background:rgba(216,91,105,.14); color:#ffd2d7; }
         .install-actions { margin-top:20px; display:flex; justify-content:flex-end; }
         .install-actions .btn { min-width:220px; }
         .install-submit { border-radius:999px; padding:12px 22px; font-weight:800; letter-spacing:.01em; box-shadow:0 12px 28px rgba(24,160,109,.28); }
@@ -329,13 +333,101 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
                 <div class="install-card-grid">
                     <section class="install-card application"><div class="install-card-inner"><h2>Application</h2><p class="install-card-note">Name the local install and set its public path.</p><div class="install-form-grid"><input type="hidden" name="install_id" value="<?= h($defaults['install_id']) ?>"><input type="hidden" name="hosted_api_url" value="<?= h($defaults['hosted_api_url']) ?>"><div class="xform-field install-field-full"><label class="xform-label" for="app_name">Application name</label><input class="xform-input" id="app_name" name="app_name" value="<?= h($defaults['app_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="base_url">Base URL</label><input class="xform-input" id="base_url" name="base_url" value="<?= h($defaults['base_url']) ?>"></div><div class="xform-field"><label class="xform-label" for="default_language">Language</label><select class="xform-input" id="default_language" name="default_language"><?php foreach (['en' => 'English', 'es' => 'Spanish', 'de' => 'German', 'fr' => 'French', 'pl' => 'Polish'] as $code => $label): ?><option value="<?= h($code) ?>" <?= $defaults['default_language'] === $code ? 'selected' : '' ?>><?= h($label) ?></option><?php endforeach; ?></select></div></div></div></section>
                     <section class="install-card database"><div class="install-card-inner"><h2>Database</h2><p class="install-card-note">Use the MySQL database and user created in cPanel.</p><div class="install-form-grid"><div class="xform-field"><label class="xform-label" for="db_host">Host</label><input class="xform-input" id="db_host" name="db_host" value="<?= h($defaults['db_host']) ?>" required></div><div class="xform-field"><label class="xform-label" for="db_name">Database</label><input class="xform-input" id="db_name" name="db_name" value="<?= h($defaults['db_name']) ?>" required></div><div class="xform-field"><label class="xform-label" for="db_user">User</label><input class="xform-input" id="db_user" name="db_user" value="<?= h($defaults['db_user']) ?>" required></div><div class="xform-field"><label class="xform-label" for="db_pass">Password</label><input class="xform-input" id="db_pass" name="db_pass" type="password" value="<?= h($defaults['db_pass']) ?>"></div></div></div></section>
-                    <section class="install-card centre"><div class="install-card-inner"><h2>Centre</h2><p class="install-card-note">Create the single rescue centre for this Lite install.</p><div class="install-form-grid"><div class="xform-field install-field-full"><label class="xform-label" for="centre_name">Centre name</label><input class="xform-input" id="centre_name" name="centre_name" value="<?= h($defaults['centre_name']) ?>" required></div><div class="xform-field install-field-full"><label class="xform-label" for="centre_email">Centre email</label><input class="xform-input" id="centre_email" name="centre_email" type="email" value="<?= h($defaults['centre_email']) ?>"></div><div class="xform-field"><label class="xform-label" for="country_code">Country code</label><input class="xform-input" id="country_code" name="country_code" maxlength="2" value="<?= h($defaults['country_code']) ?>"></div><div class="xform-field"><label class="xform-label" for="county">County / state</label><input class="xform-input" id="county" name="county" value="<?= h($defaults['county']) ?>"></div></div></div></section>
-                    <section class="install-card admin"><div class="install-card-inner"><h2>Admin user</h2><p class="install-card-note">This account will manage Lite. If the email already exists on hosted Rescue Centre, use that hosted password to link it.</p><div class="install-form-grid"><div class="xform-field"><label class="xform-label" for="admin_first_name">First name</label><input class="xform-input" id="admin_first_name" name="admin_first_name" value="<?= h($defaults['admin_first_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="admin_last_name">Last name</label><input class="xform-input" id="admin_last_name" name="admin_last_name" value="<?= h($defaults['admin_last_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="admin_username">Username</label><input class="xform-input" id="admin_username" name="admin_username" value="<?= h($defaults['admin_username']) ?>" required></div><div class="xform-field"><label class="xform-label" for="admin_email">Email</label><input class="xform-input" id="admin_email" name="admin_email" type="email" value="<?= h($defaults['admin_email']) ?>" required></div><div class="xform-field"><label class="xform-label" for="admin_password">Password</label><input class="xform-input" id="admin_password" name="admin_password" type="password" required></div><div class="xform-field"><label class="xform-label" for="admin_password_confirm">Confirm password</label><input class="xform-input" id="admin_password_confirm" name="admin_password_confirm" type="password" required></div></div></div></section>
+                    <section class="install-card centre"><div class="install-card-inner"><h2>Centre</h2><p class="install-card-note">Create the single rescue centre for this Lite install.</p><div class="install-form-grid"><div class="xform-field install-field-full"><label class="xform-label" for="centre_name">Centre name</label><input class="xform-input" id="centre_name" name="centre_name" value="<?= h($defaults['centre_name']) ?>" required></div><div class="xform-field install-field-full"><label class="xform-label" for="centre_email">Centre email</label><input class="xform-input" id="centre_email" name="centre_email" type="email" value="<?= h($defaults['centre_email']) ?>"></div><div class="xform-field"><label class="xform-label" for="country_code">Country code</label><input class="xform-input" id="country_code" name="country_code" maxlength="2" value="<?= h($defaults['country_code']) ?>"></div><div class="xform-field"><label class="xform-label" for="county">County / state</label><input class="xform-input" id="county" name="county" value="<?= h($defaults['county']) ?>"></div><div id="centre_check_status" class="install-card-status">Centre name will be checked against hosted Rescue Centre.</div></div></div></section>
+                    <section class="install-card admin"><div class="install-card-inner"><h2>Admin user</h2><p class="install-card-note">This account will manage Lite. If the email already exists on hosted Rescue Centre, use that hosted password to link it.</p><div class="install-form-grid"><div class="xform-field"><label class="xform-label" for="admin_first_name">First name</label><input class="xform-input" id="admin_first_name" name="admin_first_name" value="<?= h($defaults['admin_first_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="admin_last_name">Last name</label><input class="xform-input" id="admin_last_name" name="admin_last_name" value="<?= h($defaults['admin_last_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="admin_username">Username</label><input class="xform-input" id="admin_username" name="admin_username" value="<?= h($defaults['admin_username']) ?>" required></div><div class="xform-field"><label class="xform-label" for="admin_email">Email</label><input class="xform-input" id="admin_email" name="admin_email" type="email" value="<?= h($defaults['admin_email']) ?>" required></div><div class="xform-field"><label class="xform-label" for="admin_password">Password</label><input class="xform-input" id="admin_password" name="admin_password" type="password" required></div><div class="xform-field"><label class="xform-label" for="admin_password_confirm">Confirm password</label><input class="xform-input" id="admin_password_confirm" name="admin_password_confirm" type="password" required></div><div id="user_check_status" class="install-card-status">Admin user will be checked against hosted Rescue Centre.</div></div></div></section>
                 </div>
                 <div class="install-actions"><button class="btn green install-submit" type="submit">Install Rescue Centre Lite</button></div>
             </form>
         <?php endif; ?>
     </section>
 </main>
+<script>
+(function () {
+    const form = document.querySelector('.install-form');
+    if (!form || !window.fetch) return;
+
+    const apiUrl = form.querySelector('[name="hosted_api_url"]');
+    const installId = form.querySelector('[name="install_id"]');
+    const centreName = form.querySelector('[name="centre_name"]');
+    const centreEmail = form.querySelector('[name="centre_email"]');
+    const adminUsername = form.querySelector('[name="admin_username"]');
+    const adminEmail = form.querySelector('[name="admin_email"]');
+    const centreStatus = document.getElementById('centre_check_status');
+    const userStatus = document.getElementById('user_check_status');
+
+    function setStatus(el, message, state) {
+        if (!el) return;
+        el.textContent = message;
+        el.classList.remove('is-ok', 'is-warn', 'is-error');
+        if (state) el.classList.add(state);
+    }
+
+    function debounce(fn, delay) {
+        let timer;
+        return function () {
+            clearTimeout(timer);
+            timer = setTimeout(fn, delay);
+        };
+    }
+
+    async function checkHosted(which) {
+        if (!apiUrl || !apiUrl.value || !installId || !installId.value) return;
+
+        const payload = {
+            action: 'check',
+            install_id: installId.value,
+            centre_name: centreName ? centreName.value.trim() : '',
+            centre_email: centreEmail ? centreEmail.value.trim() : '',
+            admin_username: adminUsername ? adminUsername.value.trim() : '',
+            admin_email: adminEmail ? adminEmail.value.trim() : ''
+        };
+
+        if (which === 'centre' && !payload.centre_name) {
+            setStatus(centreStatus, 'Enter a centre name to check hosted availability.', 'is-warn');
+            return;
+        }
+        if (which === 'user' && !payload.admin_email && !payload.admin_username) {
+            setStatus(userStatus, 'Enter an admin email or username to check hosted availability.', 'is-warn');
+            return;
+        }
+
+        setStatus(which === 'centre' ? centreStatus : userStatus, 'Checking hosted Rescue Centre...', null);
+
+        try {
+            const response = await fetch(apiUrl.value, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (data.status !== 'checked') throw new Error(data.message || 'Hosted check failed.');
+
+            if (which === 'centre') {
+                if (data.centre_available) {
+                    setStatus(centreStatus, 'Centre name looks available and can be created on hosted Rescue Centre.', 'is-ok');
+                } else {
+                    setStatus(centreStatus, 'Centre already exists on hosted Rescue Centre. Use/sign in with an existing hosted account for that centre.', 'is-warn');
+                }
+            } else {
+                if (data.user_requires_login) {
+                    setStatus(userStatus, 'This hosted user already exists. Use that account password here to link it.', 'is-warn');
+                } else if (!data.username_available) {
+                    setStatus(userStatus, 'This username is already used on hosted Rescue Centre. Choose another username.', 'is-error');
+                } else {
+                    setStatus(userStatus, 'Admin user looks available and can be created on hosted Rescue Centre.', 'is-ok');
+                }
+            }
+        } catch (error) {
+            setStatus(which === 'centre' ? centreStatus : userStatus, error.message || 'Hosted check failed.', 'is-error');
+        }
+    }
+
+    const checkCentre = debounce(function () { checkHosted('centre'); }, 450);
+    const checkUser = debounce(function () { checkHosted('user'); }, 450);
+
+    [centreName, centreEmail].forEach(el => { if (el) { el.addEventListener('input', checkCentre); el.addEventListener('blur', checkCentre); } });
+    [adminUsername, adminEmail].forEach(el => { if (el) { el.addEventListener('input', checkUser); el.addEventListener('blur', checkUser); } });
+})();
+</script>
 </body>
 </html>
