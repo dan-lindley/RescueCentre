@@ -207,7 +207,7 @@ $defaults = [
     'admin_email' => '',
     'admin_first_name' => '',
     'admin_last_name' => '',
-    'hosted_api_url' => 'https://rescuecentre.org.uk/api/lite_sync.php',
+    'hosted_api_url' => 'https://myrescuecentre.com/api/lite_sync.php',
     'install_id' => 'lite_' . bin2hex(random_bytes(8)),
 ];
 
