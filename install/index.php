@@ -307,7 +307,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
 
             $roleStmt = $pdo->prepare('INSERT INTO rescue_roles (centre_id, role_name, is_default) VALUES (:centre_id, :role_name, :is_default)');
             $roleStmt->execute([':centre_id' => $centreId, ':role_name' => 'Administrator', ':is_default' => 1]);
-            $adminRescueRole = (int)$pdo->lastInsertId();
             $roleStmt->execute([':centre_id' => $centreId, ':role_name' => 'Staff', ':is_default' => 1]);
 
             $accountStmt = $pdo->prepare('INSERT INTO accounts (centre_id, username, email, password, role, rescue_role, first_name, last_name) VALUES (:centre_id, :username, :email, :password, :role, :rescue_role, :first_name, :last_name)');
@@ -316,8 +315,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
                 ':username' => $data['admin_username'],
                 ':email' => $data['admin_email'],
                 ':password' => password_hash($adminPassword, PASSWORD_DEFAULT),
-                ':role' => 'Admin',
-                ':rescue_role' => $adminRescueRole,
+                ':role' => 'Member',
+                ':rescue_role' => 1,
                 ':first_name' => $data['admin_first_name'] !== '' ? $data['admin_first_name'] : null,
                 ':last_name' => $data['admin_last_name'] !== '' ? $data['admin_last_name'] : null,
             ]);
