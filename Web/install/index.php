@@ -1,21 +1,18 @@
-﻿<?php
-
-declare(strict_types=1);
-
+<?php
 $configPath = __DIR__ . '/../config.php';
 $schemaPath = __DIR__ . '/../database/schema.sql';
 
-function h(?string $value): string
+function h($value)
 {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
-function post_string(string $key): string
+function post_string($key)
 {
     return trim((string)($_POST[$key] ?? ''));
 }
 
-function write_config(string $path, array $data): void
+function write_config($path, array $data)
 {
     $contents = "<?php\n\n";
     $contents .= "define('db_host', " . var_export($data['db_host'], true) . ");\n";
@@ -66,6 +63,14 @@ $defaults = [
     'admin_last_name' => '',
 ];
 
+$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$assetBase = basename($scriptDir) === 'install' ? dirname($scriptDir) : $scriptDir;
+$assetBase = rtrim($assetBase, '/');
+$appHome = ($assetBase === '' ? '/' : $assetBase . '/');
+if ($defaults['base_url'] === '/') {
+    $defaults['base_url'] = $appHome;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
     $data = [];
     foreach ($defaults as $key => $value) {
@@ -99,7 +104,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
                 throw new RuntimeException('database/schema.sql is empty.');
             }
             $pdo->exec($schema);
-
             $pdo->beginTransaction();
 
             $stmt = $pdo->prepare('INSERT INTO rescue_centres (rescue_name, email, county, country_code) VALUES (:name, :email, :county, :country_code)');
@@ -119,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             $adminRescueRole = (int)$pdo->lastInsertId();
             $roleStmt->execute([':centre_id' => $centreId, ':role_name' => 'Staff', ':is_default' => 1]);
 
-            $accountStmt = $pdo->prepare('\n                INSERT INTO accounts (centre_id, username, email, password, role, rescue_role, first_name, last_name)\n                VALUES (:centre_id, :username, :email, :password, :role, :rescue_role, :first_name, :last_name)\n            ');
+            $accountStmt = $pdo->prepare('INSERT INTO accounts (centre_id, username, email, password, role, rescue_role, first_name, last_name) VALUES (:centre_id, :username, :email, :password, :role, :rescue_role, :first_name, :last_name)');
             $accountStmt->execute([
                 ':centre_id' => $centreId,
                 ':username' => $data['admin_username'],
@@ -134,14 +138,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             $settingsStmt = $pdo->prepare('INSERT INTO lite_settings (setting_key, setting_value) VALUES (:setting_key, :setting_value)');
             $settingsStmt->execute([':setting_key' => 'single_centre_id', ':setting_value' => (string)$centreId]);
             $settingsStmt->execute([':setting_key' => 'installed_at', ':setting_value' => date('c')]);
-
             $pdo->commit();
 
             write_config($configPath, [
                 'app_name' => $data['app_name'] !== '' ? $data['app_name'] : 'Rescue Centre Lite',
-                'base_url' => $data['base_url'] !== '' ? $data['base_url'] : '/',
+                'base_url' => $data['base_url'] !== '' ? $data['base_url'] : $appHome,
                 'default_language' => $data['default_language'] !== '' ? $data['default_language'] : 'en',
-                'debug' => false,
                 'secret_key' => bin2hex(random_bytes(32)),
                 'db_host' => $data['db_host'],
                 'db_name' => $data['db_name'],
@@ -149,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
                 'db_pass' => $data['db_pass'],
             ]);
 
-            header('Location: /?installed=1');
+            header('Location: ' . $appHome . '?installed=1');
             exit;
         } catch (Throwable $e) {
             if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
@@ -158,140 +160,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             $errors[] = $e->getMessage();
         }
     }
-
     $defaults = array_merge($defaults, $data ?? []);
 }
-?>
-<!doctype html>
+?><!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Install Rescue Centre Lite</title>
-    <link rel="stylesheet" href="/core/css/core.css">
+    <link rel="stylesheet" href="<?= h($assetBase . '/core/css/core.css') ?>">
+    <style>
+        :root { --install-bg:#071c25; --install-card:rgba(18,58,72,.92); --install-border:rgba(139,207,224,.22); --install-text:#eef8fb; --install-muted:#a7c6d0; --install-blue:#0f77a8; --install-green:#18a06d; --install-orange:#d9872b; --install-red:#d85b69; }
+        body { min-height:100vh; margin:0; background:radial-gradient(circle at top left, rgba(15,119,168,.28), transparent 34rem), radial-gradient(circle at bottom right, rgba(24,160,109,.18), transparent 30rem), var(--install-bg); color:var(--install-text); }
+        .install-shell { max-width:1180px; margin:0 auto; padding:36px 18px 48px; }
+        .install-hero { border:1px solid var(--install-border); border-radius:24px; padding:28px; margin-bottom:20px; background:linear-gradient(135deg, rgba(10,46,61,.98), rgba(10,31,42,.94)); box-shadow:0 20px 55px rgba(0,0,0,.34); display:flex; justify-content:space-between; gap:20px; align-items:center; }
+        .install-kicker { margin:0 0 8px; color:#81d8ef; font-size:.78rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+        .install-hero h1 { margin:0; color:#fff; font-size:clamp(2rem, 4vw, 3.35rem); line-height:1; letter-spacing:-.045em; }
+        .install-hero p { max-width:680px; margin:12px 0 0; color:var(--install-muted); font-size:1rem; }
+        .install-badge { min-width:118px; min-height:118px; border-radius:28px; display:grid; place-items:center; color:#fff; background:linear-gradient(135deg, #0f77a8, #18a06d); box-shadow:inset 0 0 0 1px rgba(255,255,255,.22), 0 12px 30px rgba(0,0,0,.28); font-weight:900; font-size:2rem; }
+        .install-card-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:18px; }
+        .install-card { border:1px solid var(--install-border); border-radius:20px; background:var(--install-card); box-shadow:0 16px 40px rgba(0,0,0,.22); overflow:hidden; }
+        .install-card::before { content:""; display:block; height:6px; background:var(--accent, var(--install-blue)); }
+        .install-card-inner { padding:20px; }
+        .install-card h2 { margin:0 0 4px; color:#fff; font-size:1.24rem; }
+        .install-card-note { margin:0 0 16px; color:var(--install-muted); font-size:.92rem; }
+        .install-card.application { --accent:var(--install-blue); } .install-card.database { --accent:var(--install-green); } .install-card.centre { --accent:var(--install-orange); } .install-card.admin { --accent:var(--install-red); }
+        .install-form-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
+        .install-field-full { grid-column:1 / -1; }
+        .install-card .xform-label { color:#d9eef4; font-weight:700; }
+        .install-card .xform-input, .install-card select.xform-input { width:100%; box-sizing:border-box; background:rgba(5,22,30,.78); color:#f5fbfd; border:1px solid rgba(151,210,225,.24); }
+        .install-card .xform-input:focus { outline:none; border-color:rgba(129,216,239,.75); box-shadow:0 0 0 3px rgba(15,119,168,.22); }
+        .install-actions { margin-top:20px; display:flex; justify-content:flex-end; }
+        .install-actions .btn { min-width:220px; }
+        .install-alert { margin-bottom:18px; }
+        @media (max-width:860px) { .install-hero { align-items:flex-start; flex-direction:column; } .install-card-grid { grid-template-columns:1fr; } }
+        @media (max-width:560px) { .install-form-grid { grid-template-columns:1fr; } .install-actions .btn { width:100%; } }
+    </style>
 </head>
 <body>
-<main class="rc-page-shell">
-    <section class="rc-card rc-card-muted" style="max-width: 980px; margin: 32px auto;">
-        <div class="rc-card-header">
-            <div>
-                <p class="rc-kicker">First run setup</p>
-                <h1>Install Rescue Centre Lite</h1>
-            </div>
+<main class="install-shell">
+    <section class="install-hero">
+        <div>
+            <p class="install-kicker">First run setup</p>
+            <h1>Install Rescue Centre Lite</h1>
+            <p>Create the database, centre profile and first administrator account for your local Rescue Centre install.</p>
         </div>
-
+        <div class="install-badge" aria-hidden="true">RC</div>
+    </section>
+    <section>
         <?php if ($installed): ?>
-            <div class="rc-alert green">Rescue Centre Lite is already configured. Remove or protect the install folder.</div>
-            <p><a class="btn green" href="/">Open Rescue Centre Lite</a></p>
+            <div class="rc-alert green install-alert">Rescue Centre Lite is already configured. Remove or protect the install folder.</div>
+            <p><a class="btn green" href="<?= h($appHome) ?>">Open Rescue Centre Lite</a></p>
         <?php else: ?>
             <?php if ($errors): ?>
-                <div class="rc-alert red">
-                    <strong>Install could not continue:</strong>
-                    <ul>
-                        <?php foreach ($errors as $error): ?>
-                            <li><?= h($error) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
+                <div class="rc-alert red install-alert"><strong>Install could not continue:</strong><ul><?php foreach ($errors as $error): ?><li><?= h($error) ?></li><?php endforeach; ?></ul></div>
             <?php endif; ?>
-
-            <form method="post" class="xform">
-                <h2>Application</h2>
-                <div class="xform-grid">
-                    <div class="xform-field span-2">
-                        <label class="xform-label" for="app_name">Application name</label>
-                        <input class="xform-input" id="app_name" name="app_name" value="<?= h($defaults['app_name']) ?>">
-                    </div>
-                    <div class="xform-field">
-                        <label class="xform-label" for="base_url">Base URL</label>
-                        <input class="xform-input" id="base_url" name="base_url" value="<?= h($defaults['base_url']) ?>">
-                    </div>
-                    <div class="xform-field">
-                        <label class="xform-label" for="default_language">Language</label>
-                        <select class="xform-input" id="default_language" name="default_language">
-                            <?php foreach (['en' => 'English', 'es' => 'Spanish', 'de' => 'German', 'fr' => 'French', 'pl' => 'Polish'] as $code => $label): ?>
-                                <option value="<?= h($code) ?>" <?= $defaults['default_language'] === $code ? 'selected' : '' ?>><?= h($label) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+            <form method="post" class="xform install-form">
+                <div class="install-card-grid">
+                    <section class="install-card application"><div class="install-card-inner"><h2>Application</h2><p class="install-card-note">Name the local install and set its public path.</p><div class="install-form-grid"><div class="xform-field install-field-full"><label class="xform-label" for="app_name">Application name</label><input class="xform-input" id="app_name" name="app_name" value="<?= h($defaults['app_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="base_url">Base URL</label><input class="xform-input" id="base_url" name="base_url" value="<?= h($defaults['base_url']) ?>"></div><div class="xform-field"><label class="xform-label" for="default_language">Language</label><select class="xform-input" id="default_language" name="default_language"><?php foreach (['en' => 'English', 'es' => 'Spanish', 'de' => 'German', 'fr' => 'French', 'pl' => 'Polish'] as $code => $label): ?><option value="<?= h($code) ?>" <?= $defaults['default_language'] === $code ? 'selected' : '' ?>><?= h($label) ?></option><?php endforeach; ?></select></div></div></div></section>
+                    <section class="install-card database"><div class="install-card-inner"><h2>Database</h2><p class="install-card-note">Use the MySQL database and user created in cPanel.</p><div class="install-form-grid"><div class="xform-field"><label class="xform-label" for="db_host">Host</label><input class="xform-input" id="db_host" name="db_host" value="<?= h($defaults['db_host']) ?>" required></div><div class="xform-field"><label class="xform-label" for="db_name">Database</label><input class="xform-input" id="db_name" name="db_name" value="<?= h($defaults['db_name']) ?>" required></div><div class="xform-field"><label class="xform-label" for="db_user">User</label><input class="xform-input" id="db_user" name="db_user" value="<?= h($defaults['db_user']) ?>" required></div><div class="xform-field"><label class="xform-label" for="db_pass">Password</label><input class="xform-input" id="db_pass" name="db_pass" type="password" value="<?= h($defaults['db_pass']) ?>"></div></div></div></section>
+                    <section class="install-card centre"><div class="install-card-inner"><h2>Centre</h2><p class="install-card-note">Create the single rescue centre for this Lite install.</p><div class="install-form-grid"><div class="xform-field install-field-full"><label class="xform-label" for="centre_name">Centre name</label><input class="xform-input" id="centre_name" name="centre_name" value="<?= h($defaults['centre_name']) ?>" required></div><div class="xform-field install-field-full"><label class="xform-label" for="centre_email">Centre email</label><input class="xform-input" id="centre_email" name="centre_email" type="email" value="<?= h($defaults['centre_email']) ?>"></div><div class="xform-field"><label class="xform-label" for="country_code">Country code</label><input class="xform-input" id="country_code" name="country_code" maxlength="2" value="<?= h($defaults['country_code']) ?>"></div><div class="xform-field"><label class="xform-label" for="county">County / state</label><input class="xform-input" id="county" name="county" value="<?= h($defaults['county']) ?>"></div></div></div></section>
+                    <section class="install-card admin"><div class="install-card-inner"><h2>Admin user</h2><p class="install-card-note">This account will be able to manage the Lite install.</p><div class="install-form-grid"><div class="xform-field"><label class="xform-label" for="admin_first_name">First name</label><input class="xform-input" id="admin_first_name" name="admin_first_name" value="<?= h($defaults['admin_first_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="admin_last_name">Last name</label><input class="xform-input" id="admin_last_name" name="admin_last_name" value="<?= h($defaults['admin_last_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="admin_username">Username</label><input class="xform-input" id="admin_username" name="admin_username" value="<?= h($defaults['admin_username']) ?>" required></div><div class="xform-field"><label class="xform-label" for="admin_email">Email</label><input class="xform-input" id="admin_email" name="admin_email" type="email" value="<?= h($defaults['admin_email']) ?>" required></div><div class="xform-field"><label class="xform-label" for="admin_password">Password</label><input class="xform-input" id="admin_password" name="admin_password" type="password" required></div><div class="xform-field"><label class="xform-label" for="admin_password_confirm">Confirm password</label><input class="xform-input" id="admin_password_confirm" name="admin_password_confirm" type="password" required></div></div></div></section>
                 </div>
-
-                <h2>Database</h2>
-                <div class="xform-grid">
-                    <div class="xform-field">
-                        <label class="xform-label" for="db_host">Host</label>
-                        <input class="xform-input" id="db_host" name="db_host" value="<?= h($defaults['db_host']) ?>" required>
-                    </div>
-                    <div class="xform-field">
-                        <label class="xform-label" for="db_name">Database</label>
-                        <input class="xform-input" id="db_name" name="db_name" value="<?= h($defaults['db_name']) ?>" required>
-                    </div>
-                    <div class="xform-field">
-                        <label class="xform-label" for="db_user">User</label>
-                        <input class="xform-input" id="db_user" name="db_user" value="<?= h($defaults['db_user']) ?>" required>
-                    </div>
-                    <div class="xform-field">
-                        <label class="xform-label" for="db_pass">Password</label>
-                        <input class="xform-input" id="db_pass" name="db_pass" type="password" value="<?= h($defaults['db_pass']) ?>">
-                    </div>
-                </div>
-
-                <h2>Centre</h2>
-                <div class="xform-grid">
-                    <div class="xform-field span-2">
-                        <label class="xform-label" for="centre_name">Centre name</label>
-                        <input class="xform-input" id="centre_name" name="centre_name" value="<?= h($defaults['centre_name']) ?>" required>
-                    </div>
-                    <div class="xform-field">
-                        <label class="xform-label" for="centre_email">Centre email</label>
-                        <input class="xform-input" id="centre_email" name="centre_email" type="email" value="<?= h($defaults['centre_email']) ?>">
-                    </div>
-                    <div class="xform-field">
-                        <label class="xform-label" for="country_code">Country code</label>
-                        <input class="xform-input" id="country_code" name="country_code" maxlength="2" value="<?= h($defaults['country_code']) ?>">
-                    </div>
-                    <div class="xform-field">
-                        <label class="xform-label" for="county">County / state</label>
-                        <input class="xform-input" id="county" name="county" value="<?= h($defaults['county']) ?>">
-                    </div>
-                </div>
-
-                <h2>First Admin User</h2>
-                <div class="xform-grid">
-                    <div class="xform-field">
-                        <label class="xform-label" for="admin_first_name">First name</label>
-                        <input class="xform-input" id="admin_first_name" name="admin_first_name" value="<?= h($defaults['admin_first_name']) ?>">
-                    </div>
-                    <div class="xform-field">
-                        <label class="xform-label" for="admin_last_name">Last name</label>
-                        <input class="xform-input" id="admin_last_name" name="admin_last_name" value="<?= h($defaults['admin_last_name']) ?>">
-                    </div>
-                    <div class="xform-field">
-                        <label class="xform-label" for="admin_username">Username</label>
-                        <input class="xform-input" id="admin_username" name="admin_username" value="<?= h($defaults['admin_username']) ?>" required>
-                    </div>
-                    <div class="xform-field">
-                        <label class="xform-label" for="admin_email">Email</label>
-                        <input class="xform-input" id="admin_email" name="admin_email" type="email" value="<?= h($defaults['admin_email']) ?>" required>
-                    </div>
-                    <div class="xform-field span-2">
-                        <label class="xform-label" for="admin_password">Password</label>
-                        <input class="xform-input" id="admin_password" name="admin_password" type="password" required>
-                    </div>
-                    <div class="xform-field span-2">
-                        <label class="xform-label" for="admin_password_confirm">Confirm password</label>
-                        <input class="xform-input" id="admin_password_confirm" name="admin_password_confirm" type="password" required>
-                    </div>
-                </div>
-
-                <div class="xform-actions">
-                    <button class="btn green" type="submit">Install Rescue Centre Lite</button>
-                </div>
+                <div class="install-actions"><button class="btn green" type="submit">Install Rescue Centre Lite</button></div>
             </form>
         <?php endif; ?>
     </section>
 </main>
 </body>
 </html>
-
-
