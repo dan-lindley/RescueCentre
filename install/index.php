@@ -90,6 +90,71 @@ function lite_install_sync_connect($apiUrl, array $data)
 
     return $decoded;
 }
+
+function lite_install_sync_check($apiUrl, array $data)
+{
+    $apiUrl = trim((string)$apiUrl);
+    if ($apiUrl === '') {
+        throw new RuntimeException('Hosted sync API URL is required.');
+    }
+
+    $query = http_build_query([
+        'install_id' => $data['install_id'] ?? '',
+        'centre_name' => $data['centre_name'] ?? '',
+        'centre_email' => $data['centre_email'] ?? '',
+        'admin_username' => $data['admin_username'] ?? '',
+        'admin_email' => $data['admin_email'] ?? '',
+    ]);
+    $url = $apiUrl . (strpos($apiUrl, '?') !== false ? '&' : '?') . $query;
+    $statusCode = 0;
+    $body = false;
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['Accept: application/json'],
+            CURLOPT_TIMEOUT => 12,
+        ]);
+        $body = curl_exec($ch);
+        $statusCode = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($body === false) {
+            throw new RuntimeException('Hosted check connection failed: ' . $curlError);
+        }
+    } else {
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => "Accept: application/json\r\n",
+                'timeout' => 12,
+                'ignore_errors' => true,
+            ],
+        ]);
+        $body = file_get_contents($url, false, $context);
+        if (isset($http_response_header[0]) && preg_match('/\s(\d{3})\s/', $http_response_header[0], $match)) {
+            $statusCode = (int)$match[1];
+        }
+    }
+
+    if (!is_string($body) || trim($body) === '') {
+        throw new RuntimeException('Hosted check returned an empty response.');
+    }
+
+    $decoded = json_decode($body, true);
+    if (!is_array($decoded)) {
+        throw new RuntimeException('Hosted check returned invalid JSON.');
+    }
+
+    if ($statusCode < 200 || $statusCode >= 300) {
+        throw new RuntimeException((string)($decoded['message'] ?? 'Hosted check failed.'));
+    }
+
+    return $decoded;
+}
+
 function write_config($path, array $data)
 {
     $contents = "<?php\n\n";
@@ -149,6 +214,28 @@ $assetBase = rtrim($assetBase, '/');
 $appHome = ($assetBase === '' ? '/' : $assetBase . '/');
 if ($defaults['base_url'] === '/') {
     $defaults['base_url'] = $appHome;
+}
+
+if (isset($_GET['lite_check']) && !$installed) {
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+
+    try {
+        echo json_encode(lite_install_sync_check((string)($_GET['hosted_api_url'] ?? $defaults['hosted_api_url']), [
+            'install_id' => (string)($_GET['install_id'] ?? ''),
+            'centre_name' => (string)($_GET['centre_name'] ?? ''),
+            'centre_email' => (string)($_GET['centre_email'] ?? ''),
+            'admin_username' => (string)($_GET['admin_username'] ?? ''),
+            'admin_email' => (string)($_GET['admin_email'] ?? ''),
+        ]), JSON_UNESCAPED_SLASHES);
+    } catch (Throwable $e) {
+        http_response_code(502);
+        echo json_encode([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], JSON_UNESCAPED_SLASHES);
+    }
+    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
@@ -394,7 +481,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         setStatus(which === 'centre' ? centreStatus : userStatus, 'Checking hosted Rescue Centre...', null);
 
         try {
-            const checkUrl = new URL(apiUrl.value);
+            const checkUrl = new URL(window.location.href);
+            checkUrl.search = '';
+            checkUrl.searchParams.set('lite_check', '1');
+            checkUrl.searchParams.set('hosted_api_url', apiUrl.value);
             Object.keys(payload).forEach(key => {
                 if (payload[key]) checkUrl.searchParams.set(key, payload[key]);
             });
