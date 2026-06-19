@@ -1,6 +1,7 @@
 <?php
 $configPath = __DIR__ . '/../config.php';
 $schemaPath = __DIR__ . '/../database/schema.sql';
+require_once __DIR__ . '/../core/icons.php';
 
 function h($value)
 {
@@ -171,15 +172,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
     <link rel="stylesheet" href="<?= h($assetBase . '/core/css/core.css') ?>">
     <style>
         :root { --install-bg:#071c25; --install-card:rgba(18,58,72,.92); --install-border:rgba(139,207,224,.22); --install-text:#eef8fb; --install-muted:#a7c6d0; --install-blue:#0f77a8; --install-green:#18a06d; --install-orange:#d9872b; --install-red:#d85b69; }
-        body { min-height:100vh; margin:0; background:radial-gradient(circle at top left, rgba(15,119,168,.28), transparent 34rem), radial-gradient(circle at bottom right, rgba(24,160,109,.18), transparent 30rem), var(--install-bg); color:var(--install-text); }
+        body { min-height:100vh; margin:0; background:linear-gradient(135deg, rgba(4,18,25,.88), rgba(7,28,37,.78)), url("<?= h($assetBase . '/img/june.png') ?>") center / cover fixed no-repeat; color:var(--install-text); font-family:Arial, Helvetica, sans-serif; }
         .install-shell { max-width:1180px; margin:0 auto; padding:36px 18px 48px; }
-        .install-hero { border:1px solid var(--install-border); border-radius:24px; padding:28px; margin-bottom:20px; background:linear-gradient(135deg, rgba(10,46,61,.98), rgba(10,31,42,.94)); box-shadow:0 20px 55px rgba(0,0,0,.34); display:flex; justify-content:space-between; gap:20px; align-items:center; }
+        .install-logo { width:104px; height:104px; border-radius:26px; display:grid; place-items:center; background:rgba(3,22,30,.42); border:1px solid rgba(255,255,255,.24); box-shadow:0 12px 30px rgba(0,0,0,.28); }
+        .install-logo svg { width:72px; height:72px; display:block; }
+        .install-hero { border:1px solid var(--install-border); border-radius:24px; padding:28px; margin-bottom:20px; background:linear-gradient(135deg, rgba(10,46,61,.95), rgba(10,31,42,.90)); box-shadow:0 20px 55px rgba(0,0,0,.34); display:flex; justify-content:space-between; gap:20px; align-items:center; backdrop-filter:blur(4px); }
         .install-kicker { margin:0 0 8px; color:#81d8ef; font-size:.78rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
         .install-hero h1 { margin:0; color:#fff; font-size:clamp(2rem, 4vw, 3.35rem); line-height:1; letter-spacing:-.045em; }
         .install-hero p { max-width:680px; margin:12px 0 0; color:var(--install-muted); font-size:1rem; }
-        .install-badge { min-width:118px; min-height:118px; border-radius:28px; display:grid; place-items:center; color:#fff; background:linear-gradient(135deg, #0f77a8, #18a06d); box-shadow:inset 0 0 0 1px rgba(255,255,255,.22), 0 12px 30px rgba(0,0,0,.28); font-weight:900; font-size:2rem; }
         .install-card-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:18px; }
-        .install-card { border:1px solid var(--install-border); border-radius:20px; background:var(--install-card); box-shadow:0 16px 40px rgba(0,0,0,.22); overflow:hidden; }
+        .install-card { border:1px solid var(--install-border); border-radius:20px; background:var(--install-card); box-shadow:0 16px 40px rgba(0,0,0,.22); overflow:hidden; backdrop-filter:blur(3px); }
         .install-card::before { content:""; display:block; height:6px; background:var(--accent, var(--install-blue)); }
         .install-card-inner { padding:20px; }
         .install-card h2 { margin:0 0 4px; color:#fff; font-size:1.24rem; }
@@ -192,6 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         .install-card .xform-input:focus { outline:none; border-color:rgba(129,216,239,.75); box-shadow:0 0 0 3px rgba(15,119,168,.22); }
         .install-actions { margin-top:20px; display:flex; justify-content:flex-end; }
         .install-actions .btn { min-width:220px; }
+        .install-submit { border-radius:999px; padding:12px 22px; font-weight:800; letter-spacing:.01em; box-shadow:0 12px 28px rgba(24,160,109,.28); }
         .install-alert { margin-bottom:18px; }
         @media (max-width:860px) { .install-hero { align-items:flex-start; flex-direction:column; } .install-card-grid { grid-template-columns:1fr; } }
         @media (max-width:560px) { .install-form-grid { grid-template-columns:1fr; } .install-actions .btn { width:100%; } }
@@ -205,7 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             <h1>Install Rescue Centre Lite</h1>
             <p>Create the database, centre profile and first administrator account for your local Rescue Centre install.</p>
         </div>
-        <div class="install-badge" aria-hidden="true">RC</div>
+        <div class="install-logo" aria-hidden="true"><?= rc_icon('rclogo', 72, 'install-logo-icon') ?></div>
     </section>
     <section>
         <?php if ($installed): ?>
@@ -222,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
                     <section class="install-card centre"><div class="install-card-inner"><h2>Centre</h2><p class="install-card-note">Create the single rescue centre for this Lite install.</p><div class="install-form-grid"><div class="xform-field install-field-full"><label class="xform-label" for="centre_name">Centre name</label><input class="xform-input" id="centre_name" name="centre_name" value="<?= h($defaults['centre_name']) ?>" required></div><div class="xform-field install-field-full"><label class="xform-label" for="centre_email">Centre email</label><input class="xform-input" id="centre_email" name="centre_email" type="email" value="<?= h($defaults['centre_email']) ?>"></div><div class="xform-field"><label class="xform-label" for="country_code">Country code</label><input class="xform-input" id="country_code" name="country_code" maxlength="2" value="<?= h($defaults['country_code']) ?>"></div><div class="xform-field"><label class="xform-label" for="county">County / state</label><input class="xform-input" id="county" name="county" value="<?= h($defaults['county']) ?>"></div></div></div></section>
                     <section class="install-card admin"><div class="install-card-inner"><h2>Admin user</h2><p class="install-card-note">This account will be able to manage the Lite install.</p><div class="install-form-grid"><div class="xform-field"><label class="xform-label" for="admin_first_name">First name</label><input class="xform-input" id="admin_first_name" name="admin_first_name" value="<?= h($defaults['admin_first_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="admin_last_name">Last name</label><input class="xform-input" id="admin_last_name" name="admin_last_name" value="<?= h($defaults['admin_last_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="admin_username">Username</label><input class="xform-input" id="admin_username" name="admin_username" value="<?= h($defaults['admin_username']) ?>" required></div><div class="xform-field"><label class="xform-label" for="admin_email">Email</label><input class="xform-input" id="admin_email" name="admin_email" type="email" value="<?= h($defaults['admin_email']) ?>" required></div><div class="xform-field"><label class="xform-label" for="admin_password">Password</label><input class="xform-input" id="admin_password" name="admin_password" type="password" required></div><div class="xform-field"><label class="xform-label" for="admin_password_confirm">Confirm password</label><input class="xform-input" id="admin_password_confirm" name="admin_password_confirm" type="password" required></div></div></div></section>
                 </div>
-                <div class="install-actions"><button class="btn green" type="submit">Install Rescue Centre Lite</button></div>
+                <div class="install-actions"><button class="btn green install-submit" type="submit">Install Rescue Centre Lite</button></div>
             </form>
         <?php endif; ?>
     </section>
