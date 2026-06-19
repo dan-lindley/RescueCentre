@@ -560,7 +560,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
                 <div class="install-card-grid install-step install-step-details">
                     <section class="install-card application"><div class="install-card-inner"><h2>Application</h2><p class="install-card-note">Name the local install and set its public path.</p><div class="install-form-grid"><input type="hidden" name="install_id" value="<?= h($defaults['install_id']) ?>"><div class="xform-field install-field-full"><label class="xform-label" for="app_name">Application name</label><input class="xform-input" id="app_name" name="app_name" value="<?= h($defaults['app_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="base_url">Base URL</label><input class="xform-input" id="base_url" name="base_url" value="<?= h($defaults['base_url']) ?>"></div><div class="xform-field"><label class="xform-label" for="default_language">Language</label><select class="xform-input" id="default_language" name="default_language"><?php foreach (['en' => 'English', 'es' => 'Spanish', 'de' => 'German', 'fr' => 'French', 'pl' => 'Polish'] as $code => $label): ?><option value="<?= h($code) ?>" <?= $defaults['default_language'] === $code ? 'selected' : '' ?>><?= h($label) ?></option><?php endforeach; ?></select></div><div class="xform-field install-field-full"><label class="xform-label" for="hosted_api_url">Hosted sync API URL</label><input class="xform-input" id="hosted_api_url" name="hosted_api_url" value="<?= h($defaults['hosted_api_url']) ?>" required></div></div></div></section>
                     <section class="install-card database"><div class="install-card-inner"><h2>Database</h2><p class="install-card-note">Use the MySQL database and user created in cPanel.</p><div class="install-form-grid"><div class="xform-field"><label class="xform-label" for="db_host">Host</label><input class="xform-input" id="db_host" name="db_host" value="<?= h($defaults['db_host']) ?>" required></div><div class="xform-field"><label class="xform-label" for="db_name">Database</label><input class="xform-input" id="db_name" name="db_name" value="<?= h($defaults['db_name']) ?>" required></div><div class="xform-field"><label class="xform-label" for="db_user">User</label><input class="xform-input" id="db_user" name="db_user" value="<?= h($defaults['db_user']) ?>" required></div><div class="xform-field"><label class="xform-label" for="db_pass">Password</label><input class="xform-input" id="db_pass" name="db_pass" type="password" value="<?= h($defaults['db_pass']) ?>"></div></div></div></section>
-                    <section class="install-card centre"><div class="install-card-inner"><h2>Centre</h2><p class="install-card-note">Create a new hosted centre, or sign in with an existing hosted account to link an existing centre.</p><div class="install-form-grid"><div class="xform-field install-field-full"><label class="xform-label" for="centre_name">Centre name</label><input class="xform-input" id="centre_name" name="centre_name" value="<?= h($defaults['centre_name']) ?>" required></div><div class="xform-field install-field-full"><label class="xform-label" for="centre_email">Centre email</label><input class="xform-input" id="centre_email" name="centre_email" type="email" value="<?= h($defaults['centre_email']) ?>"></div><div class="xform-field"><label class="xform-label" for="country_code">Country code</label><input class="xform-input" id="country_code" name="country_code" maxlength="2" value="<?= h($defaults['country_code']) ?>"></div><div class="xform-field"><label class="xform-label" for="county">County / state</label><input class="xform-input" id="county" name="county" value="<?= h($defaults['county']) ?>"></div><div class="xform-field account-credential-field" style="display:none;"><label class="xform-label" for="admin_email">Account email</label><input class="xform-input" id="admin_email" name="admin_email" type="email" value="<?= h($defaults['admin_email']) ?>" required></div><div class="xform-field account-credential-field" style="display:none;"><label class="xform-label" for="admin_password">Account password</label><input class="xform-input" id="admin_password" name="admin_password" type="password" required></div><div class="xform-field install-field-full account-confirm-field" style="display:none;"><label class="xform-label" for="admin_password_confirm">Confirm password</label><input class="xform-input" id="admin_password_confirm" name="admin_password_confirm" type="password" required></div><div class="xform-field install-field-full hosted-auth-action" style="display:none;"><button class="btn blue" type="button" id="hosted_auth_button">Authenticate hosted account</button></div><div id="centre_check_status" class="install-card-status">Centre name will be checked against hosted Rescue Centre.</div><div id="user_check_status" class="install-card-status" style="display:none;">Account details will appear after choosing a setup type.</div></div></div></section>
+                    <section class="install-card centre"><div class="install-card-inner"><h2>Centre</h2><p class="install-card-note">Create a new hosted centre, or sign in with an existing hosted account to link an existing centre.</p><div class="install-form-grid"><div class="xform-field install-field-full centre-profile-field"><label class="xform-label" for="centre_name">Centre name</label><input class="xform-input" id="centre_name" name="centre_name" value="<?= h($defaults['centre_name']) ?>" required></div><div class="xform-field install-field-full centre-profile-field"><label class="xform-label" for="centre_email">Centre email</label><input class="xform-input" id="centre_email" name="centre_email" type="email" value="<?= h($defaults['centre_email']) ?>"></div><div class="xform-field centre-profile-field"><label class="xform-label" for="country_code">Country code</label><input class="xform-input" id="country_code" name="country_code" maxlength="2" value="<?= h($defaults['country_code']) ?>"></div><div class="xform-field centre-profile-field"><label class="xform-label" for="county">County / state</label><input class="xform-input" id="county" name="county" value="<?= h($defaults['county']) ?>"></div><div class="xform-field account-email-field" style="display:none;"><label class="xform-label" for="admin_email">Username or email</label><input class="xform-input" id="admin_email" name="admin_email" type="email" value="<?= h($defaults['admin_email']) ?>" required></div><div class="xform-field account-password-field" style="display:none;"><label class="xform-label" for="admin_password">Password</label><input class="xform-input" id="admin_password" name="admin_password" type="password" required></div><div class="xform-field install-field-full account-confirm-field" style="display:none;"><label class="xform-label" for="admin_password_confirm">Confirm password</label><input class="xform-input" id="admin_password_confirm" name="admin_password_confirm" type="password" required></div><div class="xform-field install-field-full hosted-auth-action" style="display:none;"><button class="btn blue" type="button" id="hosted_auth_button">Authenticate hosted account</button></div><div id="centre_check_status" class="install-card-status">Centre name will be checked against hosted Rescue Centre.</div><div id="user_check_status" class="install-card-status" style="display:none;">Account details will appear after choosing a setup type.</div></div></div></section>
                     <section class="install-card admin"><div class="install-card-inner"><h2>Local Lite user</h2><p class="install-card-note">This creates the first local account for this Lite install. Existing hosted centres are linked using the hosted login in the Centre card.</p><div class="install-form-grid"><div class="xform-field"><label class="xform-label" for="admin_first_name">First name</label><input class="xform-input" id="admin_first_name" name="admin_first_name" value="<?= h($defaults['admin_first_name']) ?>"></div><div class="xform-field"><label class="xform-label" for="admin_last_name">Last name</label><input class="xform-input" id="admin_last_name" name="admin_last_name" value="<?= h($defaults['admin_last_name']) ?>"></div><div class="xform-field install-field-full"><label class="xform-label" for="admin_username">Local username</label><input class="xform-input" id="admin_username" name="admin_username" value="<?= h($defaults['admin_username']) ?>" required></div><div class="xform-field install-field-full"><label><input type="checkbox" name="download_hosted_data" value="1" <?= $defaults['download_hosted_data'] === '1' ? 'checked' : '' ?>> Offer hosted data download after install</label></div></div></div></section>
                 </div>
                 <div class="install-actions"><button class="btn blue install-back" type="button" style="display:none;">Back</button><button class="btn green install-next" type="button">Next</button><button class="btn green install-submit" type="submit" style="display:none;">Install Rescue Centre Lite</button></div>
@@ -590,7 +590,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
     const submitButton = document.querySelector('.install-submit');
     const centreStatus = document.getElementById('centre_check_status');
     const userStatus = document.getElementById('user_check_status');
-    const accountCredentialFields = Array.from(document.querySelectorAll('.account-credential-field'));
+    const accountEmailFields = Array.from(document.querySelectorAll('.account-email-field'));
+    const accountPasswordFields = Array.from(document.querySelectorAll('.account-password-field'));
+    const centreProfileFields = Array.from(document.querySelectorAll('.centre-profile-field'));
     const accountConfirmFields = Array.from(document.querySelectorAll('.account-confirm-field'));
     const hostedAuthActions = Array.from(document.querySelectorAll('.hosted-auth-action'));
     const hostedAuthButton = document.getElementById('hosted_auth_button');
@@ -611,21 +613,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
     }
 
     function setAccountFields(options) {
-        const showCredentials = !!options.showCredentials;
+        const showEmail = !!options.showEmail;
+        const showPassword = !!options.showPassword;
         const showConfirm = !!options.showConfirm;
         const showAuthButton = !!options.showAuthButton;
-        const requireCredentials = !!options.requireCredentials;
+        const requireEmail = !!options.requireEmail;
+        const requirePassword = !!options.requirePassword;
         const requireConfirm = !!options.requireConfirm;
+        const readonlyEmail = !!options.readonlyEmail;
 
         hostedAuthNeeded = showAuthButton;
-        accountCredentialFields.forEach(el => { el.style.display = showCredentials ? '' : 'none'; });
+        accountEmailFields.forEach(el => { el.style.display = showEmail ? '' : 'none'; });
+        accountPasswordFields.forEach(el => { el.style.display = showPassword ? '' : 'none'; });
         accountConfirmFields.forEach(el => { el.style.display = showConfirm ? '' : 'none'; });
         hostedAuthActions.forEach(el => { el.style.display = showAuthButton ? '' : 'none'; });
-        if (userStatus) userStatus.style.display = (showCredentials || showConfirm || showAuthButton) ? '' : 'none';
-        if (adminEmail) adminEmail.required = requireCredentials;
-        if (adminPassword) adminPassword.required = requireCredentials;
+        if (userStatus) userStatus.style.display = (showEmail || showPassword || showConfirm || showAuthButton) ? '' : 'none';
+        if (adminEmail) { adminEmail.required = requireEmail; adminEmail.readOnly = readonlyEmail; }
+        if (adminPassword) adminPassword.required = requirePassword;
         if (adminPasswordConfirm) adminPasswordConfirm.required = requireConfirm;
-        if (!showAuthButton) hostedAuthenticated = false;
+
+    }
+
+    function setCentreProfileVisible(visible, readonly) {
+        centreProfileFields.forEach(el => { el.style.display = visible ? '' : 'none'; });
+        [centreName, centreEmail, form.querySelector('[name="country_code"]'), form.querySelector('[name="county"]')].forEach(el => {
+            if (el) el.readOnly = !!readonly;
+        });
+    }
+
+    function setLocalUserReadonly(readonly) {
+        [adminUsername, form.querySelector('[name="admin_first_name"]'), form.querySelector('[name="admin_last_name"]')].forEach(el => {
+            if (el) el.readOnly = !!readonly;
+        });
+    }
+
+    function applyHostedDetails(data) {
+        const centre = data && data.centre ? data.centre : {};
+        const account = data && data.account ? data.account : {};
+        if (centreName) centreName.value = centre.rescue_name || '';
+        if (centreEmail) centreEmail.value = centre.email || '';
+        const countryCode = form.querySelector('[name="country_code"]');
+        const county = form.querySelector('[name="county"]');
+        if (countryCode) countryCode.value = centre.country_code || countryCode.value || 'GB';
+        if (county) county.value = centre.county || '';
+        if (adminUsername) adminUsername.value = account.username || adminUsername.value || '';
+        if (adminEmail && account.email) adminEmail.value = account.email;
+        const firstName = form.querySelector('[name="admin_first_name"]');
+        const lastName = form.querySelector('[name="admin_last_name"]');
+        if (firstName) firstName.value = account.first_name || '';
+        if (lastName) lastName.value = account.last_name || '';
     }
 
     function setInstallMode(mode) {
@@ -655,29 +691,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         if (step === 'auth') {
             if (centreCard) centreCard.classList.add('is-stage-visible');
             if (currentMode === 'existing') {
-                setAccountFields({ showCredentials: true, showConfirm: false, showAuthButton: true, requireCredentials: true, requireConfirm: false });
-                setStatus(centreStatus, 'Sign in with a hosted account for this centre.', 'is-warn');
-                setStatus(userStatus, 'Authenticate before continuing.', 'is-warn');
+                setCentreProfileVisible(false, false);
+                setLocalUserReadonly(false);
+                setAccountFields({ showEmail: true, showPassword: true, showConfirm: false, showAuthButton: true, requireEmail: true, requirePassword: true, requireConfirm: false });
+                setStatus(centreStatus, 'Sign in using your hosted Rescue Centre username/email and password.', 'is-warn');
+                setStatus(userStatus, 'Authenticate before continuing. Centre details will be pulled from hosted Rescue Centre.', 'is-warn');
                 if (nextButton) nextButton.style.display = 'none';
             } else {
-                setAccountFields({ showCredentials: true, showConfirm: true, showAuthButton: false, requireCredentials: true, requireConfirm: true });
-                setStatus(centreStatus, 'Register a new Rescue Centre account. This enables sync and cloud backup.', 'is-ok');
+                setCentreProfileVisible(true, false);
+                setLocalUserReadonly(false);
+                setAccountFields({ showEmail: true, showPassword: true, showConfirm: true, showAuthButton: false, requireEmail: true, requirePassword: true, requireConfirm: true });
+                setStatus(centreStatus, 'Create the hosted centre/account details for sync and cloud backup.', 'is-ok');
                 setStatus(userStatus, 'Enter account email/password to create during install.', 'is-ok');
             }
         } else if (step === 'confirm') {
             if (centreCard) centreCard.classList.add('is-stage-visible');
             if (adminCard) adminCard.classList.add('is-stage-visible');
-            setAccountFields({ showCredentials: true, showConfirm: true, showAuthButton: false, requireCredentials: true, requireConfirm: true });
+            setCentreProfileVisible(true, currentMode === 'existing');
+            setLocalUserReadonly(currentMode === 'existing');
+            if (currentMode === 'existing') {
+                setAccountFields({ showEmail: true, showPassword: false, showConfirm: false, showAuthButton: false, requireEmail: false, requirePassword: false, requireConfirm: false, readonlyEmail: true });
+            } else {
+                setAccountFields({ showEmail: true, showPassword: true, showConfirm: true, showAuthButton: false, requireEmail: true, requirePassword: true, requireConfirm: true });
+            }
             setStatus(centreStatus, currentMode === 'local'
-                ? 'Confirm local centre details. This install will use centre ID -1 until hosted sync is enabled later.'
-                : 'Confirm centre details before entering local install fields.', currentMode === 'local' ? 'is-warn' : 'is-ok');
-            setStatus(userStatus, currentMode === 'local'
-                ? 'Enter the local account email/password and local username.'
-                : 'Confirm the local Lite username for this install.', 'is-ok');
+                ? 'Enter and confirm local centre details. This install will use centre ID -1 until hosted sync is enabled later.'
+                : 'Confirm the centre details before entering local install fields.', currentMode === 'local' ? 'is-warn' : 'is-ok');
+            setStatus(userStatus, currentMode === 'existing'
+                ? 'Hosted user details have been pulled from Rescue Centre.'
+                : 'Confirm the local Lite user details for this install.', 'is-ok');
         } else if (step === 'install') {
             if (applicationCard) applicationCard.classList.add('is-stage-visible');
             if (databaseCard) databaseCard.classList.add('is-stage-visible');
-            setAccountFields({ showCredentials: false, showConfirm: false, showAuthButton: false, requireCredentials: false, requireConfirm: false });
+            setCentreProfileVisible(false, false);
+            setLocalUserReadonly(false);
+            setAccountFields({ showEmail: false, showPassword: false, showConfirm: false, showAuthButton: false, requireEmail: false, requirePassword: false, requireConfirm: false });
         }
     }
 
@@ -731,11 +779,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             if (which === 'centre') {
                 if (data.centre_available) {
                     setStatus(centreStatus, 'Centre name looks available and can be created on hosted Rescue Centre.', 'is-ok');
-                    setAccountFields({ showCredentials: true, showConfirm: true, showAuthButton: false, requireCredentials: true, requireConfirm: true });
+                    setAccountFields({ showEmail: true, showPassword: true, showConfirm: true, showAuthButton: false, requireEmail: true, requirePassword: true, requireConfirm: true });
                     setStatus(userStatus, 'Enter the hosted account details to create/link this new centre during install.', 'is-ok');
                 } else {
                     setStatus(centreStatus, 'Centre already exists on hosted Rescue Centre. Sign in with a hosted account for that centre before installing.', 'is-warn');
-                    setAccountFields({ showCredentials: true, showConfirm: false, showAuthButton: true, requireCredentials: true, requireConfirm: false });
+                    setAccountFields({ showEmail: true, showPassword: true, showConfirm: false, showAuthButton: true, requireEmail: true, requirePassword: true, requireConfirm: false });
                     hostedAuthenticated = false;
                     setStatus(userStatus, 'Enter hosted account email/password, then authenticate before installing.', 'is-warn');
                 }
@@ -755,7 +803,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
     }
 
     async function authenticateHosted() {
-        if (!apiUrl || !installId || !centreName || !adminEmail || !adminPassword) return;
+        if (!apiUrl || !installId || !adminEmail || !adminPassword) return;
         setStatus(userStatus, 'Authenticating hosted account...', null);
         try {
             const authUrl = new URL(window.location.href);
@@ -767,8 +815,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
                 body: JSON.stringify({
                     hosted_api_url: apiUrl.value,
                     install_id: installId.value,
-                    centre_name: centreName.value.trim(),
-                    centre_email: centreEmail ? centreEmail.value.trim() : '',
                     admin_email: adminEmail.value.trim(),
                     admin_password: adminPassword.value
                 })
@@ -776,6 +822,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             const data = await response.json();
             if (data.status !== 'authenticated') throw new Error(data.message || 'Hosted authentication failed.');
             hostedAuthenticated = true;
+            applyHostedDetails(data);
             if (adminPasswordConfirm) adminPasswordConfirm.value = adminPassword.value;
             setStatus(userStatus, 'Hosted account authenticated. You can now install and link this centre.', 'is-ok');
             setStep('confirm');
@@ -785,8 +832,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         }
     }
 
-    const checkCentre = debounce(function () { checkHosted('centre'); }, 450);
-    [centreName, centreEmail].forEach(el => { if (el) { el.addEventListener('input', checkCentre); el.addEventListener('blur', checkCentre); } });
     if (hostedAuthButton) hostedAuthButton.addEventListener('click', authenticateHosted);
     modeButtons.forEach(button => {
         button.addEventListener('click', function () {
@@ -797,7 +842,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         nextButton.addEventListener('click', function () {
             if (currentStep === 'mode') {
                 setStep(currentMode === 'local' ? 'confirm' : 'auth');
-                if (currentMode === 'existing') checkHosted('centre');
                 return;
             }
             if (currentStep === 'auth') {
