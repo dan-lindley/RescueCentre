@@ -396,7 +396,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         try {
             const response = await fetch(apiUrl.value, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                headers: { 'Content-Type': 'text/plain;charset=UTF-8', 'Accept': 'application/json' },
                 body: JSON.stringify(payload)
             });
             const data = await response.json();
@@ -418,7 +418,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
                 }
             }
         } catch (error) {
-            setStatus(which === 'centre' ? centreStatus : userStatus, error.message || 'Hosted check failed.', 'is-error');
+            const detail = error && error.message ? error.message : 'Hosted check failed.';
+            setStatus(which === 'centre' ? centreStatus : userStatus, detail + ' Check the hosted API URL: ' + apiUrl.value, 'is-error');
         }
     }
 
