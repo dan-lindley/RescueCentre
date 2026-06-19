@@ -145,7 +145,10 @@ function lite_install_sync_check($apiUrl, array $data)
 
     $decoded = json_decode($body, true);
     if (!is_array($decoded)) {
-        throw new RuntimeException('Hosted check returned invalid JSON.');
+        $preview = trim(strip_tags((string)$body));
+        $preview = preg_replace('/\s+/', ' ', $preview);
+        $preview = substr((string)$preview, 0, 180);
+        throw new RuntimeException('Hosted check returned invalid JSON' . ($preview !== '' ? ': ' . $preview : '.'));
     }
 
     if ($statusCode < 200 || $statusCode >= 300) {
