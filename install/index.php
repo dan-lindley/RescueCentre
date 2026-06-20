@@ -801,6 +801,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         }
     }
 
+    async function checkRegisterUsername() {
+        if (!window.fetch || !apiUrl || !installId || !adminUsername) return true;
+        if (currentMode !== 'new' || currentStep !== 'register') return true;
+        const username = adminUsername.value.trim();
+        lastCheckedUsername = username;
+        lastUsernameAvailable = null;
+        if (!username) {
+            setStatus(userStatus, 'Enter a username to check availability.', 'is-warn');
+            return false;
+        }
+        setStatus(userStatus, 'Checking username availability...', null);
+        try {
+            const checkUrl = new URL(window.location.href);
+            checkUrl.search = '';
+            checkUrl.searchParams.set('lite_check', '1');
+            checkUrl.searchParams.set('hosted_api_url', apiUrl.value);
+            checkUrl.searchParams.set('install_id', installId.value);
+            checkUrl.searchParams.set('admin_username', username);
+            const response = await fetch(checkUrl.toString(), { method: 'GET', headers: { 'Accept': 'application/json' } });
+            const data = await response.json();
+            if (data.status !== 'checked') throw new Error(data.message || 'Hosted check failed.');
+            lastUsernameAvailable = data.username_available !== false;
+            if (!lastUsernameAvailable) {
+                setStatus(userStatus, 'That username is already in use. Choose another username.', 'is-error');
+                return false;
+            }
+            setStatus(userStatus, 'Username is available.', 'is-ok');
+            return true;
+        } catch (error) {
+            lastUsernameAvailable = null;
+            setStatus(userStatus, (error && error.message ? error.message : 'Hosted username check failed.'), 'is-error');
+            return false;
+        }
+    }
     async function checkRegisterAccount() {
         if (!window.fetch || !apiUrl || !installId || !adminUsername || !adminEmail) return true;
         const username = adminUsername.value.trim();
@@ -877,7 +911,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             setAccountFields('register');
             setCentreView('form');
             if (nextButton) nextButton.style.display = '';
-            setStatus(userStatus, 'Create your hosted Rescue Centre user first.', 'is-ok');
+            setStatus(userStatus, 'Type a username to check availability.', 'is-warn');
             return;
         }
 
@@ -949,6 +983,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             hostedAuthenticated = false;
             setStatus(userStatus, (error && error.message ? error.message : 'Hosted authentication failed.'), 'is-error');
         }
+    }
+
+    if (adminUsername) {
+        adminUsername.addEventListener('input', function () {
+            if (currentMode !== 'new' || currentStep !== 'register') return;
+            lastUsernameAvailable = null;
+            clearTimeout(usernameCheckTimer);
+            usernameCheckTimer = setTimeout(checkRegisterUsername, 450);
+        });
+        adminUsername.addEventListener('blur', function () {
+            if (currentMode === 'new' && currentStep === 'register') checkRegisterUsername();
+        });
     }
 
     if (authButton) authButton.addEventListener('click', authenticateHosted);
