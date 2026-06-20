@@ -504,6 +504,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         .install-card-note { margin:0 0 16px; color:var(--install-muted); font-size:.92rem; }
         .install-card.application { --accent:var(--install-blue); } .install-card.database { --accent:var(--install-green); } .install-card.centre { --accent:var(--install-orange); } .install-card.admin { --accent:var(--install-red); }
         .install-form-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
+        .install-password-row { display:grid; grid-template-columns:minmax(0, 1fr) auto auto; gap:10px; align-items:center; }
+        .install-password-row .btn { min-width:auto; white-space:nowrap; }
+        .install-password-note { margin:8px 0 0; color:#ffe7a3; font-size:.88rem; line-height:1.35; }
         .install-field-full { grid-column:1 / -1; }
         .install-card .xform-label { color:#d9eef4; font-weight:700; }
         .install-card .xform-input, .install-card select.xform-input { width:100%; box-sizing:border-box; background:rgba(5,22,30,.78); color:#f5fbfd; border:1px solid rgba(151,210,225,.24); }
@@ -625,7 +628,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
                                 <div class="xform-field"><label class="xform-label" for="db_host">Host</label><input class="xform-input" id="db_host" name="db_host" value="<?= h($defaults['db_host']) ?>" required></div>
                                 <div class="xform-field"><label class="xform-label" for="db_name">Database</label><input class="xform-input" id="db_name" name="db_name" value="<?= h($defaults['db_name']) ?>" required></div>
                                 <div class="xform-field"><label class="xform-label" for="db_user">User</label><input class="xform-input" id="db_user" name="db_user" value="<?= h($defaults['db_user']) ?>" required></div>
-                                <div class="xform-field"><label class="xform-label" for="db_pass">Password</label><input class="xform-input" id="db_pass" name="db_pass" type="password" value="<?= h($defaults['db_pass']) ?>"></div>
+                                <div class="xform-field install-field-full"><label class="xform-label" for="db_pass">Password</label><div class="install-password-row"><input class="xform-input" id="db_pass" name="db_pass" type="text" value="<?= h($defaults['db_pass']) ?>"><button class="btn blue" type="button" id="generate_db_password">Generate</button><button class="btn green" type="button" id="copy_db_password">Copy</button></div><p class="install-password-note">Copy this password and store it somewhere safe before continuing. You may need it for database access or future maintenance.</p><div id="db_password_status" class="install-card-status" style="display:none;"></div></div>
                             </div>
                         </div>
                     </section>
@@ -652,6 +655,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
     const nextButton = document.querySelector('.install-next');
     const submitButton = document.querySelector('.install-submit');
     const localWarning = document.querySelector('.install-local-warning');
+    const dbPassword = form.querySelector('[name="db_pass"]');
+    const generateDbPasswordButton = document.getElementById('generate_db_password');
+    const copyDbPasswordButton = document.getElementById('copy_db_password');
+    const dbPasswordStatus = document.getElementById('db_password_status');
 
     const accountCard = document.querySelector('.install-account-card');
     const centreCard = document.querySelector('.install-card.centre');
@@ -685,6 +692,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
     let currentMode = installMode ? installMode.value || 'existing' : 'existing';
     let currentStep = 'mode';
     let hostedAuthenticated = false;
+    let usernameCheckTimer = null;
+    let lastCheckedUsername = '';
+    let lastUsernameAvailable = null;
 
     function setStatus(el, message, state) {
         if (!el) return;
@@ -956,6 +966,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         }
     }
 
+    function generatePassword(length) {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!#%*-_=+?';
+        const bytes = new Uint32Array(length);
+        if (window.crypto && window.crypto.getRandomValues) {
+            window.crypto.getRandomValues(bytes);
+        } else {
+            for (let i = 0; i < length; i++) bytes[i] = Math.floor(Math.random() * chars.length);
+        }
+        let password = '';
+        for (let i = 0; i < length; i++) password += chars[bytes[i] % chars.length];
+        return password;
+    }
+
+    function setDbPasswordStatus(message, state) {
+        if (!dbPasswordStatus) return;
+        dbPasswordStatus.style.display = '';
+        setStatus(dbPasswordStatus, message, state);
+    }
+
+    async function copyDbPassword() {
+        if (!dbPassword || !dbPassword.value) {
+            setDbPasswordStatus('Generate or enter a database password before copying.', 'is-warn');
+            return;
+        }
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(dbPassword.value);
+            } else {
+                dbPassword.focus();
+                dbPassword.select();
+                document.execCommand('copy');
+            }
+            setDbPasswordStatus('Database password copied. Store it somewhere safe before continuing.', 'is-ok');
+        } catch (error) {
+            setDbPasswordStatus('Copy failed. Select the password and copy it manually.', 'is-error');
+        }
+    }
     async function authenticateHosted() {
         if (!window.fetch || !apiUrl || !installId || !adminEmail || !adminPassword) return;
         setStatus(userStatus, 'Authenticating hosted account...', null);
@@ -996,6 +1043,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             if (currentMode === 'new' && currentStep === 'register') checkRegisterUsername();
         });
     }
+
+    if (generateDbPasswordButton) {
+        generateDbPasswordButton.addEventListener('click', function () {
+            if (dbPassword) dbPassword.value = generatePassword(24);
+            setDbPasswordStatus('Password generated. Copy it and keep it safe before continuing.', 'is-warn');
+        });
+    }
+    if (copyDbPasswordButton) copyDbPasswordButton.addEventListener('click', copyDbPassword);
 
     if (authButton) authButton.addEventListener('click', authenticateHosted);
     modeButtons.forEach(button => {
