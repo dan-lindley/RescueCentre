@@ -624,7 +624,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
                     <section class="install-card database">
                         <div class="install-card-inner">
                             <h2>Database</h2>
-                            <p class="install-card-note">Use the MySQL database and user created in cPanel.</p>
+                            <p class="install-card-note">Before continuing, create a MySQL database and database user in your hosting control panel, assign the user to the database with privileges, then enter those credentials here.</p>
                             <div class="install-form-grid">
                                 <div class="xform-field"><label class="xform-label" for="db_host">Host</label><input class="xform-input" id="db_host" name="db_host" value="<?= h($defaults['db_host']) ?>" required></div>
                                 <div class="xform-field"><label class="xform-label" for="db_name">Database</label><input class="xform-input" id="db_name" name="db_name" value="<?= h($defaults['db_name']) ?>" required></div>
