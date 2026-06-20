@@ -770,9 +770,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         updateCentreSummary();
     }
 
+    function clearAccountFields() {
+        [adminUsername, adminEmail, adminPassword, adminPasswordConfirm, firstName, lastName].forEach(el => {
+            if (el) el.value = '';
+        });
+    }
+
+    function clearCentreFields() {
+        [centreName, centreEmail, county].forEach(el => {
+            if (el) el.value = '';
+        });
+        if (countryCode) countryCode.value = 'GB';
+        updateCentreSummary();
+    }
+
+    function resetForMode(mode) {
+        if (mode === 'new') {
+            clearAccountFields();
+            clearCentreFields();
+            hostedAuthenticated = false;
+            setStatus(userStatus, 'Enter a new username and email. We will check availability before centre setup.', 'is-warn');
+        } else if (mode === 'local') {
+            clearAccountFields();
+            clearCentreFields();
+            hostedAuthenticated = false;
+        } else {
+            clearAccountFields();
+            clearCentreFields();
+            hostedAuthenticated = false;
+        }
+    }
+
+    async function checkRegisterAccount() {
+        if (!window.fetch || !apiUrl || !installId || !adminUsername || !adminEmail) return true;
+        const username = adminUsername.value.trim();
+        const email = adminEmail.value.trim();
+        if (!username || !email) {
+            setStatus(userStatus, 'Enter a username and email before continuing.', 'is-error');
+            return false;
+        }
+        setStatus(userStatus, 'Checking username and email availability...', null);
+        try {
+            const checkUrl = new URL(window.location.href);
+            checkUrl.search = '';
+            checkUrl.searchParams.set('lite_check', '1');
+            checkUrl.searchParams.set('hosted_api_url', apiUrl.value);
+            checkUrl.searchParams.set('install_id', installId.value);
+            checkUrl.searchParams.set('admin_username', username);
+            checkUrl.searchParams.set('admin_email', email);
+            const response = await fetch(checkUrl.toString(), { method: 'GET', headers: { 'Accept': 'application/json' } });
+            const data = await response.json();
+            if (data.status !== 'checked') throw new Error(data.message || 'Hosted check failed.');
+            if (data.user_requires_login) {
+                setStatus(userStatus, 'That email is already registered. Use Sign in or choose another email.', 'is-error');
+                return false;
+            }
+            if (data.username_available === false) {
+                setStatus(userStatus, 'That username is already in use. Choose another username.', 'is-error');
+                return false;
+            }
+            setStatus(userStatus, 'Username and email look available.', 'is-ok');
+            return true;
+        } catch (error) {
+            setStatus(userStatus, (error && error.message ? error.message : 'Hosted check failed.'), 'is-error');
+            return false;
+        }
+    }
+
     function setInstallMode(mode) {
+        const changed = currentMode !== mode;
         currentMode = mode;
-        hostedAuthenticated = false;
+        if (changed) resetForMode(mode);
         if (installMode) installMode.value = mode;
         modeButtons.forEach(button => button.classList.toggle('is-active', button.dataset.installMode === mode));
     }
@@ -891,13 +959,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
     });
 
     if (nextButton) {
-        nextButton.addEventListener('click', function () {
+        nextButton.addEventListener('click', async function () {
             if (currentStep === 'mode') {
                 if (currentMode === 'existing') return setStep('signin');
                 if (currentMode === 'new') return setStep('register');
                 return setStep('local');
             }
-            if (currentStep === 'register') return setStep('centre');
+            if (currentStep === 'register') {
+                if (await checkRegisterAccount()) return setStep('centre');
+                return;
+            }
             if (currentStep === 'centre' || currentStep === 'centre_confirm') return setStep('install');
         });
     }
