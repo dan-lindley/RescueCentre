@@ -380,7 +380,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             if (!is_string($schema) || trim($schema) === '') {
                 throw new RuntimeException('database/schema.sql is empty.');
             }
-            $pdo->exec($schema);
+            $schema = preg_replace('/^\xEF\xBB\xBF/', '', $schema);
+            $schema = preg_replace('/^\x{FEFF}/u', '', (string)$schema);
+            $pdo->exec((string)$schema);
 
             if ($syncEnabled) {
                 try {

@@ -1,4 +1,4 @@
-﻿-- Rescue Centre Lite schema
+-- Rescue Centre Lite schema
 -- Multi-user, single-centre local install.
 -- Install-safe: creates missing tables only.
 
