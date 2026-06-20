@@ -504,9 +504,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
         .install-card-note { margin:0 0 16px; color:var(--install-muted); font-size:.92rem; }
         .install-card.application { --accent:var(--install-blue); } .install-card.database { --accent:var(--install-green); } .install-card.centre { --accent:var(--install-orange); } .install-card.admin { --accent:var(--install-red); }
         .install-form-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
-        .install-password-actions { display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+        .install-password-actions { display:flex; gap:10px; align-items:center; justify-content:flex-start; flex-wrap:wrap; }
         .install-password-actions .btn { min-width:auto; white-space:nowrap; }
-        .install-password-note { margin:8px 0 0; color:#ffe7a3; font-size:.88rem; line-height:1.35; }
+        .install-password-spacer { min-height:1px; }
+        .install-password-note { margin:0; color:#ffe7a3; font-size:.88rem; line-height:1.35; }
         .install-field-full { grid-column:1 / -1; }
         .install-card .xform-label { color:#d9eef4; font-weight:700; }
         .install-card .xform-input, .install-card select.xform-input { width:100%; box-sizing:border-box; background:rgba(5,22,30,.78); color:#f5fbfd; border:1px solid rgba(151,210,225,.24); }
@@ -628,7 +629,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
                                 <div class="xform-field"><label class="xform-label" for="db_host">Host</label><input class="xform-input" id="db_host" name="db_host" value="<?= h($defaults['db_host']) ?>" required></div>
                                 <div class="xform-field"><label class="xform-label" for="db_name">Database</label><input class="xform-input" id="db_name" name="db_name" value="<?= h($defaults['db_name']) ?>" required></div>
                                 <div class="xform-field"><label class="xform-label" for="db_user">User</label><input class="xform-input" id="db_user" name="db_user" value="<?= h($defaults['db_user']) ?>" required></div>
-                                <div class="xform-field install-field-full"><label class="xform-label" for="db_pass">Password</label><input class="xform-input" id="db_pass" name="db_pass" type="text" value="<?= h($defaults['db_pass']) ?>"><div class="install-password-actions"><button class="btn blue" type="button" id="generate_db_password">Generate</button><button class="btn green" type="button" id="copy_db_password">Copy</button></div><p class="install-password-note">Copy this password and store it somewhere safe before continuing. You may need it for database access or future maintenance.</p><div id="db_password_status" class="install-card-status" style="display:none;"></div></div>
+                                <div class="xform-field"><label class="xform-label" for="db_pass">Password</label><input class="xform-input" id="db_pass" name="db_pass" type="text" value="<?= h($defaults['db_pass']) ?>"></div>
+                                <div class="install-password-spacer" aria-hidden="true"></div><div class="install-password-actions"><button class="btn blue" type="button" id="generate_db_password">Generate</button><button class="btn green" type="button" id="copy_db_password">Copy</button></div>
+                                <div class="install-field-full"><p class="install-password-note">Copy this password and store it somewhere safe before continuing. You may need it for database access or future maintenance.</p><div id="db_password_status" class="install-card-status" style="display:none;"></div></div>
                             </div>
                         </div>
                     </section>
