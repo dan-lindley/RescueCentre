@@ -1,38 +1,21 @@
+Options -Indexes
 
-# BEGIN WordPress
-# The directives (lines) between "BEGIN WordPress" and "END WordPress" are
-# dynamically generated, and should only be modified via WordPress filters.
-# Any changes to the directives between these markers will be overwritten.
-RewriteCond %{REQUEST_FILENAME} -s
-RewriteCond %{HTTP_USER_AGENT} !facebookexternalhit/[0-9]
-RewriteCond %{HTTP_USER_AGENT} !Twitterbot/[0-9]
-RewriteCond %{HTTP_USER_AGENT} !Googlebot/[0-9]
-RewriteRule wp-content/uploads/wp-import-export-lite(\/[A-Za-z0-9_@.\/&+-]+)+\.([A-Za-z0-9_@.\/&+-]+)$ [L]
 <IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-RewriteBase /
-# Allow centre_profile.php
-RewriteCond %{REQUEST_URI} !^/rescue/centre_profile\.php$
+    RewriteEngine On
 
-# All other non-index.php requests route to index.php
-RewriteRule !^index\.php$ index.php [L]
+    # Preserve Authorization headers for API/login requests.
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.php [L]
+    # Never rewrite real files or directories. This keeps CSS, JS, images,
+    # uploads, and install assets loading normally.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Route friendly URLs to front controller only when no real file exists.
+    RewriteRule ^ index.php [L]
 </IfModule>
 
-
-# END WordPress
-# BEGIN LiteSpeed
-# The directives (lines) between "BEGIN LiteSpeed" and "END LiteSpeed" are
-# dynamically generated, and should only be modified via WordPress filters.
-# Any changes to the directives between these markers will be overwritten.
-<IfModule Litespeed>
-SetEnv noabort 1
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
 </IfModule>
-# END LiteSpeed
-# php -- BEGIN cPanel-generated handler, do not edit
-# This domain inherits the “PHP” package.
-# php -- END cPanel-generated handler, do not edit

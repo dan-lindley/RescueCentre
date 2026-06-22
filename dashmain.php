@@ -351,7 +351,8 @@ $lang_dropdown = '
         : '';
     // Indenting the below code may cause an error
 //CSS versioning
-$css_version = filemtime(__DIR__ . '/admin/admin.css');
+$admin_shell_css_path = __DIR__ . '/core/css/admin-shell.css';
+$css_version = is_file($admin_shell_css_path) ? filemtime($admin_shell_css_path) : time();
 $core_css_path = __DIR__ . '/core/css/core.css';
 $core_css_version = file_exists($core_css_path) ? filemtime($core_css_path) : $css_version;
 $favicon_path = __DIR__ . '/img/favicon.ico';
@@ -362,7 +363,7 @@ if (!empty($page_css_files) && is_array($page_css_files)) {
         $page_css_file = ltrim((string)$page_css_file, '/\\');
         $page_css_path = __DIR__ . '/' . $page_css_file;
         if (is_file($page_css_path)) {
-            $page_css_links .= '        <link href="' . htmlspecialchars($page_css_file, ENT_QUOTES) . '?v=' . filemtime($page_css_path) . '" rel="stylesheet" type="text/css">' . "\n";
+            $page_css_links .= '        <link href="' . htmlspecialchars(base_url . $page_css_file, ENT_QUOTES) . '?v=' . filemtime($page_css_path) . '" rel="stylesheet" type="text/css">' . "\n";
         }
     }
 }
@@ -380,8 +381,8 @@ echo '<!DOCTYPE html>
                 document.documentElement.setAttribute("data-theme", "dark");
             }
         </script>
-        <link href="admin/admin.css?v=' . $css_version . '" rel="stylesheet" type="text/css">
-        <link href="core/css/core.css?v=' . $core_css_version . '" rel="stylesheet" type="text/css">
+        <link href="' . htmlspecialchars(base_url . 'core/css/admin-shell.css', ENT_QUOTES) . '?v=' . $css_version . '" rel="stylesheet" type="text/css">
+        <link href="' . htmlspecialchars(base_url . 'core/css/core.css', ENT_QUOTES) . '?v=' . $core_css_version . '" rel="stylesheet" type="text/css">
 ' . $page_css_links . '        <link rel="icon" type="image/x-icon" href="' . base_url . 'img/favicon.ico?v=' . $favicon_version . '">
         <link rel="shortcut icon" type="image/x-icon" href="' . base_url . 'img/favicon.ico?v=' . $favicon_version . '">
     </head>
@@ -440,7 +441,7 @@ echo '<!DOCTYPE html>
 function template_admin_footer($footer = '') {
 // DO NOT INDENT THE BELOW CODE
 echo '  </main>
-        <script src="admin/admin.js"></script>
+        <script src="' . htmlspecialchars(base_url . 'core/js/admin-shell.js', ENT_QUOTES) . '"></script>
         <script src="core/js/theme.js"></script>
   
         ' . $footer . '

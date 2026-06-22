@@ -1,11 +1,11 @@
 <?php
-include 'dashmain.php';
-include 'getcentreinfo.php';
-include 'models/all_dataModel.php';
 $page_css_files = [
     'core/css/dashboard.css',
     'core/css/charts.css',
 ];
+include 'dashmain.php';
+include 'getcentreinfo.php';
+include 'models/all_dataModel.php';
 ?>
 <?=template_admin_header($lang['LM_DASHBOARD'] . ' - ' . $rescue_name . ' - Rescue Centre - Rescue Management System', 'dashboard')?>
 

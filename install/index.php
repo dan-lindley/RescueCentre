@@ -380,8 +380,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             if (!is_string($schema) || trim($schema) === '') {
                 throw new RuntimeException('database/schema.sql is empty.');
             }
-            $schema = preg_replace('/^\xEF\xBB\xBF/', '', $schema);
+            // Some cPanel upload/edit tools silently add a UTF-8 BOM. MariaDB
+            // then sees it as part of the first SQL token and fails near "﻿--".
+            $schema = str_replace("\xEF\xBB\xBF", '', $schema);
             $schema = preg_replace('/^\x{FEFF}/u', '', (string)$schema);
+            $schema = ltrim((string)$schema);
             $pdo->exec((string)$schema);
 
             if ($syncEnabled) {
