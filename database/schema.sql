@@ -493,15 +493,19 @@ CREATE TABLE IF NOT EXISTS rescue_medications_given (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS rescue_medications (
-    med_profile_id INT AUTO_INCREMENT PRIMARY KEY,
-    medication VARCHAR(190) NOT NULL,
-    concentration_dose VARCHAR(80) NULL,
-    concentration_dose_type VARCHAR(80) NULL,
-    concentration_volume VARCHAR(80) NULL,
-    concentration_volume_type VARCHAR(80) NULL,
+    medication_id INT AUTO_INCREMENT PRIMARY KEY,
+    medication_name VARCHAR(190) NOT NULL,
+    common_name VARCHAR(190) NULL,
+    class VARCHAR(120) NULL,
+    description TEXT NULL,
+    contraindications TEXT NULL,
+    cautions TEXT NULL,
+    dose VARCHAR(120) NULL,
     route VARCHAR(120) NULL,
+    side_effects TEXT NULL,
     active TINYINT(1) NOT NULL DEFAULT 1,
-    UNIQUE KEY uq_medication_name (medication)
+    UNIQUE KEY uq_medication_name (medication_name),
+    INDEX idx_medication_class (class)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS rescue_stock_forms (
@@ -511,9 +515,9 @@ CREATE TABLE IF NOT EXISTS rescue_stock_forms (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS rescue_stock_medication (
-    stock_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    medication_profile_id INT AUTO_INCREMENT PRIMARY KEY,
     centre_id INT NOT NULL,
-    medication VARCHAR(190) NOT NULL,
+    medication INT NULL,
     stock_form_id INT NULL,
     concentration_dose VARCHAR(80) NULL,
     concentration_dose_type VARCHAR(80) NULL,

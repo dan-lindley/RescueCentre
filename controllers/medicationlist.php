@@ -6,7 +6,19 @@
 // Medication list from PHP
 const medicationList = [
     <?php
-    $medStmt = $pdo->prepare("SELECT * FROM rescue_medications ORDER BY class ASC");
+    $hasCatalogueStmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'rescue_medications'
+          AND COLUMN_NAME = 'medication_name'
+    ");
+    $hasCatalogueStmt->execute();
+    $hasMedicationCatalogue = (int)$hasCatalogueStmt->fetchColumn() > 0;
+
+    $medStmt = $hasMedicationCatalogue
+        ? $pdo->prepare("SELECT medication_name, COALESCE(common_name, '') AS common_name, COALESCE(class, '') AS class FROM rescue_medications ORDER BY class ASC, medication_name ASC")
+        : $pdo->prepare("SELECT medication AS medication_name, '' AS common_name, '' AS class FROM rescue_medications ORDER BY medication ASC");
     $medStmt->execute();
 
     while ($row = $medStmt->fetch(PDO::FETCH_ASSOC)) {
