@@ -12,7 +12,6 @@ if (!$selected_user_id) {
     exit;
 }
 
-// Make $pdo, $centre_id, $selected_user_id available:
-//include __DIR__ . '../views/permissions_users_table.php';
-include $_SERVER['DOCUMENT_ROOT'] . '/views/permission_users_table.php';
+// Make $pdo, $centre_id, $selected_user_id available.
+include __DIR__ . '/../views/permission_users_table.php';
 
