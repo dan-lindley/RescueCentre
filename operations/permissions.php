@@ -128,12 +128,18 @@ function can($permission_key) {
     global $pdo;
     
     // These MUST already be defined in your session globals
-    $uid = $GLOBALS['user_id'];
-    $rid = $GLOBALS['role'];
-    $cid = $GLOBALS['centre_id'];
+    $uid = (int)($GLOBALS['user_id'] ?? 0);
+    $rid = (int)($GLOBALS['rescue_role'] ?? 0);
+    $cid = (int)($GLOBALS['centre_id'] ?? 0);
 
     if (!$uid || !$rid) {
         return false; // Not logged in or invalid state
+    }
+
+    // Rescue role 1 is the centre owner/administrator created during install.
+    // It must never be locked out of management, staff, or permission screens.
+    if ($rid === 1) {
+        return true;
     }
 
     // 1. Resolve permission_id

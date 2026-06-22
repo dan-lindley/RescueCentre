@@ -424,9 +424,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$installed) {
             $pdo->prepare('INSERT INTO rescue_centre_meta (centre_id, centre_bio) VALUES (:centre_id, :bio)')
                 ->execute([':centre_id' => $centreId, ':bio' => '']);
 
-            $roleStmt = $pdo->prepare('INSERT INTO rescue_roles (centre_id, role_name, is_default) VALUES (:centre_id, :role_name, :is_default)');
-            $roleStmt->execute([':centre_id' => $centreId, ':role_name' => 'Administrator', ':is_default' => 1]);
-            $roleStmt->execute([':centre_id' => $centreId, ':role_name' => 'Staff', ':is_default' => 1]);
+            $roleStmt = $pdo->prepare('INSERT INTO rescue_roles (role_id, centre_id, role_name, is_default) VALUES (:role_id, :centre_id, :role_name, :is_default)');
+            $roleStmt->execute([':role_id' => 1, ':centre_id' => $centreId, ':role_name' => 'Administrator', ':is_default' => 1]);
+            $roleStmt->execute([':role_id' => 2, ':centre_id' => $centreId, ':role_name' => 'Staff', ':is_default' => 1]);
 
             $accountStmt = $pdo->prepare('INSERT INTO accounts (centre_id, username, email, password, role, rescue_role, first_name, last_name) VALUES (:centre_id, :username, :email, :password, :role, :rescue_role, :first_name, :last_name)');
             $accountStmt->execute([
