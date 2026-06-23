@@ -14,36 +14,22 @@ $cards = [
         'title' => 'Species',
         'count' => $localCounts['species'],
         'placeholder' => 'Search species, type or class...',
-        'button' => 'Sync selected species',
-        'modes' => [
-            'all' => 'All species',
-            'type' => 'By species type',
-            'class' => 'By class',
-        ],
-        'value_placeholder' => 'e.g. Bat, Mammal',
+        'hidden' => 'selected_species_ids',
+        'hint' => 'Matches species names, scientific names, species types and classes.',
     ],
     'medications' => [
         'title' => 'Medication',
         'count' => $localCounts['medications'],
         'placeholder' => 'Search medication name or class...',
-        'button' => 'Sync selected medication',
-        'modes' => [
-            'all' => 'All medications',
-            'class' => 'By medication class',
-        ],
-        'value_placeholder' => 'e.g. antibiotic, NSAID',
+        'hidden' => 'selected_medications_ids',
+        'hint' => 'Matches medication names, common names and medication classes.',
     ],
     'feed' => [
-        'title' => 'Feed',
+        'title' => 'Food / Feed',
         'count' => $localCounts['feed'],
-        'placeholder' => 'Search feed name, type or category...',
-        'button' => 'Sync selected feed',
-        'modes' => [
-            'all' => 'All feed items',
-            'type' => 'By feed type',
-            'category' => 'By category',
-        ],
-        'value_placeholder' => 'e.g. liquid, invertebrate',
+        'placeholder' => 'Search food, feed type or category...',
+        'hidden' => 'selected_feed_ids',
+        'hint' => 'Matches feed names, types and categories.',
     ],
 ];
 ?>
@@ -58,9 +44,9 @@ $cards = [
     top: calc(100% + 4px);
     max-height: 260px;
     overflow: auto;
-    border: 1px solid var(--border-color, #d7dde8);
+    border: 1px solid var(--rc-border, #d7dde8);
     border-radius: 10px;
-    background: var(--card-bg, #fff);
+    background: var(--rc-surface, #fff);
     box-shadow: 0 14px 30px rgba(0,0,0,.16);
 }
 .sync-result {
@@ -68,7 +54,7 @@ $cards = [
     width: 100%;
     padding: 10px 12px;
     border: 0;
-    border-bottom: 1px solid var(--border-color, #e6ebf2);
+    border-bottom: 1px solid var(--rc-border, #e6ebf2);
     background: transparent;
     color: inherit;
     text-align: left;
@@ -82,6 +68,7 @@ $cards = [
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 10px;
+    min-height: 34px;
 }
 .sync-chip {
     display: inline-flex;
@@ -89,8 +76,9 @@ $cards = [
     gap: 6px;
     padding: 6px 10px;
     border-radius: 999px;
-    border: 1px solid var(--accent-color, #2f80ed);
-    background: rgba(47, 128, 237, .12);
+    border: 1px solid var(--rc-blue-border, #2f80ed);
+    background: var(--rc-blue-bg, rgba(47, 128, 237, .12));
+    color: var(--rc-blue-text, inherit);
 }
 .sync-chip button {
     border: 0;
@@ -99,11 +87,10 @@ $cards = [
     font-weight: 700;
     cursor: pointer;
 }
-.sync-card-actions {
+.sync-footer-actions {
     display: flex;
+    justify-content: flex-end;
     gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
 }
 </style>
 
@@ -111,121 +98,92 @@ $cards = [
     <div class="content-block">
         <h3>Sync</h3>
         <p class="rc-muted">
-            Pull hosted Rescue Centre catalogue data into this Lite install. Search, select the records you want, then sync them locally. Existing local records are left unchanged.
+            Search the hosted Rescue Centre catalogue, select the records you want, then sync them into this Lite install. Existing local records are left unchanged.
         </p>
         <?php if (!$syncSettings['enabled']): ?>
             <div class="rc-alert amber">Hosted sync is not enabled for this install. Local-only installs cannot download hosted catalogues until sync is configured.</div>
         <?php else: ?>
-            <div class="rc-alert blue">Connected to hosted sync. Selected records will be added locally only if they do not already exist.</div>
+            <div class="rc-alert blue">Connected to hosted sync at <?= htmlspecialchars($syncSettings['api_url']) ?>.</div>
         <?php endif; ?>
     </div>
 
-    <div class="rc-card-grid">
+    <form method="post" action="controllers/sync_controller.php" class="xform" id="catalogueSyncForm">
+        <input type="hidden" name="sync_action" value="selected_catalogues">
         <?php foreach ($cards as $catalogue => $card): ?>
-            <div class="rc-card">
-                <h3><?= htmlspecialchars($card['title']) ?></h3>
-                <p class="rc-muted">Local records: <?= number_format((int)$card['count']) ?></p>
+            <input type="hidden" name="<?= htmlspecialchars($card['hidden']) ?>" value="[]" class="js-selected-ids" data-catalogue="<?= htmlspecialchars($catalogue) ?>">
+        <?php endforeach; ?>
 
-                <form method="post" action="controllers/sync_controller.php" class="xform sync-selected-form">
-                    <input type="hidden" name="catalogue" value="<?= htmlspecialchars($catalogue) ?>">
-                    <input type="hidden" name="mode" value="selected">
-                    <input type="hidden" name="selected_ids" value="[]" class="js-selected-ids">
-                    <?php if ($catalogue === 'feed'): ?>
-                        <input type="hidden" name="enable_for_centre" value="1">
-                    <?php endif; ?>
+        <div class="rc-card-grid">
+            <?php foreach ($cards as $catalogue => $card): ?>
+                <div class="rc-card">
+                    <h3><?= htmlspecialchars($card['title']) ?></h3>
+                    <p class="rc-muted">Local records: <?= number_format((int)$card['count']) ?></p>
 
                     <div class="xform-field sync-picker" data-catalogue="<?= htmlspecialchars($catalogue) ?>">
-                        <label class="xform-label">Search and select</label>
+                        <label class="xform-label">Search</label>
                         <input type="search" class="xform-input js-sync-search" placeholder="<?= htmlspecialchars($card['placeholder']) ?>" autocomplete="off" <?= !$syncSettings['enabled'] ? 'disabled' : '' ?>>
                         <div class="sync-results js-sync-results" hidden></div>
-                        <div class="sync-chips js-sync-chips" aria-live="polite"></div>
                     </div>
 
-                    <div class="xform-actions sync-card-actions">
-                        <button class="btn green" type="submit" <?= !$syncSettings['enabled'] ? 'disabled' : '' ?>><?= htmlspecialchars($card['button']) ?></button>
-                    </div>
-                </form>
+                    <p class="rc-muted"><?= htmlspecialchars($card['hint']) ?></p>
+                    <div class="sync-chips js-sync-chips" data-catalogue="<?= htmlspecialchars($catalogue) ?>" aria-live="polite"></div>
+                </div>
+            <?php endforeach; ?>
+        </div>
 
-                <hr>
-
-                <form method="post" action="controllers/sync_controller.php" class="xform">
-                    <input type="hidden" name="catalogue" value="<?= htmlspecialchars($catalogue) ?>">
-                    <?php if ($catalogue === 'feed'): ?>
-                        <input type="hidden" name="enable_for_centre" value="1">
-                    <?php endif; ?>
-                    <div class="xform-grid">
-                        <div class="xform-field span-2">
-                            <label class="xform-label">Or sync by group</label>
-                            <select name="mode" class="xform-input js-sync-mode">
-                                <?php foreach ($card['modes'] as $mode => $label): ?>
-                                    <option value="<?= htmlspecialchars($mode) ?>"><?= htmlspecialchars($label) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="xform-field span-2">
-                            <label class="xform-label">Group value</label>
-                            <input name="value" class="xform-input js-sync-value" placeholder="<?= htmlspecialchars($card['value_placeholder']) ?>">
-                        </div>
-                    </div>
-                    <div class="xform-actions sync-card-actions">
-                        <button class="btn blue" type="submit" <?= !$syncSettings['enabled'] ? 'disabled' : '' ?>>Sync group/all</button>
-                    </div>
-                </form>
+        <div class="content-block">
+            <div class="sync-footer-actions">
+                <button class="btn green" type="submit" <?= !$syncSettings['enabled'] ? 'disabled' : '' ?>>Sync selected items</button>
             </div>
-        <?php endforeach; ?>
-    </div>
+        </div>
+    </form>
 </div>
 
 <script>
-document.querySelectorAll('.js-sync-mode').forEach((select) => {
-    const form = select.closest('form');
-    const value = form ? form.querySelector('.js-sync-value') : null;
-    const update = () => {
-        if (!value) return;
-        const isAll = select.value === 'all';
-        value.disabled = isAll;
-        value.required = !isAll;
-        if (isAll) value.value = '';
-    };
-    select.addEventListener('change', update);
-    update();
-});
+const syncSelections = {
+    species: new Map(),
+    medications: new Map(),
+    feed: new Map()
+};
+
+const getLabel = (item) => item.label || item.name || item.species_name || item.medication_name || 'Selected item';
+
+const updateHidden = (catalogue) => {
+    const hidden = document.querySelector('.js-selected-ids[data-catalogue="' + catalogue + '"]');
+    if (!hidden) return;
+    hidden.value = JSON.stringify(Array.from(syncSelections[catalogue].keys()).map((id) => Number(id)));
+};
+
+const renderChips = (catalogue) => {
+    const chips = document.querySelector('.js-sync-chips[data-catalogue="' + catalogue + '"]');
+    if (!chips) return;
+    chips.innerHTML = '';
+
+    syncSelections[catalogue].forEach((item, id) => {
+        const chip = document.createElement('span');
+        chip.className = 'sync-chip';
+        chip.textContent = item.label;
+
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.textContent = 'x';
+        remove.setAttribute('aria-label', 'Remove ' + item.label);
+        remove.addEventListener('click', () => {
+            syncSelections[catalogue].delete(id);
+            updateHidden(catalogue);
+            renderChips(catalogue);
+        });
+
+        chip.appendChild(remove);
+        chips.appendChild(chip);
+    });
+};
 
 document.querySelectorAll('.sync-picker').forEach((picker) => {
     const catalogue = picker.dataset.catalogue;
-    const form = picker.closest('form');
     const input = picker.querySelector('.js-sync-search');
     const results = picker.querySelector('.js-sync-results');
-    const chips = form.querySelector('.js-sync-chips');
-    const hidden = form.querySelector('.js-selected-ids');
-    const selected = new Map();
     let timer = null;
-
-    const updateHidden = () => {
-        hidden.value = JSON.stringify(Array.from(selected.keys()).map((id) => Number(id)));
-    };
-
-    const renderChips = () => {
-        chips.innerHTML = '';
-        selected.forEach((item, id) => {
-            const chip = document.createElement('span');
-            chip.className = 'sync-chip';
-            chip.textContent = item.label;
-
-            const remove = document.createElement('button');
-            remove.type = 'button';
-            remove.textContent = 'x';
-            remove.setAttribute('aria-label', 'Remove ' + item.label);
-            remove.addEventListener('click', () => {
-                selected.delete(id);
-                updateHidden();
-                renderChips();
-            });
-
-            chip.appendChild(remove);
-            chips.appendChild(chip);
-        });
-    };
 
     const hideResults = () => {
         results.hidden = true;
@@ -233,15 +191,13 @@ document.querySelectorAll('.sync-picker').forEach((picker) => {
     };
 
     const addItem = (item) => {
-        const id = String(item.id);
-        if (!id || selected.has(id)) return;
-        selected.set(id, {
-            label: item.label || item.name || item.species_name || item.medication_name || 'Selected item'
-        });
+        const id = String(item.id || '');
+        if (!id || syncSelections[catalogue].has(id)) return;
+        syncSelections[catalogue].set(id, { label: getLabel(item) });
         input.value = '';
         hideResults();
-        updateHidden();
-        renderChips();
+        updateHidden(catalogue);
+        renderChips(catalogue);
         input.focus();
     };
 
@@ -258,7 +214,7 @@ document.querySelectorAll('.sync-picker').forEach((picker) => {
             button.type = 'button';
             button.className = 'sync-result';
             button.innerHTML = '<strong></strong><span></span>';
-            button.querySelector('strong').textContent = item.label || item.name || item.species_name || item.medication_name || 'Untitled';
+            button.querySelector('strong').textContent = getLabel(item);
             button.querySelector('span').textContent = item.subtitle || '';
             button.addEventListener('click', () => addItem(item));
             results.appendChild(button);
@@ -266,7 +222,7 @@ document.querySelectorAll('.sync-picker').forEach((picker) => {
         results.hidden = false;
     };
 
-    const search = () => {
+    const searchHostedCatalogue = () => {
         const q = input.value.trim();
         if (q.length < 2) {
             hideResults();
@@ -291,7 +247,7 @@ document.querySelectorAll('.sync-picker').forEach((picker) => {
 
     input.addEventListener('input', () => {
         window.clearTimeout(timer);
-        timer = window.setTimeout(search, 250);
+        timer = window.setTimeout(searchHostedCatalogue, 250);
     });
 
     document.addEventListener('click', (event) => {

@@ -39,6 +39,60 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+if (($_POST['sync_action'] ?? '') === 'selected_catalogues') {
+    $selectedByCatalogue = [
+        'species' => json_decode((string)($_POST['selected_species_ids'] ?? '[]'), true),
+        'medications' => json_decode((string)($_POST['selected_medications_ids'] ?? '[]'), true),
+        'feed' => json_decode((string)($_POST['selected_feed_ids'] ?? '[]'), true),
+    ];
+
+    foreach ($selectedByCatalogue as $key => $ids) {
+        if (!is_array($ids)) {
+            $ids = [];
+        }
+        $selectedByCatalogue[$key] = array_values(array_unique(array_filter(array_map('intval', $ids))));
+    }
+
+    if (!$selectedByCatalogue['species'] && !$selectedByCatalogue['medications'] && !$selectedByCatalogue['feed']) {
+        header('Location: ../management.php?tab=sync&error=' . urlencode('Select at least one item before syncing.'));
+        exit;
+    }
+
+    try {
+        $pdo->beginTransaction();
+        $counts = ['species' => 0, 'medications' => 0, 'feed' => 0];
+
+        if ($selectedByCatalogue['species']) {
+            lite_sync_ensure_catalogue_schema($pdo, 'species');
+            $items = lite_sync_fetch_catalogue($pdo, 'species', 'selected', '', $selectedByCatalogue['species']);
+            $counts['species'] = lite_sync_import_species($pdo, $items);
+        }
+
+        if ($selectedByCatalogue['medications']) {
+            lite_sync_ensure_catalogue_schema($pdo, 'medications');
+            $items = lite_sync_fetch_catalogue($pdo, 'medications', 'selected', '', $selectedByCatalogue['medications']);
+            $counts['medications'] = lite_sync_import_medications($pdo, $items);
+        }
+
+        if ($selectedByCatalogue['feed']) {
+            lite_sync_ensure_catalogue_schema($pdo, 'feed');
+            $items = lite_sync_fetch_catalogue($pdo, 'feed', 'selected', '', $selectedByCatalogue['feed']);
+            $counts['feed'] = lite_sync_import_feed($pdo, $items, (int)$centre_id, true);
+        }
+
+        $pdo->commit();
+        $summary = 'Species: ' . $counts['species'] . ', medication: ' . $counts['medications'] . ', feed: ' . $counts['feed'];
+        header('Location: ../management.php?tab=sync&success=' . urlencode('Sync complete. Added new records only. ' . $summary . '.'));
+        exit;
+    } catch (Throwable $e) {
+        if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        header('Location: ../management.php?tab=sync&error=' . urlencode($e->getMessage()));
+        exit;
+    }
+}
+
 $catalogue = (string)($_POST['catalogue'] ?? '');
 $mode = (string)($_POST['mode'] ?? 'all');
 $value = trim((string)($_POST['value'] ?? ''));
