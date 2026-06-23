@@ -615,7 +615,21 @@ CREATE TABLE IF NOT EXISTS rescue_feeding_events (
     INDEX idx_feeding_at (feed_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS rescue_diet_items (diet_item_id INT AUTO_INCREMENT PRIMARY KEY, item_name VARCHAR(190) NOT NULL, default_unit VARCHAR(40) NULL, active TINYINT(1) NOT NULL DEFAULT 1, UNIQUE KEY uq_diet_item (item_name)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS rescue_diet_items (
+    diet_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(190) NOT NULL,
+    type VARCHAR(80) NULL,
+    category VARCHAR(80) NULL,
+    default_unit VARCHAR(40) NULL,
+    shelf_life_days INT NULL,
+    kcal_per_g DECIMAL(10,3) NULL,
+    kcal_per_ml DECIMAL(10,3) NULL,
+    notes TEXT NULL,
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    UNIQUE KEY uq_diet_item (name),
+    INDEX idx_diet_type (type),
+    INDEX idx_diet_category (category)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS rescue_centre_diet_items (centre_diet_item_id INT AUTO_INCREMENT PRIMARY KEY, centre_id INT NOT NULL, diet_item_id INT NOT NULL, is_enabled TINYINT(1) NOT NULL DEFAULT 1, use_within_days INT NULL, notes TEXT NULL, UNIQUE KEY uq_centre_diet_item (centre_id, diet_item_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS rescue_transfers_log (transfer_log_id INT AUTO_INCREMENT PRIMARY KEY, patient_id INT NOT NULL, admission_id INT NULL, centre_id INT NULL, event_type VARCHAR(80) NOT NULL, event_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, from_location_id INT NULL, to_location_id INT NULL, disposition_id INT NULL, notes TEXT NULL, created_by_user_id INT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, INDEX idx_transfers_patient (patient_id), INDEX idx_transfers_admission (admission_id), INDEX idx_transfers_event (event_type)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -686,7 +700,7 @@ INSERT IGNORE INTO rescue_dispositions (disposition, final_status, sort_order) V
 INSERT IGNORE INTO rescue_labs_tests (lab_test) VALUES ('Microscopy'), ('Culture'), ('PCR'), ('Other');
 INSERT IGNORE INTO rescue_sample_types (sample_type) VALUES ('Faeces'), ('Swab'), ('Blood'), ('Tissue'), ('Other');
 INSERT IGNORE INTO rescue_frequencies (frequency, sort_order) VALUES ('Once daily', 10), ('Twice daily', 20), ('Three times daily', 30), ('As required', 90);
-INSERT IGNORE INTO rescue_diet_items (item_name, default_unit) VALUES ('Mealworms', 'g'), ('Formula', 'ml'), ('Water', 'ml');
+INSERT IGNORE INTO rescue_diet_items (name, type, category, default_unit) VALUES ('Mealworms', 'solid', 'invertebrate', 'g'), ('Formula', 'liquid', 'milk/formula', 'ml'), ('Water', 'liquid', 'water', 'ml');
 INSERT IGNORE INTO rescue_partner_types (partner_type) VALUES ('Police'), ('RSPCA'), ('Vet'), ('Local Authority'), ('Other');
 
 CREATE TABLE IF NOT EXISTS rescue_orgs (

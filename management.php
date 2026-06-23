@@ -26,6 +26,7 @@ $tabRoutes = [
     'profile'   => 'views/centre_profile_preview.php',
     'config'    => 'views/centre_configs.php',
     'bulletins' => 'views/bulletins.php',
+    'sync'      => 'views/sync.php',
 
 ];
 
@@ -67,6 +68,7 @@ $error   = $_GET['error'] ?? null;
         <a class="rc-tab <?= $tab === 'config' ? 'is-active' : '' ?>" href="?tab=config"><?= htmlspecialchars($lang['SETTINGS_CONFIGURATION']) ?></a>
 
         <a class="rc-tab <?= $tab === 'bulletins' ? 'is-active' : '' ?>" href="?tab=bulletins"><?= htmlspecialchars($lang['SETTINGS_BULLETINS']) ?></a>
+        <a class="rc-tab <?= $tab === 'sync' ? 'is-active' : '' ?>" href="?tab=sync">Sync</a>
                 
     </div>
 
