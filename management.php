@@ -18,7 +18,7 @@ registerPermission(
 
 // Enforce permission
 requirePermission("page_centre_management");
-
+echo "error reporting has been inserted";
 // ---------------------------
 // âœ… TAB ROUTING
 // ---------------------------
