@@ -326,6 +326,10 @@ try {
         $finder_tel          = trim((string)($section3['finder_tel'] ?? ''));
         $consent_to_update   = isset($section3['consent_to_update']) ? (int)$section3['consent_to_update'] : null;
         $passphrase          = trim((string)($section3['passphrase'] ?? ''));
+        $storedPassphrase    = trim((string)($existingAdmission['passphrase'] ?? ''));
+        if ($storedPassphrase !== '') {
+            $passphrase = $storedPassphrase;
+        }
 
         $missing3 = [];
         if ($collection_location === '') $missing3[] = 'collection_location';
