@@ -37,7 +37,7 @@ if (!$centre) {
 }
 
 // Load animal orders and species
-$oStmt = $pdo->query("SELECT order_name FROM rescue_animal_orders ORDER BY order_name ASC");
+$oStmt = $pdo->query("SELECT animal_order FROM rescue_animal_orders ORDER BY animal_order ASC");
 $orders = $oStmt->fetchAll(PDO::FETCH_COLUMN);
 
 $tStmt = $pdo->query("SELECT type_name, animal_order FROM rescue_animal_types ORDER BY type_name ASC");
