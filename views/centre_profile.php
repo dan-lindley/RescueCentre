@@ -279,7 +279,7 @@ $speciesAccepted = $centre['species_accepted'] ?? "";
         <!-- Opening Hours -->
         <div class="xform-field" style="grid-column: span 2;">
             <label class="xform-label"><?= htmlspecialchars($lang['SETTINGS_OPENING_HOURS']) ?></label>
-            <textarea name="opening_hours" class="xform-input" rows="3"><?= htmlspecialchars($centre['opening_hours']) ?></textarea>
+            <textarea name="opening_hours" class="xform-input" rows="3"><?= htmlspecialchars($centre['opening_hours'] ?? '') ?></textarea>
         </div>
 
         <!-- Accepting Admissions -->
@@ -292,7 +292,7 @@ $speciesAccepted = $centre['species_accepted'] ?? "";
         <!-- Closed Message -->
         <div class="xform-field" style="grid-column: span 2;">
             <label class="xform-label"><?= htmlspecialchars($lang['SETTINGS_CLOSED_MESSAGE']) ?></label>
-            <textarea name="closed_message" class="xform-input" rows="3"><?= htmlspecialchars($centre['closed_message']) ?></textarea>
+            <textarea name="closed_message" class="xform-input" rows="3"><?= htmlspecialchars($centre['closed_message'] ?? '') ?></textarea>
         </div>
 
     </div>
