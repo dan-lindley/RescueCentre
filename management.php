@@ -1,9 +1,9 @@
-﻿<?php
-//ini_set('display_errors', '1');
-//ini_set('display_startup_errors', '1');
-//error_reporting(E_ALL);
+<?php
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
 
-//define('APP_LOADED', true);
+define('APP_LOADED', true);
 
 include 'dashmain.php'; // $pdo
 include 'getcentreinfo.php';
@@ -29,7 +29,7 @@ $tabRoutes = [
     'centre'    => 'views/centre_profile.php',
     'profile'   => 'views/centre_profile_preview.php',
     'config'    => 'views/centre_configs.php',
-    'bulletins' => 'views/bulletins.php',
+    //'bulletins' => 'views/bulletins.php',
     'sync'      => 'views/sync.php',
 
 ];
@@ -71,7 +71,7 @@ $error   = $_GET['error'] ?? null;
         <a class="rc-tab <?= $tab === 'profile' ? 'is-active' : '' ?>" href="?tab=profile"><?= htmlspecialchars($lang['SETTINGS_PROFILE_PAGE']) ?></a>
         <a class="rc-tab <?= $tab === 'config' ? 'is-active' : '' ?>" href="?tab=config"><?= htmlspecialchars($lang['SETTINGS_CONFIGURATION']) ?></a>
 
-        <a class="rc-tab <?= $tab === 'bulletins' ? 'is-active' : '' ?>" href="?tab=bulletins"><?= htmlspecialchars($lang['SETTINGS_BULLETINS']) ?></a>
+       <!-- <a class="rc-tab <?= $tab === 'bulletins' ? 'is-active' : '' ?>" href="?tab=bulletins"><?= htmlspecialchars($lang['SETTINGS_BULLETINS']) ?></a> -->
         <a class="rc-tab <?= $tab === 'sync' ? 'is-active' : '' ?>" href="?tab=sync">Sync</a>
                 
     </div>

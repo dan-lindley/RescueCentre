@@ -1,6 +1,43 @@
 <?php
 define('APP_LOADED', true);
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? '') === 'search') {
+    ob_start();
+    include __DIR__ . '/../main.php';
+    require_once __DIR__ . '/../operations/lite_sync_catalogue.php';
+
+    $jsonOut = static function (array $payload, int $statusCode = 200): void {
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    };
+
+    try {
+        check_loggedin($pdo);
+
+        $catalogue = (string)($_GET['catalogue'] ?? '');
+        $query = trim((string)($_GET['q'] ?? ''));
+        if (!in_array($catalogue, ['species', 'medications', 'feed'], true)) {
+            throw new RuntimeException('Unknown sync catalogue.');
+        }
+        if (strlen($query) < 2) {
+            $jsonOut(['status' => 'ok', 'items' => []]);
+        }
+
+        lite_sync_ensure_catalogue_schema($pdo, $catalogue);
+        $jsonOut([
+            'status' => 'ok',
+            'items' => lite_sync_search_catalogue($pdo, $catalogue, $query),
+        ]);
+    } catch (Throwable $e) {
+        $jsonOut(['status' => 'error', 'message' => $e->getMessage()], 400);
+    }
+}
+
 include __DIR__ . '/../dashmain.php';
 include __DIR__ . '/../getcentreinfo.php';
 require_once __DIR__ . '/../operations/permissions.php';
@@ -8,31 +45,6 @@ require_once __DIR__ . '/../operations/lite_sync_catalogue.php';
 
 registerPermission('page_centre_management', 'Access to Centre Management Settings Page', 'page');
 requirePermission('page_centre_management');
-
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? '') === 'search') {
-    header('Content-Type: application/json; charset=utf-8');
-    try {
-        $catalogue = (string)($_GET['catalogue'] ?? '');
-        $query = trim((string)($_GET['q'] ?? ''));
-        if (!in_array($catalogue, ['species', 'medications', 'feed'], true)) {
-            throw new RuntimeException('Unknown sync catalogue.');
-        }
-        if (strlen($query) < 2) {
-            echo json_encode(['status' => 'ok', 'items' => []]);
-            exit;
-        }
-        lite_sync_ensure_catalogue_schema($pdo, $catalogue);
-        echo json_encode([
-            'status' => 'ok',
-            'items' => lite_sync_search_catalogue($pdo, $catalogue, $query),
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
-    } catch (Throwable $e) {
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
-        exit;
-    }
-}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../management.php?tab=sync&error=' . urlencode('Invalid sync request.'));
