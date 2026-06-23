@@ -46,7 +46,7 @@ $favicon_version = is_file($favicon_path) ? filemtime($favicon_path) : time();
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width,minimum-scale=1">
-		<title>MyRescueCentre.com - Member Login</title>
+		<title>Rescue Centre - Lite - Self-hosted</title>
 		<link href="style.css" rel="stylesheet" type="text/css">
 		<link rel="icon" type="image/x-icon" href="<?= htmlspecialchars(base_url . 'img/favicon.ico?v=' . $favicon_version, ENT_QUOTES, 'UTF-8') ?>">
 		<link rel="shortcut icon" type="image/x-icon" href="<?= htmlspecialchars(base_url . 'img/favicon.ico?v=' . $favicon_version, ENT_QUOTES, 'UTF-8') ?>">
@@ -103,17 +103,6 @@ $favicon_version = is_file($favicon_path) ? filemtime($favicon_path) : time();
 				<button class="btn blue" type="submit">Login</button>
 				<br>
 				
-				<!--Google SSO button --> 
-				<div id="g_id_onload" data-client_id="211946896680-28005ke1hgelc8e4go1aovl6h74e4urs.apps.googleusercontent.com"
-  				data-ux_mode="redirect" data-login_uri="https://myrescuecentre.com/google_callback.php" data-auto_prompt="false"></div>
-
-				<div class="g_id_signin" data-type="standard" data-theme="outline" data-text="continue_with" data-size="large" data-width="100%"></div>
-				<!--end google SSO button -->
-
-
-				<p class="register-link">Don't have an account? <a href="register.php" class="form-link">Register</a>
-			<br>Existing users that have not migrated should log into the <a href="legacy.rescuecentre.org.uk" class="form-link">legacy system</a> and use the migration tool to use this version.</p>
-			<br>The legacy version will no longer be accessible from 1st July 2026
 			</form>
 		</div>
 	</div>
