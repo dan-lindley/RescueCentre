@@ -298,6 +298,7 @@ $lang_dropdown = '
         </a>
         <div class="sub">
             <a href="management.php"' . ($selected == 'management' && $selected_child == 'settings' ? ' class="selected"' : '') . '><span class="square"></span>' . ($lang['LM_CENTRE_SETTINGS'] ?? 'Centre Settings') . '</a>
+            <a href="management.php?tab=sync"' . ($selected == 'management' && $selected_child == 'sync' ? ' class="selected"' : '') . '><span class="square"></span>Sync</a>
             <a href="locations.php"' . ($selected == 'management' && $selected_child == 'locations' ? ' class="selected"' : '') . '><span class="square"></span>' . ($lang['LM_LOCATIONS'] ?? 'Locations') . '</a>
             <a href="data.php"' . ($selected == 'management' && $selected_child == 'data' ? ' class="selected"' : '') . '><span class="square"></span>' . ($lang['LM_MANAGE_DATA'] ?? 'Manage Data') . '</a>
             <a href="reports.php"' . ($selected == 'management' && $selected_child == 'reports' ? ' class="selected"' : '') . '><span class="square"></span>' . ($lang['LM_REPORTS'] ?? 'Reports') . '</a>

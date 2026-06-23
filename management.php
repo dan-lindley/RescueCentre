@@ -45,7 +45,7 @@ $error   = $_GET['error'] ?? null;
 <?= template_admin_header(
     ($lang['LM_MANAGEMENT'] ?? 'Management') . ' - ' . $rescue_name . ' - Rescue Centre - Rescue Management System',
     'management',
-    'settings'
+    $tab === 'sync' ? 'sync' : 'settings'
 ) ?>
 
 <div class="content-title">

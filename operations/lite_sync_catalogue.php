@@ -79,7 +79,35 @@ function lite_sync_post_json(string $url, array $payload): array
     return $decoded;
 }
 
-function lite_sync_fetch_catalogue(PDO $pdo, string $catalogue, string $mode, string $value): array
+function lite_sync_search_catalogue(PDO $pdo, string $catalogue, string $query): array
+{
+    $settings = lite_sync_settings($pdo);
+    if (!$settings['enabled']) {
+        throw new RuntimeException('Hosted sync is not enabled for this Lite install.');
+    }
+    if ($settings['api_url'] === '') {
+        throw new RuntimeException('Hosted sync API URL is missing.');
+    }
+
+    $response = lite_sync_post_json($settings['api_url'], [
+        'action' => 'catalogue_search',
+        'catalogue' => $catalogue,
+        'q' => $query,
+        'api_key' => $settings['api_key'],
+        'install_id' => $settings['install_id'],
+        'hosted_centre_id' => $settings['hosted_centre_id'],
+        'limit' => 25,
+    ]);
+
+    $items = $response['items'] ?? [];
+    if (!is_array($items)) {
+        throw new RuntimeException('Hosted sync search response did not contain an item list.');
+    }
+
+    return $items;
+}
+
+function lite_sync_fetch_catalogue(PDO $pdo, string $catalogue, string $mode, string $value, array $ids = []): array
 {
     $settings = lite_sync_settings($pdo);
     if (!$settings['enabled']) {
@@ -94,6 +122,7 @@ function lite_sync_fetch_catalogue(PDO $pdo, string $catalogue, string $mode, st
         'catalogue' => $catalogue,
         'mode' => $mode,
         'value' => $value,
+        'ids' => array_values(array_unique(array_map('intval', $ids))),
         'api_key' => $settings['api_key'],
         'install_id' => $settings['install_id'],
         'hosted_centre_id' => $settings['hosted_centre_id'],
@@ -137,6 +166,7 @@ function lite_sync_ensure_catalogue_schema(PDO $pdo, string $catalogue): void
             'contraindications' => 'TEXT NULL',
             'cautions' => 'TEXT NULL',
             'dose' => 'VARCHAR(120) NULL',
+            'route' => 'VARCHAR(120) NULL',
             'side_effects' => 'TEXT NULL',
         ];
         foreach ($columns as $column => $definition) {
@@ -168,8 +198,9 @@ function lite_sync_ensure_catalogue_schema(PDO $pdo, string $catalogue): void
 
 function lite_sync_import_species(PDO $pdo, array $items): int
 {
+    $existsStmt = $pdo->prepare('SELECT species_id FROM rescue_animal_species WHERE LOWER(species_name) = LOWER(:species_name) LIMIT 1');
     $stmt = $pdo->prepare("
-        INSERT INTO rescue_animal_species
+        INSERT IGNORE INTO rescue_animal_species
             (species_name, scientific_name, animal_type, animal_order, gbif_id, iucn_status, reference,
              species_weight_from, species_weight_to, species_weight_unit,
              species_measurement_from, species_measurement_to, species_measurement_standard, species_measurement_unit)
@@ -177,20 +208,6 @@ function lite_sync_import_species(PDO $pdo, array $items): int
             (:species_name, :scientific_name, :animal_type, :animal_order, :gbif_id, :iucn_status, :reference,
              :species_weight_from, :species_weight_to, :species_weight_unit,
              :species_measurement_from, :species_measurement_to, :species_measurement_standard, :species_measurement_unit)
-        ON DUPLICATE KEY UPDATE
-            scientific_name = VALUES(scientific_name),
-            animal_type = VALUES(animal_type),
-            animal_order = VALUES(animal_order),
-            gbif_id = VALUES(gbif_id),
-            iucn_status = VALUES(iucn_status),
-            reference = VALUES(reference),
-            species_weight_from = VALUES(species_weight_from),
-            species_weight_to = VALUES(species_weight_to),
-            species_weight_unit = VALUES(species_weight_unit),
-            species_measurement_from = VALUES(species_measurement_from),
-            species_measurement_to = VALUES(species_measurement_to),
-            species_measurement_standard = VALUES(species_measurement_standard),
-            species_measurement_unit = VALUES(species_measurement_unit)
     ");
 
     $count = 0;
@@ -198,6 +215,8 @@ function lite_sync_import_species(PDO $pdo, array $items): int
         if (!is_array($item)) continue;
         $name = trim((string)($item['species_name'] ?? $item['name'] ?? ''));
         if ($name === '') continue;
+        $existsStmt->execute([':species_name' => $name]);
+        if ($existsStmt->fetchColumn()) continue;
         $stmt->execute([
             ':species_name' => $name,
             ':scientific_name' => $item['scientific_name'] ?? null,
@@ -214,28 +233,19 @@ function lite_sync_import_species(PDO $pdo, array $items): int
             ':species_measurement_standard' => $item['species_measurement_standard'] ?? null,
             ':species_measurement_unit' => $item['species_measurement_unit'] ?? null,
         ]);
-        $count++;
+        $count += $stmt->rowCount() > 0 ? 1 : 0;
     }
     return $count;
 }
 
 function lite_sync_import_medications(PDO $pdo, array $items): int
 {
+    $existsStmt = $pdo->prepare('SELECT medication_id FROM rescue_medications WHERE LOWER(medication_name) = LOWER(:medication_name) LIMIT 1');
     $stmt = $pdo->prepare("
-        INSERT INTO rescue_medications
+        INSERT IGNORE INTO rescue_medications
             (medication_name, common_name, class, description, contraindications, cautions, dose, route, side_effects, active)
         VALUES
             (:medication_name, :common_name, :class, :description, :contraindications, :cautions, :dose, :route, :side_effects, 1)
-        ON DUPLICATE KEY UPDATE
-            common_name = VALUES(common_name),
-            class = VALUES(class),
-            description = VALUES(description),
-            contraindications = VALUES(contraindications),
-            cautions = VALUES(cautions),
-            dose = VALUES(dose),
-            route = VALUES(route),
-            side_effects = VALUES(side_effects),
-            active = 1
     ");
 
     $count = 0;
@@ -243,6 +253,8 @@ function lite_sync_import_medications(PDO $pdo, array $items): int
         if (!is_array($item)) continue;
         $name = trim((string)($item['medication_name'] ?? $item['name'] ?? ''));
         if ($name === '') continue;
+        $existsStmt->execute([':medication_name' => $name]);
+        if ($existsStmt->fetchColumn()) continue;
         $stmt->execute([
             ':medication_name' => $name,
             ':common_name' => $item['common_name'] ?? null,
@@ -254,7 +266,7 @@ function lite_sync_import_medications(PDO $pdo, array $items): int
             ':route' => $item['route'] ?? null,
             ':side_effects' => $item['side_effects'] ?? null,
         ]);
-        $count++;
+        $count += $stmt->rowCount() > 0 ? 1 : 0;
     }
     return $count;
 }
@@ -262,19 +274,10 @@ function lite_sync_import_medications(PDO $pdo, array $items): int
 function lite_sync_import_feed(PDO $pdo, array $items, int $centreId, bool $enableForCentre): int
 {
     $itemStmt = $pdo->prepare("
-        INSERT INTO rescue_diet_items
+        INSERT IGNORE INTO rescue_diet_items
             (name, type, category, default_unit, shelf_life_days, kcal_per_g, kcal_per_ml, notes, active)
         VALUES
             (:name, :type, :category, :default_unit, :shelf_life_days, :kcal_per_g, :kcal_per_ml, :notes, 1)
-        ON DUPLICATE KEY UPDATE
-            type = VALUES(type),
-            category = VALUES(category),
-            default_unit = VALUES(default_unit),
-            shelf_life_days = VALUES(shelf_life_days),
-            kcal_per_g = VALUES(kcal_per_g),
-            kcal_per_ml = VALUES(kcal_per_ml),
-            notes = VALUES(notes),
-            active = 1
     ");
     $findStmt = $pdo->prepare('SELECT diet_item_id FROM rescue_diet_items WHERE name = :name LIMIT 1');
     $centreStmt = $pdo->prepare("
@@ -290,21 +293,25 @@ function lite_sync_import_feed(PDO $pdo, array $items, int $centreId, bool $enab
         if ($name === '') continue;
         $category = (string)($item['category'] ?? '');
         $useWithin = isset($item['use_within_days']) ? (int)$item['use_within_days'] : (strtolower($category) === 'liquid' ? 730 : 365);
-        $itemStmt->execute([
-            ':name' => $name,
-            ':type' => $item['type'] ?? $item['feed_type'] ?? null,
-            ':category' => $category !== '' ? $category : null,
-            ':default_unit' => $item['default_unit'] ?? $item['unit'] ?? null,
-            ':shelf_life_days' => $item['shelf_life_days'] ?? null,
-            ':kcal_per_g' => $item['kcal_per_g'] ?? null,
-            ':kcal_per_ml' => $item['kcal_per_ml'] ?? null,
-            ':notes' => $item['notes'] ?? null,
-        ]);
-        $count++;
-
-        if ($enableForCentre && $centreId > 0) {
+        $findStmt->execute([':name' => $name]);
+        $dietItemId = (int)$findStmt->fetchColumn();
+        if ($dietItemId <= 0) {
+            $itemStmt->execute([
+                ':name' => $name,
+                ':type' => $item['type'] ?? $item['feed_type'] ?? null,
+                ':category' => $category !== '' ? $category : null,
+                ':default_unit' => $item['default_unit'] ?? $item['unit'] ?? null,
+                ':shelf_life_days' => $item['shelf_life_days'] ?? null,
+                ':kcal_per_g' => $item['kcal_per_g'] ?? null,
+                ':kcal_per_ml' => $item['kcal_per_ml'] ?? null,
+                ':notes' => $item['notes'] ?? null,
+            ]);
+            $count += $itemStmt->rowCount() > 0 ? 1 : 0;
             $findStmt->execute([':name' => $name]);
             $dietItemId = (int)$findStmt->fetchColumn();
+        }
+
+        if ($enableForCentre && $centreId > 0) {
             if ($dietItemId > 0) {
                 $centreStmt->execute([
                     ':centre_id' => $centreId,
