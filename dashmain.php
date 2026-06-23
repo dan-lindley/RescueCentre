@@ -394,7 +394,7 @@ echo '<!DOCTYPE html>
                 &nbsp;<span class="title">Rescue Centre</span>
             </h1>
             ' . $admin_links . '
-            ' . $admin_panel_link . '
+           
             
             <div class="footer">
 
