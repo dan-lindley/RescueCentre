@@ -9,6 +9,27 @@ $localCounts = [
     'feed' => (int)$pdo->query('SELECT COUNT(*) FROM rescue_diet_items')->fetchColumn(),
 ];
 
+$localRecords = [
+    'species' => $pdo->query("
+        SELECT species_name AS label, CONCAT_WS(' | ', NULLIF(scientific_name, ''), NULLIF(animal_type, ''), NULLIF(animal_order, '')) AS detail
+        FROM rescue_animal_species
+        ORDER BY species_name ASC
+        LIMIT 30
+    ")->fetchAll(PDO::FETCH_ASSOC),
+    'medications' => $pdo->query("
+        SELECT medication_name AS label, CONCAT_WS(' | ', NULLIF(common_name, ''), NULLIF(class, '')) AS detail
+        FROM rescue_medications
+        ORDER BY medication_name ASC
+        LIMIT 30
+    ")->fetchAll(PDO::FETCH_ASSOC),
+    'feed' => $pdo->query("
+        SELECT name AS label, CONCAT_WS(' | ', NULLIF(type, ''), NULLIF(category, ''), NULLIF(default_unit, '')) AS detail
+        FROM rescue_diet_items
+        ORDER BY name ASC
+        LIMIT 30
+    ")->fetchAll(PDO::FETCH_ASSOC),
+];
+
 $cards = [
     'species' => [
         'title' => 'Species',
@@ -100,6 +121,28 @@ $cards = [
     justify-content: flex-end;
     gap: 10px;
 }
+.sync-local-list {
+    display: grid;
+    gap: 6px;
+    margin-top: 12px;
+    max-height: 230px;
+    overflow: auto;
+}
+.sync-local-item {
+    padding: 8px 10px;
+    border: 1px solid var(--rc-border, #e5e7eb);
+    border-radius: 8px;
+    background: var(--rc-surface-muted, #f9fafb);
+}
+.sync-local-item strong,
+.sync-local-item span {
+    display: block;
+}
+.sync-local-item span {
+    margin-top: 2px;
+    font-size: .85rem;
+    opacity: .72;
+}
 </style>
 
 <div class="rc-stack">
@@ -131,6 +174,26 @@ $cards = [
 
                     <p class="rc-muted"><?= htmlspecialchars($card['hint']) ?></p>
                     <div class="sync-chips js-sync-chips" data-catalogue="<?= htmlspecialchars($catalogue) ?>" aria-live="polite"></div>
+
+                    <hr>
+                    <h4>Local records</h4>
+                    <?php if (!empty($localRecords[$catalogue])): ?>
+                        <div class="sync-local-list">
+                            <?php foreach ($localRecords[$catalogue] as $record): ?>
+                                <div class="sync-local-item">
+                                    <strong><?= htmlspecialchars((string)($record['label'] ?? '')) ?></strong>
+                                    <?php if (!empty($record['detail'])): ?>
+                                        <span><?= htmlspecialchars((string)$record['detail']) ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php if ((int)$card['count'] > count($localRecords[$catalogue])): ?>
+                            <p class="rc-muted">Showing first <?= count($localRecords[$catalogue]) ?> of <?= number_format((int)$card['count']) ?> local records.</p>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <p class="rc-muted">No local records yet.</p>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
