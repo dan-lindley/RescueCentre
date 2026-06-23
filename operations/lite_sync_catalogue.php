@@ -11,7 +11,7 @@ function lite_sync_setting(PDO $pdo, string $key, string $default = ''): string
 function lite_sync_settings(PDO $pdo): array
 {
     return [
-        'enabled' => lite_sync_setting($pdo, 'sync_enabled', '0') === '1',
+        'enabled' => true,
         'api_url' => lite_sync_setting($pdo, 'sync_api_url', 'https://myrescuecentre.com/api/lite_sync.php'),
         'api_key' => lite_sync_setting($pdo, 'sync_api_key', ''),
         'install_id' => lite_sync_setting($pdo, 'sync_install_id', ''),
@@ -82,9 +82,6 @@ function lite_sync_post_json(string $url, array $payload): array
 function lite_sync_search_catalogue(PDO $pdo, string $catalogue, string $query): array
 {
     $settings = lite_sync_settings($pdo);
-    if (!$settings['enabled']) {
-        throw new RuntimeException('Hosted sync is not enabled for this Lite install.');
-    }
     if ($settings['api_url'] === '') {
         throw new RuntimeException('Hosted sync API URL is missing.');
     }
@@ -110,9 +107,6 @@ function lite_sync_search_catalogue(PDO $pdo, string $catalogue, string $query):
 function lite_sync_fetch_catalogue(PDO $pdo, string $catalogue, string $mode, string $value, array $ids = []): array
 {
     $settings = lite_sync_settings($pdo);
-    if (!$settings['enabled']) {
-        throw new RuntimeException('Hosted sync is not enabled for this Lite install.');
-    }
     if ($settings['api_url'] === '') {
         throw new RuntimeException('Hosted sync API URL is missing.');
     }

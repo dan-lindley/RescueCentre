@@ -108,11 +108,7 @@ $cards = [
         <p class="rc-muted">
             Search the hosted Rescue Centre catalogue, select the records you want, then sync them into this Lite install. Existing local records are left unchanged.
         </p>
-        <?php if (!$syncSettings['enabled']): ?>
-            <div class="rc-alert amber">Hosted sync is not enabled for this install. Local-only installs cannot download hosted catalogues until sync is configured.</div>
-        <?php else: ?>
-            <div class="rc-alert blue">Connected to hosted sync at <?= htmlspecialchars($syncSettings['api_url']) ?>.</div>
-        <?php endif; ?>
+        <div class="rc-alert blue">Catalogue sync uses hosted Rescue Centre data at <?= htmlspecialchars($syncSettings['api_url']) ?>.</div>
     </div>
 
     <form method="post" action="controllers/sync_controller.php" class="xform" id="catalogueSyncForm">
@@ -141,7 +137,7 @@ $cards = [
 
         <div class="content-block">
             <div class="sync-footer-actions">
-                <button class="btn green" type="submit" <?= !$syncSettings['enabled'] ? 'disabled' : '' ?>>Sync selected items</button>
+                <button class="btn green" type="submit">Sync selected items</button>
             </div>
         </div>
     </form>

@@ -140,31 +140,31 @@ $speciesAccepted = $centre['species_accepted'] ?? "";
         <div class="xform-field">
             <label class="xform-label"><?= htmlspecialchars($lang['SETTINGS_CENTRE_NAME']) ?></label>
             <input type="text" name="rescue_name" class="xform-input"
-                   value="<?= htmlspecialchars($centre['rescue_name']) ?>">
+                   value="<?= htmlspecialchars($centre['rescue_name'] ?? '') ?>">
         </div>
 
         <div class="xform-field">
             <label class="xform-label"><?= htmlspecialchars($lang['SETTINGS_EMAIL']) ?></label>
             <input type="email" name="email" class="xform-input"
-                   value="<?= htmlspecialchars($centre['email']) ?>">
+                   value="<?= htmlspecialchars($centre['email'] ?? '') ?>">
         </div>
 
         <div class="xform-field">
             <label class="xform-label"><?= htmlspecialchars($lang['SETTINGS_OFFICE_TEL']) ?></label>
             <input type="text" name="office_tel" class="xform-input"
-                   value="<?= htmlspecialchars($centre['office_tel']) ?>">
+                   value="<?= htmlspecialchars($centre['office_tel'] ?? '') ?>">
         </div>
 
         <div class="xform-field">
             <label class="xform-label"><?= htmlspecialchars($lang['SETTINGS_MOBILE']) ?></label>
             <input type="text" name="mobile" class="xform-input"
-                   value="<?= htmlspecialchars($centre['mobile']) ?>">
+                   value="<?= htmlspecialchars($centre['mobile'] ?? '') ?>">
         </div>
 
         <div class="xform-field">
             <label class="xform-label"><?= htmlspecialchars($lang['SETTINGS_24H_TEL']) ?></label>
             <input type="text" name="24_hour" class="xform-input"
-                   value="<?= htmlspecialchars($centre['24_hour']) ?>">
+                   value="<?= htmlspecialchars($centre['24_hour'] ?? '') ?>">
         </div>
     </div>
 
@@ -192,7 +192,7 @@ $speciesAccepted = $centre['species_accepted'] ?? "";
             <label class="xform-label"><?= htmlspecialchars($lang['SETTINGS_ADDRESS_LINE_1']) ?></label>
             <input type="text" id="address_line_one" name="address_line_one"
                    class="xform-input"
-                   value="<?= htmlspecialchars($centre['address_line_one']) ?>">
+                   value="<?= htmlspecialchars($centre['address_line_one'] ?? '') ?>">
         </div>
 
         <!-- Address Line 2 -->
@@ -200,14 +200,14 @@ $speciesAccepted = $centre['species_accepted'] ?? "";
             <label class="xform-label"><?= htmlspecialchars($lang['SETTINGS_ADDRESS_LINE_2']) ?></label>
             <input type="text" id="address_line_two" name="address_line_two"
                    class="xform-input"
-                   value="<?= htmlspecialchars($centre['address_line_two']) ?>">
+                   value="<?= htmlspecialchars($centre['address_line_two'] ?? '') ?>">
         </div>
 
         <!-- City -->
         <div class="xform-field">
             <label class="xform-label"><?= htmlspecialchars($lang['CITY']) ?></label>
             <input type="text" id="city" name="city" class="xform-input"
-                   value="<?= htmlspecialchars($centre['city']) ?>">
+                   value="<?= htmlspecialchars($centre['city'] ?? '') ?>">
         </div>
 
         <!-- County / State -->
@@ -221,7 +221,7 @@ $speciesAccepted = $centre['species_accepted'] ?? "";
         <div class="xform-field">
             <label class="xform-label"><?= htmlspecialchars($lang['POSTCODE']) ?></label>
             <input type="text" id="postcode" name="postcode" class="xform-input"
-                   value="<?= htmlspecialchars($centre['postcode']) ?>">
+                   value="<?= htmlspecialchars($centre['postcode'] ?? '') ?>">
         </div>
 
         <!-- LAT -->
@@ -273,7 +273,7 @@ $speciesAccepted = $centre['species_accepted'] ?? "";
             <div id="species_selected" class="species-tags"></div>
 
             <input type="hidden" id="species_accepted" name="species_accepted"
-                   value="<?= htmlspecialchars($speciesAccepted) ?>">
+                   value="<?= htmlspecialchars($speciesAccepted ?? '') ?>">
         </div>
 
         <!-- Opening Hours -->
@@ -286,7 +286,7 @@ $speciesAccepted = $centre['species_accepted'] ?? "";
         <div class="xform-field" style="grid-column: span 2;">
             <label class="xform-label"><?= htmlspecialchars($lang['SETTINGS_ACCEPTING_ADMISSIONS']) ?></label>
             <input type="text" name="accepting_admissions" class="xform-input"
-                   value="<?= htmlspecialchars($centre['accepting_admissions']) ?>">
+                   value="<?= htmlspecialchars($centre['accepting_admissions'] ?? '') ?>">
         </div>
 
         <!-- Closed Message -->
