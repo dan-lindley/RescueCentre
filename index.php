@@ -40,13 +40,43 @@ $_SESSION['onboarded'] = isset($account['onboarded']) ? (int)$account['onboarded
 }
 $favicon_path = __DIR__ . '/img/favicon.ico';
 $favicon_version = is_file($favicon_path) ? filemtime($favicon_path) : time();
+
+$login_centre_name = 'MyRescueCentre';
+$login_centre_logo = '';
+$login_centre_initials = 'RC';
+
+try {
+	$stmt = $pdo->query("
+		SELECT rc.rescue_name, cm.centre_logo
+		FROM rescue_centres rc
+		LEFT JOIN rescue_centre_meta cm
+			ON cm.centre_id = rc.rescue_id
+		ORDER BY rc.rescue_id ASC
+		LIMIT 1
+	");
+	$centre_brand = $stmt ? $stmt->fetch(PDO::FETCH_ASSOC) : false;
+	if ($centre_brand) {
+		$login_centre_name = trim((string)($centre_brand['rescue_name'] ?? '')) ?: $login_centre_name;
+		$logo = trim((string)($centre_brand['centre_logo'] ?? ''));
+		if ($logo !== '' && strpos($logo, 'placeholder') === false) {
+			$login_centre_logo = $logo;
+		}
+	}
+} catch (Throwable $e) {
+	// Keep the login screen usable before/around first install.
+}
+
+$initial_words = preg_split('/\s+/', preg_replace('/[^A-Za-z0-9 ]/', ' ', $login_centre_name) ?: '', -1, PREG_SPLIT_NO_EMPTY);
+if ($initial_words) {
+	$login_centre_initials = strtoupper(substr((string)$initial_words[0], 0, 1) . substr((string)($initial_words[1] ?? $initial_words[0]), 0, 1));
+}
 ?>
 <!DOCTYPE html>
 <html>
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width,minimum-scale=1">
-		<title>Rescue Centre - Lite - Self-hosted</title>
+		<title><?= htmlspecialchars($login_centre_name, ENT_QUOTES, 'UTF-8') ?> - Rescue Centre Lite</title>
 		<link href="style.css" rel="stylesheet" type="text/css">
 		<link rel="icon" type="image/x-icon" href="<?= htmlspecialchars(base_url . 'img/favicon.ico?v=' . $favicon_version, ENT_QUOTES, 'UTF-8') ?>">
 		<link rel="shortcut icon" type="image/x-icon" href="<?= htmlspecialchars(base_url . 'img/favicon.ico?v=' . $favicon_version, ENT_QUOTES, 'UTF-8') ?>">
@@ -64,12 +94,16 @@ $favicon_version = is_file($favicon_path) ? filemtime($favicon_path) : time();
 <div class="login-page month-<?= htmlspecialchars($GLOBALS['login_month_key'], ENT_QUOTES, 'UTF-8'); ?>">
 		<div class="login">
 			
-			<div class="icon blue">
-				<!-- You could add your own site logo or icon here 26 -->
-				 <img src="rescue_centre_logo_login.png" width="50px" height="50px">
+			<div class="login-brand">
+				<?php if ($login_centre_logo !== ''): ?>
+					<img src="<?= htmlspecialchars($login_centre_logo, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($login_centre_name, ENT_QUOTES, 'UTF-8') ?> logo">
+				<?php else: ?>
+					<div class="login-brand-initials" aria-hidden="true"><?= htmlspecialchars($login_centre_initials, ENT_QUOTES, 'UTF-8') ?></div>
+				<?php endif; ?>
 			</div>
 
-			<h1>MyRescueCentre Login</h1>
+			<h1><?= htmlspecialchars($login_centre_name, ENT_QUOTES, 'UTF-8') ?></h1>
+			<p class="login-subtitle">Rescue Centre Lite</p>
 
 			<form action="authenticate.php" method="post" class="form login-form">
 

@@ -337,12 +337,49 @@ h1, h2, h3, h4, h5, h6 {
 .login .icon svg, .register .icon svg {
   fill: #fff;
 }
+.login .login-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 82px;
+  height: 82px;
+  margin: 8px auto 4px auto;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #143235, #2f6570);
+  border: 2px solid rgba(255, 255, 255, .9);
+  box-shadow: 0 12px 30px rgba(20, 50, 53, .18);
+}
+.login .login-brand img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fff;
+}
+.login .login-brand-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
 .login h1, .register h1 {
   text-align: center;
   font-size: 20px;
   font-weight: 500;
   padding: 6px 0 6px 0;
   margin: 0;
+}
+.login .login-subtitle {
+  margin: -2px 0 14px 0;
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
 }
 .login .btn[type=submit], .register .btn[type=submit] {
   height: 42px;
@@ -958,6 +995,15 @@ html[data-theme="dark"] .register {
   background-color: #162527;
   color: #eaf6f4;
   box-shadow: 0 14px 32px rgba(0, 0, 0, .22);
+}
+
+html[data-theme="dark"] .login .login-brand {
+  border-color: rgba(234, 246, 244, .75);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, .34);
+}
+
+html[data-theme="dark"] .login .login-subtitle {
+  color: #9db0b5;
 }
 
 html[data-theme="dark"] .site-footer {
