@@ -36,6 +36,11 @@ $cards = [
 
 <style>
 .sync-picker { position: relative; }
+.sync-picker .js-sync-search {
+    position: relative;
+    z-index: 2;
+    cursor: text;
+}
 .sync-results {
     position: absolute;
     z-index: 20;
@@ -48,6 +53,9 @@ $cards = [
     border-radius: 10px;
     background: var(--rc-surface, #fff);
     box-shadow: 0 14px 30px rgba(0,0,0,.16);
+}
+.sync-results[hidden] {
+    display: none !important;
 }
 .sync-result {
     display: block;
@@ -121,7 +129,7 @@ $cards = [
 
                     <div class="xform-field sync-picker" data-catalogue="<?= htmlspecialchars($catalogue) ?>">
                         <label class="xform-label">Search</label>
-                        <input type="search" class="xform-input js-sync-search" placeholder="<?= htmlspecialchars($card['placeholder']) ?>" autocomplete="off" <?= !$syncSettings['enabled'] ? 'disabled' : '' ?>>
+                        <input type="search" class="xform-input js-sync-search" placeholder="<?= htmlspecialchars($card['placeholder']) ?>" autocomplete="off">
                         <div class="sync-results js-sync-results" hidden></div>
                     </div>
 
@@ -140,6 +148,7 @@ $cards = [
 </div>
 
 <script>
+(() => {
 const syncSelections = {
     species: new Map(),
     medications: new Map(),
@@ -256,4 +265,5 @@ document.querySelectorAll('.sync-picker').forEach((picker) => {
         }
     });
 });
+})();
 </script>
