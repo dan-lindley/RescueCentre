@@ -66,7 +66,8 @@ $finder_tel  = $admission['finder_tel']  ?? '';
 // backend expects consent_to_update
 $consent_to_update = $admission['consent_to_update'] ?? ($admission['sms_consent'] ?? 0);
 
-$passphrase  = $admission['passphrase']  ?? '';
+$passphrase  = trim((string)($admission['passphrase']  ?? ''));
+$has_stored_passphrase = ($passphrase !== '');
 
 // Fetch 3 passphrases
 $words = $pdo->query("SELECT word_1, word_2, word_3 FROM rescue_words ORDER BY RAND() LIMIT 1")
@@ -261,24 +262,34 @@ $pp3 = $words['word_3'] ?? 'gamma';
             <label class="xform-label"><?= htmlspecialchars($lang['PASSPHRASE'] ?? 'Passphrase') ?> *</label>
             <div class="rc-inline-options">
 
-            <?php if (!$can_passphrase): ?>
+            <?php if ($has_stored_passphrase): ?>
                 <input type="hidden" name="passphrase" value="<?= htmlspecialchars($passphrase) ?>">
+                <input type="text"
+                       class="xform-input is-readonly"
+                       value="<?= htmlspecialchars($passphrase) ?>"
+                       readonly>
+                <div class="rc-note"><?= htmlspecialchars($lang['ADM_PASSPHRASE_LOCKED'] ?? 'Stored passphrase. This cannot be changed after first save.') ?></div>
+            <?php elseif (!$can_passphrase): ?>
+                <input type="hidden" name="passphrase" value="<?= htmlspecialchars($passphrase) ?>">
+                <input type="text"
+                       class="xform-input is-readonly"
+                       value="<?= htmlspecialchars($passphrase) ?>"
+                       readonly>
+            <?php else: ?>
+                <?php
+                $passphrase = $_POST['passphrase'] ?? $pp1;
+                ?>
+
+                <?php foreach ([$pp1, $pp2, $pp3] as $p): ?>
+                    <label>
+                        <input type="radio"
+                               name="passphrase"
+                               value="<?= htmlspecialchars($p) ?>"
+                               <?= ($passphrase === $p ? 'checked' : '') ?>>
+                        <?= htmlspecialchars($p) ?>
+                    </label>
+                <?php endforeach; ?>
             <?php endif; ?>
-
-            <?php
-            $passphrase = $_POST['passphrase'] ?? $pp1;
-            ?>
-
-            <?php foreach ([$pp1, $pp2, $pp3] as $p): ?>
-                <label>
-                    <input type="radio"
-                           name="passphrase"
-                           value="<?= htmlspecialchars($p) ?>"
-                           <?= ($passphrase === $p ? 'checked' : '') ?>
-                           <?= $can_passphrase ? '' : 'disabled' ?>>
-                    <?= htmlspecialchars($p) ?>
-                </label>
-            <?php endforeach; ?>
             </div>
         </div>
 

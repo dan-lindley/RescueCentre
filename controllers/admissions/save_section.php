@@ -792,6 +792,28 @@ $incomplete_json = json_encode($existingMeta);
         $admission_id = (int)$pdo->lastInsertId();
     }
 
+    // Once chosen, the finder passphrase is immutable. This prevents edits,
+    // stale forms, or regenerated random options from replacing the stored value.
+    if ($admission_id > 0) {
+        $passStmt = $pdo->prepare("
+            SELECT passphrase
+            FROM rescue_admissions
+            WHERE admission_id = :aid
+              AND patient_id = :pid
+              AND centre_id = :cid
+            LIMIT 1
+        ");
+        $passStmt->execute([
+            ':aid' => $admission_id,
+            ':pid' => $patient_id,
+            ':cid' => $centre_id
+        ]);
+        $storedPassphrase = trim((string)($passStmt->fetchColumn() ?: ''));
+        if ($storedPassphrase !== '') {
+            $passphrase = $storedPassphrase;
+        }
+    }
+
     // ---------------- UPDATE ----------------
     $stmt = $pdo->prepare("
         UPDATE rescue_admissions
