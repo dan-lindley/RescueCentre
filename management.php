@@ -1,9 +1,9 @@
 ﻿<?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
+//ini_set('display_errors', '1');
+//ini_set('display_startup_errors', '1');
+//error_reporting(E_ALL);
 
-define('APP_LOADED', true);
+//define('APP_LOADED', true);
 
 include 'dashmain.php'; // $pdo
 include 'getcentreinfo.php';
@@ -18,7 +18,7 @@ registerPermission(
 
 // Enforce permission
 requirePermission("page_centre_management");
-echo "error reporting has been inserted";
+
 // ---------------------------
 // âœ… TAB ROUTING
 // ---------------------------
