@@ -23,6 +23,227 @@ try {
     // (If you already set this globally, you can remove it)
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    $currentAccountId = (int)($_SESSION['account_id'] ?? 0);
+
+    $redirectUsers = static function (array $params = []): void {
+        $params = array_merge(['tab' => 'users'], $params);
+        header('Location: user_accounts.php?' . http_build_query($params));
+        exit;
+    };
+
+    $fetchCentreAccount = static function (PDO $pdo, int $accountId, int $centreId): ?array {
+        if ($accountId <= 0) {
+            return null;
+        }
+
+        $stmt = $pdo->prepare("
+            SELECT id, username, email, rescue_role, activation_code
+            FROM accounts
+            WHERE id = :id
+              AND centre_id = :centre_id
+            LIMIT 1
+        ");
+        $stmt->execute([
+            ':id' => $accountId,
+            ':centre_id' => $centreId
+        ]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    };
+
+    $assertRoleForCentre = static function (PDO $pdo, int $roleId, int $centreId): void {
+        $stmt = $pdo->prepare("
+            SELECT role_id
+            FROM rescue_roles
+            WHERE role_id = :role_id
+              AND centre_id = :centre_id
+            LIMIT 1
+        ");
+        $stmt->execute([
+            ':role_id' => $roleId,
+            ':centre_id' => $centreId
+        ]);
+
+        if (!$stmt->fetchColumn()) {
+            throw new Exception("Role is not valid for this centre.");
+        }
+    };
+
+    $assertNotLastOwner = static function (PDO $pdo, array $account, int $centreId): void {
+        if ((int)($account['rescue_role'] ?? 0) !== 1) {
+            return;
+        }
+
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*)
+            FROM accounts
+            WHERE centre_id = :centre_id
+              AND rescue_role = 1
+              AND activation_code = 'activated'
+        ");
+        $stmt->execute([':centre_id' => $centreId]);
+
+        if ((int)$stmt->fetchColumn() <= 1) {
+            throw new Exception("You cannot remove or deactivate the last centre administrator.");
+        }
+    };
+
+    // ---------------------------
+    // USER ACCOUNT CREATE
+    // ---------------------------
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_account'])) {
+        $first_name = trim((string)($_POST['first_name'] ?? ''));
+        $last_name = trim((string)($_POST['last_name'] ?? ''));
+        $username = trim((string)($_POST['username'] ?? ''));
+        $email = trim((string)($_POST['email'] ?? ''));
+        $rescue_role = (int)($_POST['rescue_role'] ?? 0);
+        $password = (string)($_POST['password'] ?? '');
+        $password_confirm = (string)($_POST['password_confirm'] ?? '');
+
+        $errors = [];
+        if ($username === '') $errors[] = 'Username is required.';
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Valid email is required.';
+        if ($rescue_role <= 0) $errors[] = 'Role is required.';
+        if ($password === '' || $password_confirm === '') {
+            $errors[] = 'Password fields are required.';
+        } elseif ($password !== $password_confirm) {
+            $errors[] = 'Passwords do not match.';
+        } elseif (strlen($password) < 8) {
+            $errors[] = 'Password must be at least 8 characters.';
+        }
+
+        if (!$errors) {
+            $assertRoleForCentre($pdo, $rescue_role, (int)$centre_id);
+
+            $stmt = $pdo->prepare("SELECT id FROM accounts WHERE username = :username LIMIT 1");
+            $stmt->execute([':username' => $username]);
+            if ($stmt->fetchColumn()) $errors[] = 'Username is already taken.';
+
+            $stmt = $pdo->prepare("SELECT id FROM accounts WHERE email = :email LIMIT 1");
+            $stmt->execute([':email' => $email]);
+            if ($stmt->fetchColumn()) $errors[] = 'Email is already in use.';
+        }
+
+        if ($errors) {
+            $_SESSION['create_user_errors'] = $errors;
+            $_SESSION['create_user_old'] = $_POST;
+            $redirectUsers(['error' => 'Could not create account. Check the form below.']);
+        }
+
+        $stmt = $pdo->prepare("
+            INSERT INTO accounts (
+                centre_id, username, email, password, role, rescue_role,
+                first_name, last_name, approved, activation_code, onboarded, registered
+            ) VALUES (
+                :centre_id, :username, :email, :password, 'Member', :rescue_role,
+                :first_name, :last_name, 1, 'activated', 1, NOW()
+            )
+        ");
+        $stmt->execute([
+            ':centre_id' => $centre_id,
+            ':username' => $username,
+            ':email' => $email,
+            ':password' => password_hash($password, PASSWORD_DEFAULT),
+            ':rescue_role' => $rescue_role,
+            ':first_name' => ($first_name !== '' ? $first_name : null),
+            ':last_name' => ($last_name !== '' ? $last_name : null)
+        ]);
+
+        if (function_exists('audit_write')) {
+            audit_write($pdo, 'account_created', 'accounts', null, [
+                'new_user_id' => (int)$pdo->lastInsertId(),
+                'username' => $username,
+                'email' => $email,
+                'rescue_role' => $rescue_role
+            ]);
+        }
+
+        $redirectUsers(['success_msg' => 1]);
+    }
+
+    // ---------------------------
+    // USER ACCOUNT QUICK ACTIONS
+    // ---------------------------
+    $accountActions = ['delete', 'deactivate', 'activate', 'approve', 'resetpw'];
+    foreach ($accountActions as $action) {
+        if (!isset($_GET[$action])) {
+            continue;
+        }
+
+        $targetId = (int)$_GET[$action];
+        $targetAccount = $fetchCentreAccount($pdo, $targetId, (int)$centre_id);
+        if (!$targetAccount) {
+            throw new Exception("User not found for this centre.");
+        }
+
+        if (($action === 'delete' || $action === 'deactivate') && $targetId === $currentAccountId) {
+            throw new Exception("You cannot {$action} your own account.");
+        }
+
+        if ($action === 'delete' || $action === 'deactivate') {
+            $assertNotLastOwner($pdo, $targetAccount, (int)$centre_id);
+        }
+
+        if ($action === 'delete') {
+            $pdo->prepare("DELETE FROM rescue_user_permissions WHERE user_id = :id")->execute([':id' => $targetId]);
+            $stmt = $pdo->prepare("DELETE FROM accounts WHERE id = :id AND centre_id = :centre_id LIMIT 1");
+            $stmt->execute([':id' => $targetId, ':centre_id' => $centre_id]);
+            if (function_exists('audit_write')) audit_write($pdo, 'account_deleted', 'accounts', $targetAccount, null);
+            $redirectUsers(['success_msg' => 3]);
+        }
+
+        if ($action === 'deactivate') {
+            $stmt = $pdo->prepare("
+                UPDATE accounts
+                SET activation_code = 'deactivated',
+                    remember_me_code = NULL
+                WHERE id = :id
+                  AND centre_id = :centre_id
+                LIMIT 1
+            ");
+            $stmt->execute([':id' => $targetId, ':centre_id' => $centre_id]);
+            if (function_exists('audit_write')) audit_write($pdo, 'account_deactivated', 'accounts', $targetAccount, ['id' => $targetId]);
+            $redirectUsers(['success_msg' => 2]);
+        }
+
+        if ($action === 'activate' || $action === 'approve') {
+            $setSql = $action === 'activate' ? "activation_code = 'activated'" : "approved = 1";
+            $stmt = $pdo->prepare("
+                UPDATE accounts
+                SET {$setSql}
+                WHERE id = :id
+                  AND centre_id = :centre_id
+                LIMIT 1
+            ");
+            $stmt->execute([':id' => $targetId, ':centre_id' => $centre_id]);
+            if (function_exists('audit_write')) audit_write($pdo, 'account_' . $action, 'accounts', $targetAccount, ['id' => $targetId]);
+            $redirectUsers(['success_msg' => 2]);
+        }
+
+        if ($action === 'resetpw') {
+            $tempPassword = bin2hex(random_bytes(6));
+            $stmt = $pdo->prepare("
+                UPDATE accounts
+                SET password = :password,
+                    reset_code = NULL,
+                    remember_me_code = NULL
+                WHERE id = :id
+                  AND centre_id = :centre_id
+                LIMIT 1
+            ");
+            $stmt->execute([
+                ':password' => password_hash($tempPassword, PASSWORD_DEFAULT),
+                ':id' => $targetId,
+                ':centre_id' => $centre_id
+            ]);
+
+            $_SESSION['reset_temp_pw'] = $tempPassword;
+            $_SESSION['reset_temp_user'] = (string)$targetAccount['username'];
+            if (function_exists('audit_write')) audit_write($pdo, 'account_password_reset', 'accounts', $targetAccount, ['id' => $targetId]);
+            $redirectUsers(['success_msg' => 5]);
+        }
+    }
+
     // ---------------------------
     // ROLE PERMISSIONS SAVE
     // ---------------------------
@@ -31,10 +252,13 @@ try {
         $posted = $_POST['perm'] ?? [];
 
         // Load roles
-        $roles = $pdo->query("
+        $roleStmt = $pdo->prepare("
             SELECT role_id
             FROM rescue_roles
-        ")->fetchAll(PDO::FETCH_ASSOC);
+            WHERE centre_id = :centre_id
+        ");
+        $roleStmt->execute([':centre_id' => $centre_id]);
+        $roles = $roleStmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Load permissions (non system_)
         $perms = $pdo->query("
@@ -241,6 +465,8 @@ try {
             $activation_code = 'activated';
         }
 
+        $assertRoleForCentre($pdo, $rescue_role, (int)$centre_id);
+
         if ($password !== '' || $password_confirm !== '') {
             if ($password !== $password_confirm) {
                 throw new Exception("Passwords do not match.");
@@ -277,7 +503,7 @@ try {
 
         $passwordSql = '';
         if ($password !== '') {
-            $passwordSql = ', password = :password';
+            $passwordSql = ', password = :password, remember_me_code = NULL, reset_code = NULL';
             $params[':password'] = password_hash($password, PASSWORD_DEFAULT);
         }
 
@@ -297,6 +523,17 @@ try {
         ");
         $stmt->execute($params);
 
+        if (function_exists('audit_write')) {
+            audit_write($pdo, 'account_updated', 'accounts', ['id' => $edit_user_id], [
+                'username' => $username,
+                'email' => $email,
+                'rescue_role' => $rescue_role,
+                'activation_code' => $activation_code,
+                'approved' => $approved,
+                'password_changed' => ($password !== '')
+            ]);
+        }
+
         header("Location: user_accounts.php?tab=users&success=" . urlencode("User account updated."));
         exit;
     }
@@ -306,6 +543,7 @@ try {
     $fallbackTab = 'users';
     if (isset($_POST['role_permissions_form'])) $fallbackTab = 'role-perms';
     if (isset($_POST['user_permissions_form'])) $fallbackTab = 'user-perms';
+    if (isset($_POST['create_account'])) $fallbackTab = 'users';
     if (isset($_POST['edit_user_account_form'])) $fallbackTab = 'edit&id=' . (int)($_POST['edit_user_id'] ?? 0);
 
     header("Location: user_accounts.php?tab={$fallbackTab}&error=" . urlencode($e->getMessage()));

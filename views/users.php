@@ -1,9 +1,4 @@
 <?php
-// Make sure session is available (for flash messages like reset password, create user errors)
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 if (!defined('APP_LOADED')) exit;
 echo '<div class="content-title">
     <div class="title">
@@ -15,82 +10,17 @@ echo '<div class="content-title">
 </div>';
 
 // -----------------------------------------------------------------------------
-// 1. HANDLE ACCOUNT ACTIONS (DELETE / ACTIVATE / DEACTIVATE / APPROVE / RESET PW)
-// -----------------------------------------------------------------------------
-// NOTE: These are still here because they were already working in your flow.
-// If you later want them moved into controllers as well, we can do that as a second step.
-
-// Delete account
-if (isset($_GET['delete'])) {
-    $stmt = $pdo->prepare('DELETE FROM accounts WHERE id = ?');
-    $stmt->execute([ $_GET['delete'] ]);
-    header('Location: user_accounts.php?success_msg=3');
-    exit;
-}
-
-// Deactivate (also remove remember me code)
-if (isset($_GET['deactivate'])) {
-    $stmt = $pdo->prepare('UPDATE accounts SET activation_code = "deactivated", remember_me_code = "" WHERE id = ?');
-    $stmt->execute([ $_GET['deactivate'] ]);
-    header('Location: user_accounts.php?success_msg=2');
-    exit;
-}
-
-// Activate
-if (isset($_GET['activate'])) {
-    $stmt = $pdo->prepare('UPDATE accounts SET activation_code = "activated" WHERE id = ?');
-    $stmt->execute([ $_GET['activate'] ]);
-    header('Location: user_accounts.php?success_msg=2');
-    exit;
-}
-
-// Approve
-if (isset($_GET['approve'])) {
-    $stmt = $pdo->prepare('UPDATE accounts SET approved = 1 WHERE id = ?');
-    $stmt->execute([ $_GET['approve'] ]);
-    header('Location: user_accounts.php?success_msg=2');
-    exit;
-}
-
-// Reset password (generate temporary password, store in session, redirect)
-if (isset($_GET['resetpw'])) {
-    $id = (int) $_GET['resetpw'];
-
-    // Generate a simple temporary password (8 hex chars)
-    $temp_password = bin2hex(random_bytes(4));
-    $hash          = password_hash($temp_password, PASSWORD_DEFAULT);
-
-    // Get username for message
-    $stmt = $pdo->prepare('SELECT username FROM accounts WHERE id = ?');
-    $stmt->execute([$id]);
-    $uname = $stmt->fetchColumn();
-
-    if ($uname) {
-        $stmt = $pdo->prepare('UPDATE accounts SET password = :pass, reset_code = NULL WHERE id = :id');
-        $stmt->execute([
-            ':pass' => $hash,
-            ':id'   => $id
-        ]);
-
-        $_SESSION['reset_temp_pw']   = $temp_password;
-        $_SESSION['reset_temp_user'] = $uname;
-    }
-
-    header('Location: user_accounts.php?success_msg=5');
-    exit;
-}
-
-// -----------------------------------------------------------------------------
-// 2. LOAD RESCUE ROLES (for dropdown & filtering)
+// 1. LOAD RESCUE ROLES (for dropdown & filtering)
 // -----------------------------------------------------------------------------
 $centre_roles = $pdo->query("
     SELECT role_id, role_name 
     FROM rescue_roles 
+    WHERE centre_id = " . (int)$centre_id . "
     ORDER BY role_name
 ")->fetchAll(PDO::FETCH_ASSOC);
 
 // -----------------------------------------------------------------------------
-// 3. RETRIEVE FILTERS, PAGINATION & ACCOUNT LIST (SCOPED BY centre_id)
+// 2. RETRIEVE FILTERS, PAGINATION & ACCOUNT LIST (SCOPED BY centre_id)
 // -----------------------------------------------------------------------------
 
 // Retrieve the GET request parameters (if specified)
@@ -145,48 +75,48 @@ $whereClauses = [];
 $whereParams  = [];
 
 // Always scope to current centre
-$whereClauses[]             = 'centre_id = :centre_id';
+$whereClauses[]             = 'a.centre_id = :centre_id';
 $whereParams[':centre_id']  = $centre_id;
 
 // Search filter
 if ($search) {
-    $whereClauses[]         = '(username LIKE :search OR email LIKE :search)';
+    $whereClauses[]         = '(a.username LIKE :search OR a.email LIKE :search)';
     $whereParams[':search'] = $param3;
 }
 
 // Role filter (using rescue_role ID)
 if ($role !== '') {
-    $whereClauses[]              = 'rescue_role = :rescue_role';
+    $whereClauses[]              = 'a.rescue_role = :rescue_role';
     $whereParams[':rescue_role'] = (int)$role;
 }
 
 // Last seen filter
 $now = date('Y-m-d H:i:s');
 if ($last_seen == 'today') {
-    $whereClauses[] = 'last_seen > DATE_SUB("'.$now.'", INTERVAL 1 DAY)';
+    $whereClauses[] = 'a.last_seen > DATE_SUB("'.$now.'", INTERVAL 1 DAY)';
 } elseif ($last_seen == 'yesterday') {
-    $whereClauses[] = 'last_seen > DATE_SUB("'.$now.'", INTERVAL 2 DAY) AND last_seen < DATE_SUB("'.$now.'", INTERVAL 1 DAY)';
+    $whereClauses[] = 'a.last_seen > DATE_SUB("'.$now.'", INTERVAL 2 DAY) AND a.last_seen < DATE_SUB("'.$now.'", INTERVAL 1 DAY)';
 } elseif ($last_seen == 'week') {
-    $whereClauses[] = 'last_seen > DATE_SUB("'.$now.'", INTERVAL 1 WEEK)';
+    $whereClauses[] = 'a.last_seen > DATE_SUB("'.$now.'", INTERVAL 1 WEEK)';
 } elseif ($last_seen == 'month') {
-    $whereClauses[] = 'last_seen > DATE_SUB("'.$now.'", INTERVAL 1 MONTH)';
+    $whereClauses[] = 'a.last_seen > DATE_SUB("'.$now.'", INTERVAL 1 MONTH)';
 } elseif ($last_seen == 'year') {
-    $whereClauses[] = 'last_seen > DATE_SUB("'.$now.'", INTERVAL 1 YEAR)';
+    $whereClauses[] = 'a.last_seen > DATE_SUB("'.$now.'", INTERVAL 1 YEAR)';
 } elseif ($last_seen == 'inactive') {
-    $whereClauses[] = 'last_seen < DATE_SUB("'.$now.'", INTERVAL 1 MONTH)';
+    $whereClauses[] = 'a.last_seen < DATE_SUB("'.$now.'", INTERVAL 1 MONTH)';
 }
 
 // Status filter
 if ($status == 'Activated') {
-    $whereClauses[] = 'activation_code = "activated"';
+    $whereClauses[] = 'a.activation_code = "activated"';
 } elseif ($status == 'Deactivated') {
-    $whereClauses[] = 'activation_code = "deactivated"';
+    $whereClauses[] = 'a.activation_code = "deactivated"';
 } elseif ($status == 'Pending Activation') {
-    $whereClauses[] = 'activation_code != "activated" AND activation_code != "deactivated"';
+    $whereClauses[] = 'a.activation_code != "activated" AND a.activation_code != "deactivated"';
 } elseif ($status == 'Approved') {
-    $whereClauses[] = 'approved = 1';
+    $whereClauses[] = 'a.approved = 1';
 } elseif ($status == 'Pending Approval') {
-    $whereClauses[] = 'approved = 0';
+    $whereClauses[] = 'a.approved = 0';
 }
 
 // WHERE SQL
@@ -196,7 +126,7 @@ if (!empty($whereClauses)) {
 }
 
 // Retrieve total number of accounts
-$stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM accounts ' . $whereSQL);
+$stmt = $pdo->prepare('SELECT COUNT(*) AS total FROM accounts a ' . $whereSQL);
 foreach ($whereParams as $key => $val) {
     if ($key === ':centre_id' || $key === ':rescue_role') {
         $stmt->bindValue($key, (int)$val, PDO::PARAM_INT);
@@ -229,7 +159,7 @@ $stmt->execute();
 $accounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // -----------------------------------------------------------------------------
-// 4. SUCCESS / INFO MESSAGES
+// 3. SUCCESS / INFO MESSAGES
 // -----------------------------------------------------------------------------
 if (isset($_GET['success_msg'])) {
     if ($_GET['success_msg'] == 1) {
@@ -251,7 +181,7 @@ if (isset($_GET['success_msg'])) {
 }
 
 // -----------------------------------------------------------------------------
-// 5. CREATE USER ERRORS FROM CONTROLLER (SESSION)
+// 4. CREATE USER ERRORS FROM CONTROLLER (SESSION)
 // -----------------------------------------------------------------------------
 $create_errors = $_SESSION['create_user_errors'] ?? [];
 $create_old    = $_SESSION['create_user_old']    ?? [];
@@ -496,7 +426,7 @@ if ($role !== '') {
 <!-- Inline CREATE USER form (hidden by default) -->
 <div id="create-user-form" class="content-block" style="margin-top:20px; display:none;">
     <h3>Create New User</h3>
-    <form method="post" action="controllers/create_user.php" class="xform">
+    <form method="post" action="user_accounts.php" class="xform">
         <input type="hidden" name="create_account" value="1">
         <div class="xform-grid">
             <div class="xform-field">

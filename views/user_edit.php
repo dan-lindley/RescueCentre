@@ -27,11 +27,14 @@ if (!$edit_account) {
     return;
 }
 
-$centre_roles = $pdo->query("
+$roleStmt = $pdo->prepare("
     SELECT role_id, role_name
     FROM rescue_roles
+    WHERE centre_id = :centre_id
     ORDER BY role_name
-")->fetchAll(PDO::FETCH_ASSOC);
+");
+$roleStmt->execute([':centre_id' => $centre_id]);
+$centre_roles = $roleStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <div class="rc-panel">
