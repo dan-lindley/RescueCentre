@@ -271,7 +271,7 @@ try {
         // We'll do SELECT+UPDATE/INSERT safely:
 
         $selectStmt = $pdo->prepare("
-            SELECT id
+            SELECT 1
             FROM rescue_role_permissions
             WHERE centre_id = :centre_id
               AND role_id = :role_id
@@ -374,7 +374,7 @@ try {
         ");
 
         $selectStmt = $pdo->prepare("
-            SELECT id
+            SELECT 1
             FROM rescue_user_permissions
             WHERE user_id = :uid AND permission_id = :pid
             LIMIT 1

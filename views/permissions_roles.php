@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['role_permissions_form
 
     // Prepare statements for upsert
     $selectStmt = $pdo->prepare("
-        SELECT id
+        SELECT 1
         FROM rescue_role_permissions
         WHERE centre_id = :centre_id
           AND role_id = :role_id

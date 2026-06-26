@@ -81,7 +81,7 @@ echo '<div class="content-title">
 /* Shared header + row grid */
 .loc-grid{
     display:grid;
-    grid-template-columns: 1fr 240px 120px 280px; /* Location | Type | Max | Actions */
+    grid-template-columns: 1fr 220px 220px 100px 280px; /* Location | Area | Type | Max | Actions */
     gap:10px;
     align-items:center;
 }
@@ -400,6 +400,7 @@ echo '<div class="content-title">
 
                         <div class="loc-grid loc-head">
                             <div><strong><?= htmlspecialchars($lang['LOCATION']) ?></strong></div>
+                            <div><strong><?= htmlspecialchars($lang['LOC_AREA']) ?></strong></div>
                             <div><strong><?= htmlspecialchars($lang['DIET_TH_TYPE'] ?? 'Type') ?></strong></div>
                             <div><strong><?= htmlspecialchars($lang['LOC_MAX']) ?></strong></div>
                             <div><strong><?= htmlspecialchars($lang['ACTIONS']) ?></strong></div>
@@ -418,14 +419,30 @@ echo '<div class="content-title">
                                     <form action="../controllers/locations_handler.php" method="post" class="xform" style="margin:0;">
                                         <input type="hidden" name="centre_id" value="<?php echo $centre_id_int; ?>">
                                         <input type="hidden" name="location_id" value="<?php echo $lid; ?>">
-                                        <input type="hidden" name="area_id" value="<?php echo $aid; ?>">
-                                        <input type="hidden" name="location_area" value="<?php echo htmlspecialchars($aname); ?>">
 
                                         <div class="loc-grid">
                                             <div>
                                                 <input type="text" name="location_name" class="xform-input"
                                                        value="<?php echo htmlspecialchars($lname); ?>"
                                                        placeholder="<?= htmlspecialchars($lang['LOC_LOCATION_NAME']) ?>" aria-label="<?= htmlspecialchars($lang['LOC_LOCATION_NAME']) ?>" required>
+                                            </div>
+                                            <div>
+                                                <select name="area_id" class="xform-input" aria-label="<?= htmlspecialchars($lang['LOC_AREA']) ?>" required>
+                                                    <?php foreach ($zones as $areaZone): ?>
+                                                        <?php foreach (($areaZone['areas'] ?? []) as $moveArea): ?>
+                                                            <?php
+                                                            $moveAreaId = (int)$moveArea['area_id'];
+                                                            $moveAreaLabel = (string)$moveArea['area_name'];
+                                                            if (!empty($areaZone['zone_name'])) {
+                                                                $moveAreaLabel .= ' - ' . (string)$areaZone['zone_name'];
+                                                            }
+                                                            ?>
+                                                            <option value="<?php echo $moveAreaId; ?>" <?php echo ($moveAreaId === $aid ? 'selected' : ''); ?>>
+                                                                <?php echo htmlspecialchars($moveAreaLabel); ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    <?php endforeach; ?>
+                                                </select>
                                             </div>
                                             <div><?php echo render_type_select($LOCATION_TYPES, $ltype); ?></div>
                                             <div>
@@ -462,6 +479,7 @@ echo '<div class="content-title">
                                         <input type="text" name="location_name" class="xform-input"
                                                placeholder="<?= htmlspecialchars($lang['LOC_ADD_NEW_LOCATION']) ?>" aria-label="<?= htmlspecialchars($lang['LOC_ADD_LOCATION_NAME']) ?>" required>
                                     </div>
+                                    <div><input type="text" class="xform-input" value="<?php echo htmlspecialchars($aname); ?>" aria-label="<?= htmlspecialchars($lang['LOC_AREA']) ?>" disabled></div>
                                     <div><?php echo render_type_select($LOCATION_TYPES, ''); ?></div>
                                     <div>
                                         <input type="number" name="max_occupancy" class="xform-input"
